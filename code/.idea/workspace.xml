@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="462fd6bc-ec32-49f0-8d9d-0a35dcfefd10" name="Default Changelist" comment="" />
+    <list default="true" id="462fd6bc-ec32-49f0-8d9d-0a35dcfefd10" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../a1_implementations/elias_and_ollie/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../a1_implementations/elias_and_ollie/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../a1_implementations/elias_and_ollie/out/production/elias_and_ollie/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../a1_implementations/elias_and_ollie/out/production/elias_and_ollie/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../a1_implementations/elias_and_ollie/out/production/elias_and_ollie/META-INF/MANIFEST.MF" beforeDir="false" afterPath="$PROJECT_DIR$/../a1_implementations/elias_and_ollie/out/production/elias_and_ollie/META-INF/MANIFEST.MF" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -20,7 +25,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../a1_implementations/elias_and_ollie" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src" />
     <property name="project.structure.last.edited" value="Artifacts" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -39,15 +44,13 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="ArquillianTestNG" factoryName="" nameIsGenerated="true">
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
       <option name="arquillianRunConfiguration">
         <value>
           <option name="containerStateName" value="" />
         </value>
       </option>
-      <option name="TEST_OBJECT" value="CLASS" />
-      <properties />
-      <listeners />
+      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -69,6 +72,7 @@
       <workItem from="1598068270383" duration="1296000" />
       <workItem from="1598070318744" duration="909000" />
       <workItem from="1598237047587" duration="1334000" />
+      <workItem from="1598241368072" duration="130000" />
     </task>
     <servers />
   </component>
@@ -76,10 +80,14 @@
     <option name="version" value="3" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="2109" y="286" width="424" height="491" key="FileChooserDialogImpl" timestamp="1598238862117">
+    <state x="1954" y="336" width="525" height="422" key="#com.intellij.ide.util.TreeClassChooserDialog" timestamp="1598241457057">
       <screen x="1366" y="0" width="1920" height="1080" />
     </state>
-    <state x="2109" y="286" width="424" height="491" key="FileChooserDialogImpl/1366.0.1920.1080/0.312.1366.768@1366.0.1920.1080" timestamp="1598238862117" />
+    <state x="1954" y="336" width="525" height="422" key="#com.intellij.ide.util.TreeClassChooserDialog/1366.0.1920.1080/0.312.1366.768@1366.0.1920.1080" timestamp="1598241457057" />
+    <state x="2109" y="286" width="424" height="491" key="FileChooserDialogImpl" timestamp="1598241496818">
+      <screen x="1366" y="0" width="1920" height="1080" />
+    </state>
+    <state x="2109" y="286" width="424" height="491" key="FileChooserDialogImpl/1366.0.1920.1080/0.312.1366.768@1366.0.1920.1080" timestamp="1598241496818" />
     <state width="1874" height="491" key="GridCell.Tab.0.bottom" timestamp="1598238866100">
       <screen x="1366" y="0" width="1920" height="1080" />
     </state>
