@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
-
+// Hello, World!
 /**
  * Game class that handles all input/output and the game logic
  *
@@ -114,10 +114,7 @@ public class Game {
 	//get all input from this scanner
 	Scanner input;
 	
-	/**
-	 * Constructs the game, sets up stuff
-	 * @param playerNum
-	 */
+	// Constructs the game
 	public Game() {
 		cards = new ArrayList<Card>();
 		
