@@ -46,6 +46,17 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -78,5 +89,21 @@
       <screen x="0" y="0" width="1536" height="826" />
     </state>
     <state x="498" y="214" key="#com.intellij.ide.util.TreeClassChooserDialog/0.0.1536.826@0.0.1536.826" timestamp="1598238794604" />
+    <state width="1492" height="527" key="GridCell.Tab.0.bottom" timestamp="1598238938112">
+      <screen x="0" y="0" width="1536" height="826" />
+    </state>
+    <state width="1492" height="527" key="GridCell.Tab.0.bottom/0.0.1536.826@0.0.1536.826" timestamp="1598238938112" />
+    <state width="1492" height="527" key="GridCell.Tab.0.center" timestamp="1598238938112">
+      <screen x="0" y="0" width="1536" height="826" />
+    </state>
+    <state width="1492" height="527" key="GridCell.Tab.0.center/0.0.1536.826@0.0.1536.826" timestamp="1598238938112" />
+    <state width="1492" height="527" key="GridCell.Tab.0.left" timestamp="1598238938111">
+      <screen x="0" y="0" width="1536" height="826" />
+    </state>
+    <state width="1492" height="527" key="GridCell.Tab.0.left/0.0.1536.826@0.0.1536.826" timestamp="1598238938111" />
+    <state width="1492" height="527" key="GridCell.Tab.0.right" timestamp="1598238938112">
+      <screen x="0" y="0" width="1536" height="826" />
+    </state>
+    <state width="1492" height="527" key="GridCell.Tab.0.right/0.0.1536.826@0.0.1536.826" timestamp="1598238938112" />
   </component>
 </project>
