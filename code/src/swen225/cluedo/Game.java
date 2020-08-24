@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
-// Hello, World!
+// Hello, World! - Carlo's Edit 2
 /**
  * Game class that handles all input/output and the game logic
  *
