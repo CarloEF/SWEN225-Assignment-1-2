@@ -20,31 +20,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eb583eac-d889-4e56-a9f4-2b5493f757fa" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/.idea/artifacts/code_jar.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/.idea/artifacts/unnamed.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/Java/Board.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/Java/Card$PlayerCard.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/Java/Card$RoomCard.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/Java/Card$WeaponCard.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/Java/Card.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/Java/Cell.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/Java/EmptyCell.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/Java/Game.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/Java/HallCell.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/Java/Item.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/Java/Player.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/Java/RoomCell.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/Java/Weapon.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/META-INF/MANIFEST.MF" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/code.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/data/cell-data.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/code/data/printed-board.txt" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,17 +50,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
-      <option name="arquillianRunConfiguration">
-        <value>
-          <option name="containerStateName" value="" />
-        </value>
-      </option>
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -95,6 +60,7 @@
       <option name="presentableId" value="Default" />
       <updated>1598238750300</updated>
       <workItem from="1598239914647" duration="22000" />
+      <workItem from="1598240253674" duration="178000" />
     </task>
     <servers />
   </component>
