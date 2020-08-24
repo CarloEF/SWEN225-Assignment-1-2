@@ -68,6 +68,7 @@ public class Room implements Card {
 	
 	/**
 	 * Gets the room's name
+	 * @return name
 	 */
 	public String getName() {
 		return name;
@@ -75,6 +76,7 @@ public class Room implements Card {
 	
 	/**
 	 * This room's representation on the board
+	 * @return tile value
 	 */
 	public String toString() {
 		return tileValue;

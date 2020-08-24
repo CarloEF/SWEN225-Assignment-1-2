@@ -9,22 +9,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
-// Hello, World! - Carlo's Edit 2
+
+// Hello, World!
+
 /**
  * Game class that handles all input/output and the game logic
  *
  */
 public class Game {
-	
+
 	/*************
 	 * CONSTANTS *
 	 *************/
 	public static final int BOARD_WIDTH = 24;
 	public static final int BOARD_HEIGHT = 25;
-	
+
 	//player order clockwise around the board
 	public static final String[] PLAYER_ORDER = {"Miss Scarlett", "Col. Mustard", "Mrs. White", "Mr. Green", "Mrs. Peacock", "Prof. Plum"};
-	
+
 	//i = inaccessible
 	//h = hallway
 	//k = kitchen
@@ -36,94 +38,107 @@ public class Game {
 	//a = hall
 	//s = study
 	//o = lounge
-	public static final String ROOM_BOARD = "iiiiiiiiihiiiihiiiiiiiii" + 
-									 		"kkkkkkihhhbbbbhhhicccccc" + 
-									 		"kkkkkkhhbbbbbbbbhhcccccc" + 
-									 		"kkkkkkhhbbbbbbbbhhcccccc" + 
-											"kkkkkkhhbbbbbbbbhhcccccc" + 
-											"kkkkkkhhbbbbbbbbhhhcccci" +
-											"ikkkkkhhbbbbbbbbhhhhhhhh" +
-											"hhhhhhhhbbbbbbbbhhhhhhhi" +
-											"ihhhhhhhhhhhhhhhhhmmmmmm" +
-											"dddddhhhhhhhhhhhhhmmmmmm" +
-											"ddddddddhhiiiiihhhmmmmmm" +
-											"ddddddddhhiiiiihhhmmmmmm" + 
-											"ddddddddhhiiiiihhhmmmmmm" + 
-											"ddddddddhhiiiiihhhhhhhhi" +
-											"ddddddddhhiiiiihhhllllli" +
-											"ddddddddhhiiiiihhlllllll" +
-											"ihhhhhhhhhiiiiihhlllllll" +
-											"hhhhhhhhhhhhhhhhhlllllll" +
-											"ihhhhhhhhaaaaaahhhllllli" +
-											"ooooooohhaaaaaahhhhhhhhh" +
-											"ooooooohhaaaaaahhhhhhhhi" +
-											"ooooooohhaaaaaahhsssssss" + 
-											"ooooooohhaaaaaahhsssssss" + 
-											"ooooooohhaaaaaahhsssssss" + 
-											"ooooooihiaaaaaaihissssss";
-	
-	//bitwise flag for walls with / as delimiter
-	//1 for left, 2 for up, 4 for right, 8 for down
-	//convention is walls are on both tiles they are connected to
-	public static final String WALL_BOARD = "0/0/0/0/0/0/0/0/0/7/0/0/0/0/7/0/0/0/0/0/0/0/0/0/" + 
-											"3/2/2/2/2/6/0/3/10/12/3/2/2/6/9/10/6/0/3/2/2/2/2/6/" +
-											"1/0/0/0/0/4/3/4/3/2/0/0/0/0/2/6/1/6/1/0/0/0/0/4/" +
-											"1/0/0/0/0/4/1/4/1/0/0/0/0/0/0/4/1/4/1/0/0/0/0/4/" +
-											"1/0/0/0/0/4/1/4/1/0/0/0/0/0/0/4/1/4/1/0/0/0/0/12/" +
-											"9/0/0/0/0/4/1/0/0/0/0/0/0/0/0/0/0/0/4/9/8/8/12/0/" +
-											"0/9/8/8/0/12/1/4/1/0/0/0/0/0/0/4/1/0/0/2/2/2/2/14/" +
-											"11/2/2/2/0/2/0/4/9/0/8/8/8/8/0/12/1/0/8/8/8/8/12/0/" +
-											"0/9/8/8/8/0/0/0/2/0/2/2/2/2/0/2/0/4/3/2/2/2/2/6/" +
-											"3/2/2/2/6/9/8/8/0/0/8/8/8/8/8/0/0/0/0/0/0/0/0/4/" +
-											"1/0/0/0/0/2/2/6/1/4/3/2/2/2/6/1/0/4/1/0/0/0/0/4/" +
-											"1/0/0/0/0/0/0/4/1/4/1/0/0/0/4/1/0/4/1/0/0/0/0/4/" +
-											"1/0/0/0/0/0/0/0/0/4/1/0/0/0/4/1/0/4/9/8/8/8/0/12/" +
-											"1/0/0/0/0/0/0/4/1/4/1/0/0/0/4/1/0/0/10/10/2/10/12/0/" +
-											"1/0/0/0/0/0/0/4/1/4/1/0/0/0/4/1/0/12/3/2/0/2/6/0/" +
-											"9/8/8/8/8/8/0/12/1/4/1/0/0/0/4/1/4/3/0/0/0/0/0/6/" +
-											"0/3/2/2/2/2/0/2/0/4/9/8/8/8/12/1/0/0/0/0/0/0/0/4/" +
-											"11/0/0/0/0/0/0/0/0/8/10/2/2/10/10/0/4/9/0/0/0/0/0/12/" +
-											"0/9/8/8/8/8/0/0/4/3/2/0/0/2/6/1/0/6/9/8/8/8/12/0/" +
-											"3/2/2/2/2/2/4/1/4/1/0/0/0/0/4/1/0/0/2/2/2/2/2/14/" +
-											"1/0/0/0/0/0/4/1/4/1/0/0/0/0/0/0/0/0/8/8/8/8/12/0/" +
-											"1/0/0/0/0/0/4/1/4/1/0/0/0/0/4/1/4/1/2/2/2/2/2/6/" +
-											"1/0/0/0/0/0/4/1/4/1/0/0/0/0/4/1/4/1/0/0/0/0/0/4/" + 
-											"1/0/0/0/0/0/12/1/12/1/0/0/0/0/4/9/4/9/0/0/0/0/0/4/" +
-											"9/8/8/8/8/12/0/13/0/9/8/8/8/8/12/0/13/0/9/8/8/8/8/12/";
-	
-	//stores the number of players
+	public static final String ROOM_BOARD = 
+					"iiiiiiiiihiiiihiiiiiiiii" + 
+					"kkkkkkihhhbbbbhhhicccccc" + 
+					"kkkkkkhhbbbbbbbbhhcccccc" + 
+					"kkkkkkhhbbbbbbbbhhcccccc" + 
+					"kkkkkkhhbbbbbbbbhhcccccc" + 
+					"kkkkkkhhbbbbbbbbhhhcccci" +
+					"ikkkkkhhbbbbbbbbhhhhhhhh" +
+					"hhhhhhhhbbbbbbbbhhhhhhhi" +
+					"ihhhhhhhhhhhhhhhhhmmmmmm" +
+					"dddddhhhhhhhhhhhhhmmmmmm" +
+					"ddddddddhhiiiiihhhmmmmmm" +
+					"ddddddddhhiiiiihhhmmmmmm" + 
+					"ddddddddhhiiiiihhhmmmmmm" + 
+					"ddddddddhhiiiiihhhhhhhhi" +
+					"ddddddddhhiiiiihhhllllli" +
+					"ddddddddhhiiiiihhlllllll" +
+					"ihhhhhhhhhiiiiihhlllllll" +
+					"hhhhhhhhhhhhhhhhhlllllll" +
+					"ihhhhhhhhaaaaaahhhllllli" +
+					"ooooooohhaaaaaahhhhhhhhh" +
+					"ooooooohhaaaaaahhhhhhhhi" +
+					"ooooooohhaaaaaahhsssssss" + 
+					"ooooooohhaaaaaahhsssssss" + 
+					"ooooooohhaaaaaahhsssssss" + 
+					"ooooooihiaaaaaaihissssss";
+
+	// Bitwise flag for how many walls a Tile contains.
+	// 1 for left, 2 for up, 4 for right, 8 for down
+	// Convention is walls are on both tiles they are connected to
+	public static final String WALL_BOARD = 
+					"0/0/0/0/0/0/0/0/0/7/0/0/0/0/7/0/0/0/0/0/0/0/0/0/" + 
+					"3/2/2/2/2/6/0/3/10/12/3/2/2/6/9/10/6/0/3/2/2/2/2/6/" +
+					"1/0/0/0/0/4/3/4/3/2/0/0/0/0/2/6/1/6/1/0/0/0/0/4/" +
+					"1/0/0/0/0/4/1/4/1/0/0/0/0/0/0/4/1/4/1/0/0/0/0/4/" +
+					"1/0/0/0/0/4/1/4/1/0/0/0/0/0/0/4/1/4/1/0/0/0/0/12/" +
+					"9/0/0/0/0/4/1/0/0/0/0/0/0/0/0/0/0/0/4/9/8/8/12/0/" +
+					"0/9/8/8/0/12/1/4/1/0/0/0/0/0/0/4/1/0/0/2/2/2/2/14/" +
+					"11/2/2/2/0/2/0/4/9/0/8/8/8/8/0/12/1/0/8/8/8/8/12/0/" +
+					"0/9/8/8/8/0/0/0/2/0/2/2/2/2/0/2/0/4/3/2/2/2/2/6/" +
+					"3/2/2/2/6/9/8/8/0/0/8/8/8/8/8/0/0/0/0/0/0/0/0/4/" +
+					"1/0/0/0/0/2/2/6/1/4/3/2/2/2/6/1/0/4/1/0/0/0/0/4/" +
+					"1/0/0/0/0/0/0/4/1/4/1/0/0/0/4/1/0/4/1/0/0/0/0/4/" +
+					"1/0/0/0/0/0/0/0/0/4/1/0/0/0/4/1/0/4/9/8/8/8/0/12/" +
+					"1/0/0/0/0/0/0/4/1/4/1/0/0/0/4/1/0/0/10/10/2/10/12/0/" +
+					"1/0/0/0/0/0/0/4/1/4/1/0/0/0/4/1/0/12/3/2/0/2/6/0/" +
+					"9/8/8/8/8/8/0/12/1/4/1/0/0/0/4/1/4/3/0/0/0/0/0/6/" +
+					"0/3/2/2/2/2/0/2/0/4/9/8/8/8/12/1/0/0/0/0/0/0/0/4/" +
+					"11/0/0/0/0/0/0/0/0/8/10/2/2/10/10/0/4/9/0/0/0/0/0/12/" +
+					"0/9/8/8/8/8/0/0/4/3/2/0/0/2/6/1/0/6/9/8/8/8/12/0/" +
+					"3/2/2/2/2/2/4/1/4/1/0/0/0/0/4/1/0/0/2/2/2/2/2/14/" +
+					"1/0/0/0/0/0/4/1/4/1/0/0/0/0/0/0/0/0/8/8/8/8/12/0/" +
+					"1/0/0/0/0/0/4/1/4/1/0/0/0/0/4/1/4/1/2/2/2/2/2/6/" +
+					"1/0/0/0/0/0/4/1/4/1/0/0/0/0/4/1/4/1/0/0/0/0/0/4/" + 
+					"1/0/0/0/0/0/12/1/12/1/0/0/0/0/4/9/4/9/0/0/0/0/0/4/" +
+					"9/8/8/8/8/12/0/13/0/9/8/8/8/8/12/0/13/0/9/8/8/8/8/12/";
+
+	// Stores number of players
 	int playerNum;
-	
-	List<Card> cards;
-	
 	Board board;
-	
+
+
+	// Stores 
+	List<Card> cards;
+
+	// Stores a map of every Player, Weapon and Room
 	Map<String, Player> players;
 	Map<String, Weapon> weapons;
 	Map<String, Room> rooms;
-	
+
+	List<Player> playerList;
+	List<Weapon> weaponList;
+	List<Room> roomList;
+
 	Player murderer = null;
 	Weapon murderWeapon = null;
 	Room murderRoom = null;
-	
-	//list of only players that are playing in order 
+
+	// Ordered List of all Players
 	List<Player> playersOrdered;
-	
+
 	boolean isRunning = true;
-	
+
 	//get all input from this scanner
 	Scanner input;
-	
-	// Constructs the game
+
+	/**
+	 * Constructs the game, sets up stuff
+	 */
 	public Game() {
 		cards = new ArrayList<Card>();
-		
+
 		players = new HashMap<String, Player>();
+		playerList = new ArrayList<Player>();
 		weapons = new HashMap<String, Weapon>();
+		weaponList = new ArrayList<Weapon>();
 		rooms = new HashMap<String, Room>();
-		
+		roomList = new ArrayList<Room>();
+
 		playersOrdered = new ArrayList<Player>();
-		
+
 		input = new Scanner(System.in);
 	}
 
@@ -133,37 +148,37 @@ public class Game {
 	public static void main(String[] args) {
 		Game game = new Game();
 		game.startGame();
-		
+
 	}
-	
+
 	/**
 	 * Initiates the board
 	 */
 	private void initBoard() {
 		board = new Board(BOARD_WIDTH, BOARD_HEIGHT);
-		
+
 		board.setBoard(ROOM_BOARD, WALL_BOARD, rooms);
 	}
-	
+
 	/**
 	 * Initiates the cards
 	 */
 	private void initCards() {
-		
+
 		addPlayer(new Player("Miss Scarlett", "S"));
 		addPlayer(new Player("Col. Mustard", "M"));
 		addPlayer(new Player("Mrs. White", "W"));
 		addPlayer(new Player("Mr. Green", "G"));
 		addPlayer(new Player("Mrs. Peacock", "P"));
 		addPlayer(new Player("Prof. Plum", "p"));
-		
+
 		addWeapon(new Weapon("Candlestick", "C"));
 		addWeapon(new Weapon("Dagger", "D"));
 		addWeapon(new Weapon("Lead Pipe", "L"));
 		addWeapon(new Weapon("Revolver", "R"));
 		addWeapon(new Weapon("Rope", "r"));
 		addWeapon(new Weapon("Spanner", "s"));
-		
+
 		addRoom(new Room("Kitchen", "K"));
 		addRoom(new Room("Ball Room", "B"));
 		addRoom(new Room("Conservatory", "C"));
@@ -173,9 +188,9 @@ public class Game {
 		addRoom(new Room("Hall", "H"));
 		addRoom(new Room("Lounge", "l"));
 		addRoom(new Room("Dining Room", "D"));
-		
+
 	}
-	
+
 	/**
 	 * Adds a player to collections
 	 * @param player
@@ -183,8 +198,9 @@ public class Game {
 	private void addPlayer(Player player) {
 		cards.add(player);
 		players.put(player.getName(), player);
+		playerList.add(player);
 	}
-	
+
 	/**
 	 * Adds a weapon to collections
 	 * @param weapon
@@ -192,8 +208,9 @@ public class Game {
 	private void addWeapon(Weapon weapon) {
 		cards.add(weapon);
 		weapons.put(weapon.getName(), weapon);
+		weaponList.add(weapon);
 	}
-	
+
 	/**
 	 * Adds a room to collections
 	 * @param room
@@ -201,39 +218,40 @@ public class Game {
 	private void addRoom(Room room) {
 		cards.add(room);
 		rooms.put(room.getName(), room);
+		roomList.add(room);
 	}
-	
+
 	/**
 	 * Adds the room exits
 	 */
 	private void addRoomExits() {
 		rooms.get("Kitchen").addExitTile(board.getTile(4, 6));
-		
+
 		rooms.get("Ball Room").addExitTile(board.getTile(8, 5));
 		rooms.get("Ball Room").addExitTile(board.getTile(9, 7));
 		rooms.get("Ball Room").addExitTile(board.getTile(14, 7));
 		rooms.get("Ball Room").addExitTile(board.getTile(15, 5));
-		
+
 		rooms.get("Conservatory").addExitTile(board.getTile(18, 4));
-		
+
 		rooms.get("Billiard Room").addExitTile(board.getTile(18, 9));
 		rooms.get("Billiard Room").addExitTile(board.getTile(22, 12));
-		
+
 		rooms.get("Library").addExitTile(board.getTile(20, 14));
 		rooms.get("Library").addExitTile(board.getTile(17, 16));
-		
+
 		rooms.get("Study").addExitTile(board.getTile(17, 21));
 
 		rooms.get("Hall").addExitTile(board.getTile(14, 20));
 		rooms.get("Hall").addExitTile(board.getTile(12, 18));
 		rooms.get("Hall").addExitTile(board.getTile(11, 18));
-		
+
 		rooms.get("Lounge").addExitTile(board.getTile(6, 19));
 
 		rooms.get("Dining Room").addExitTile(board.getTile(6, 15));
 		rooms.get("Dining Room").addExitTile(board.getTile(7, 12));
 	}
-	
+
 	/**
 	 * Sets the players to their starting positions
 	 */
@@ -245,7 +263,7 @@ public class Game {
 		players.get("Mrs. Peacock").moveToTile(board.getTile(23, 6));
 		players.get("Prof. Plum").moveToTile(board.getTile(23, 19));
 	}
-	
+
 	/**
 	 * Sets weapons to random rooms
 	 */
@@ -253,18 +271,18 @@ public class Game {
 		//copy to new list
 		List<Room> roomsLeft = new ArrayList<Room>(rooms.values());
 		List<Weapon> weaponsLeft = new ArrayList<Weapon>(weapons.values());
-		
+
 		while (weaponsLeft.size() > 0) {
 			int random = (int)Math.floor(Math.random()*roomsLeft.size());
-			
+
 			board.moveWeapon(weaponsLeft.get(0), roomsLeft.get(random));
-			
+
 			roomsLeft.remove(random);
 			weaponsLeft.remove(0);
 		}
-		
+
 	}
-	
+
 	/**
 	 * Handles all the logic at the start of the game
 	 */
@@ -274,23 +292,25 @@ public class Game {
 		addRoomExits();
 		setPlayerTiles();
 		setWeaponTiles();
-		
+
+		System.out.println("Hello, welcome to Cluedo!");
+
 		playerNum = getPlayerNum();
-		
+
 		orderPlayers();
 		dealCards();
-		
+
 		//could be random
 		int currentPlayerIndex = 0;
-		
+
 		while(isRunning) {
 			Player currentPlayer = playersOrdered.get(currentPlayerIndex);
 			startPlayerTurn(currentPlayer);
-			
+
 			currentPlayerIndex = (currentPlayerIndex + 1) % playerNum;
 		}
 	}
-	
+
 	/**
 	 * Orders the players depending on how many players there are
 	 */
@@ -299,17 +319,18 @@ public class Game {
 			playersOrdered.add(players.get(PLAYER_ORDER[i]));
 		}
 	}
-	
+
 	/**
 	 * Deals cards out, including picking the murder cards
 	 */
 	private void dealCards() {
 		Collections.shuffle(cards);
-		
-		//take out 1 player, 1 weapon, 1 room cards for the murder circumstance
+
+		// Take out 1 player, 1 weapon, 1 room cards for the murder circumstance
 		int index = 0;
 		while(murderer == null || murderWeapon == null || murderRoom == null) {
 			Card card = cards.get(index);
+
 			if (murderer == null && card instanceof Player) {
 				murderer = (Player)card;
 				cards.remove(index);
@@ -327,63 +348,62 @@ public class Game {
 			}
 			index++;
 		}
-		
+
 		//deal the other cards out
 		for (int i=0, len=cards.size();i<len;i++) {
 			Player player = playersOrdered.get(i % playerNum);
-			
+
 			player.addCard(cards.get(i));
 		}
 	}
-	
+
 	/**
 	 * Gets input about the number of players.
 	 * @return the number of players
 	 */
 	private int getPlayerNum() {
-		
+
 		System.out.println("How many players are playing?");
-		
-		//TODO catch potential errors on input
-		int num = input.nextInt();
-		
-		while (num < 3 || num > 6) {
-			System.out.println("Players(must be between 3 and 6):");
-			
-			num = input.nextInt();
-		}
-		
-		return num;
+
+		return getNum(3, 6);
 	}
-	
+
 	/**
 	 * Starts a player's turn, taking input
 	 * @param player
 	 */
 	public void startPlayerTurn(Player player) {
-		
+
 		System.out.println("Board:");
-		
+
 		System.out.println(board + "\n");
-		
+
 		System.out.printf("%s's turn:\n", player.getName());
-		
+
 		int step1 = diceRoll();
 		int step2 = diceRoll();
-		
+
 		int stepNum = step1 + step2;
-		
+
 		System.out.printf("You rolled a %d and a %d.\n", step1, step2);
 		//player MUST make a move
+
 		doMove(player, stepNum);
-		
+
+		// Allows the player to make a suggestion
 		Tile tile = player.getTile();
 		if (tile instanceof RoomTile && player.canAccuse()) {
 			//can do suggestion
 			doSuggestion(player);
 		}
+		// Allows the player to make an accusation
+		System.out.println("Do you want to make an accusation?");
+		System.out.println("Warning: if your accusation is wrong, you will lose and be unable to accuse");
+		if (getBooleanInput()) {
+			doAccusation(player);
+		}
 	}
-	
+
 	/**
 	 * Gets input and does the move
 	 * Need to add more outputs
@@ -392,32 +412,32 @@ public class Game {
 		//converts player coords from array indices to board coords
 		int playerX = player.getTile().getX()+1;
 		int playerY = BOARD_HEIGHT - player.getTile().getY();
-		
+
 		Set<Tile> validTiles = new HashSet<Tile>();
 		Set<Room> validRooms = new HashSet<Room>();
-		
+
 		//gets all valid tiles and rooms the player can go to and puts them into the sets
 		board.getValidMoves(diceRoll, player, validTiles, validRooms);
-		
+
 		if (validTiles.size() == 0 && validRooms.size() == 0) {
 			System.out.println("You are blocked and cannot move!");
 			return;
 		}
-		
+
 		try {
-			
+
 			System.out.printf("You are at (%d %d) and have %d moves to use.\n", playerX, playerY, diceRoll);
 			System.out.println("Where do you want to move (give in pairs of coords or room name):");
-			
+
 			String textInput;
-			
+
 			//catch and ignore nothing lines
 			do {
 				textInput = input.nextLine();
 			} while (textInput.equals(""));
-			
+
 			String[] inputs = textInput.split(" ");
-			
+
 			if (inputs.length == 0) {
 				System.out.println("Invalid input, please try again");
 				doMove(player, diceRoll);
@@ -426,13 +446,13 @@ public class Game {
 				//coords
 				int newX = Integer.parseInt(inputs[0]);
 				int newY = Integer.parseInt(inputs[1]);
-				
+
 				//convert to board array indices
 				newX--;
 				newY = BOARD_HEIGHT - newY;
-				
+
 				Tile newTile = board.getTile(newX, newY);
-				
+
 				//check if tile is invalid
 				if (newTile == null) {
 					System.out.println("Invalid coordinates, please try again.");
@@ -440,7 +460,7 @@ public class Game {
 					//check if they want to move to a room
 				} else if (newTile instanceof RoomTile) {
 					Room newRoom = ((RoomTile) newTile).getRoom();
-					
+
 					if (validRooms.contains(newRoom)) {
 						board.movePlayer(player, newRoom);
 					} else {
@@ -456,27 +476,31 @@ public class Game {
 						doMove(player, diceRoll);
 					}
 				}
-			} else {
-				//must be a room
-				
+			} else {		// Must be a room
+
 				//join all of line together, rooms are only 2 words max so this is sufficient
 				if (inputs.length == 2) {
 					textInput = String.join(" ", inputs[0], inputs[1]);
 				} else {
 					textInput = inputs[0];
 				}
-				
-				//input is text, so check if it's a valid room
-				if (rooms.containsKey(textInput)) {
-					Room room = rooms.get(textInput);
-					
-					if (validRooms.contains(room)) {
-						board.movePlayer(player, room);
-					} else {
-						System.out.println("Can't get to that room, please try again");
-						doMove(player, diceRoll);
+				boolean roomFound = false;
+
+				for (Room room : rooms.values()) {
+					if (textInput.equalsIgnoreCase(room.getName()) || textInput.equals(room.toString())) {
+
+						if (validRooms.contains(room)) {
+							board.movePlayer(player, room);
+						} else {
+							System.out.println("Can't get to that room, please try again");
+							doMove(player, diceRoll);
+						}
+						roomFound = true;
+						break;
 					}
-				} else {
+				}
+
+				if (!roomFound) {
 					System.out.println("Invalid room, please try again");
 					doMove(player, diceRoll);
 				}
@@ -484,9 +508,12 @@ public class Game {
 		} catch(InputMismatchException e) {
 			System.out.println("Invalid input, please try again");
 			doMove(player, diceRoll);
+		} catch(NumberFormatException e) {
+			System.out.println("Invalid input, please try again");
+			doMove(player, diceRoll);
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param player
@@ -495,9 +522,9 @@ public class Game {
 	private void doSuggestion(Player player) {
 		//assumes player is in a roomtile
 		Room room = ((RoomTile)player.getTile()).getRoom();
-		
+
 		System.out.printf("You(%s) are in room %s.\n", player.getName(), room.getName());
-		
+
 		List<Card> playerCards = player.getCards();
 		String cardString = "";
 		for (int i=0;i<playerCards.size();i++) {
@@ -507,124 +534,125 @@ public class Game {
 			}
 		}
 		System.out.printf("You have cards %s.\n", cardString);
-				
+
 		System.out.println("You can make a suggestion about the murder circumstances.");
-		
-		System.out.println("Who do you think the murderer was?");
-		
-		Player murdererSugg = getSuggestion(players);
-		
-		System.out.println("What weapon do you think was used to carry out the murder?");
-		
-		Weapon weaponSugg = getSuggestion(weapons);
-		
-		//move objects to the room
+		// Ask which Character to suggest, print out possible Character options.
+		System.out.println("Which Player would you like to suggest?");
+		System.out.println(getPlayerList());
+		Player murdererSugg = playerList.get(getNum(0, playerList.size()-1));
+
+		// Ask which weapon to suggest, print out possible Weapon options.
+		System.out.println("Which Weapon would you like to suggest?");
+		System.out.println(getWeaponList());
+		Weapon weaponSugg = weaponList.get(getNum(0, weaponList.size()-1));
+
+		// Move objects to the room
 		board.movePlayer(murdererSugg, room);
 		board.moveWeapon(weaponSugg, room);
-		
+
 		//go through all the players in order
 		int playerIndex = playersOrdered.indexOf(player);
-		
-		boolean refuted = false;
-		
+
 		for (int index = (playerIndex + 1) % playerNum; index != playerIndex; index++, index %= playerNum) {
 			Player currPlayer = playersOrdered.get(index);
 			List<Card> refuteCards = currPlayer.getRefutes(murdererSugg, weaponSugg, room);
-			
+
 			if (refuteCards.size() == 0) {
 				System.out.printf("%s cannot refute the murder suggestion.\n", currPlayer.getName());
 			} else if (refuteCards.size() == 1) {
 				System.out.printf("%s refuted the murder suggestion with %s.\n", currPlayer.getName(), refuteCards.get(0).getName());
-				refuted = true;
 				break;
 			} else {
-				
+
+
 				System.out.printf("%s needs to choose a card to refute.\n", currPlayer.getName());
 				System.out.println("Choose a card to use:");
-				for (Card c : refuteCards) {
-					System.out.printf("%s\n", c.getName());
+				for (int i=0;i<refuteCards.size();i++) {
+					System.out.printf("%d: %s\n", i, refuteCards.get(i).getName());
 				}
-				
-				String cardName;
-				Card inputCard = null;
-				
-				do {
-					cardName = input.nextLine();
-					for (Card c : refuteCards) {
-						if (c.getName().equals(cardName)) {
-							inputCard = c;
-							break;
-						}
-					}
-				} while (inputCard == null);
-				
+
+				Card inputCard = refuteCards.get(getNum(0, refuteCards.size()-1));
+
 				System.out.printf("%s refuted the murder suggestion with %s.\n", currPlayer.getName(), inputCard.getName());
-				refuted = true;
 				break;
+			}
+		}
+	}
+
+	private void doAccusation(Player player) {
+
+		// Ask which Player to accuse, print out possible Player options.
+		System.out.println("Which Player would you like to accuse?");
+		System.out.println(getPlayerList());
+		Player murdererAcc = playerList.get(getNum(0, playerList.size()-1));
+		// Ask which Weapon to suggest, print out possible Weapon options.
+		System.out.println("Which Weapon would you like to accuse?");
+		System.out.println(getWeaponList());
+		Weapon weaponAcc = weaponList.get(getNum(0, weaponList.size()-1));
+		// Ask which Room to suggest, print out possible Room options.
+		System.out.println("Which Room would you like to accuse?");
+		System.out.println(getRoomList());
+		Room roomAcc = roomList.get(getNum(0, roomList.size()-1));
+
+		if (murdererAcc == murderer && weaponAcc == murderWeapon && roomAcc == murderRoom) {
+			System.out.println("Congratulations, you won!");
+			input.close();
+			isRunning = false;
+		}
+		else {
+			System.out.println("Oops, that was not correct, you can no longer suggest/accuse");
+			player.setCanAccuse(false);
+		}
+
+		// Code to check if 
+		int playersLeft = 0;
+		Player last = null;
+
+		for (Player p : playersOrdered) {
+			if (p.canAccuse()) {
+				playersLeft++;
+				last = p;
 			}
 		}
 
-		//now do accusation
-		if (!refuted) {
-			System.out.println("Suggestion was unrefuted, would you like to accuse?");
-			
-			if (getBooleanInput()) {
-				if (murderRoom == room && murderer == murdererSugg && murderWeapon == weaponSugg) {
-					System.out.println("Congratulations, you won!");
-					input.close();
-					isRunning = false;
-				} else {
-					System.out.println("Oops, that was not correct, you can no longer suggest/accuse");
-					player.setCanAccuse(false);
-					
-					int playersLeft = 0;
-					Player last = null;
-					
-					for (Player p : playersOrdered) {
-						if (p.canAccuse()) {
-							playersLeft++;
-							last = p;
-						}
-					}
-					
-					if (playersLeft == 1) {
-						//everyone else accused wrongly, so the last player wins
-						System.out.printf("Everyone else accused incorrectly, so %s wins!\n", last.getName());
-						System.out.printf("The murderer was %s with the %s in the room %s", murderer.getName(), murderWeapon.getName(), murderRoom.getName());
-						input.close();
-						isRunning = false;
-					}
-				}
-			}
+		if (playersLeft == 1) {
+			//everyone else accused wrongly, so the last player wins
+			System.out.printf("Everyone else accused incorrectly, so %s wins!\n", last.getName());
+			System.out.printf("The murderer was %s with the %s in the room %s", murderer.getName(), murderWeapon.getName(), murderRoom.getName());
+			input.close();
+			isRunning = false;
 		}
 	}
-	
+
 	/**
-	 * Useful generics method to get input about a suggested murder circumstance
-	 * @param <T>
-	 * @param map
+	 * Gets a number between min and max
+	 * @param min
+	 * @param max
 	 * @return
 	 */
-	private <T> T getSuggestion(Map<String, T> map) {
-		String objName;
-		T objSugg = null;
-		
+	private int getNum(int min, int max) {
+		int num = 0;
+		int temp;
+		boolean validNum = false;
+
 		do {
-			//catch and ignore nothing lines
-			do {
-				objName = input.nextLine();
-			} while (objName.equals(""));
-			
-			if (map.containsKey(objName)) {
-				objSugg = map.get(objName);
+			if (input.hasNextInt()) {
+				temp = input.nextInt();
+				if (temp < min || temp > max) {
+					System.out.printf("Number must be between %d and %d:\n", min, max);
+				} else {
+					num = temp;
+					validNum = true;
+				}
 			} else {
-				System.out.println("Invalid object, please try again.");
+				System.out.println("Number must be an integer:");
+				input.next();
 			}
-		} while (objSugg == null);
-		
-		return objSugg;
+		} while(!validNum);
+
+		return num;
 	}
-	
+
 	/**
 	 * 
 	 * @return
@@ -632,11 +660,11 @@ public class Game {
 	private boolean getBooleanInput() {
 		String[] yesInputs = {"y", "yes", "true", "t"};
 		String[] noInputs = {"n", "no", "false", "f"};
-		
-		
+
+
 		while(true) {
 			String text = input.next();
-			
+
 			for (String y : yesInputs) {
 				if (text.equalsIgnoreCase(y)) {
 					return true;
@@ -649,7 +677,7 @@ public class Game {
 			}
 		}
 	}
-	
+
 	/**
 	 * Simulates a dice roll
 	 * @return a random number between 1 and 6
@@ -657,6 +685,39 @@ public class Game {
 	private int diceRoll() {
 		return (int)Math.floor(Math.random()*6+1);
 	}
-	
+
+
+
+
+
+	public String getPlayerList() {
+		String temp = "Players: \n";
+		for (int i = 0; i < this.playerList.size(); i++) {
+			String lineTemp = i+": "+this.playerList.get(i).getName()+"\n";
+			temp += lineTemp;
+		}
+		return temp;
+	}
+
+
+	public String getWeaponList() {
+		String temp = "Weapons: "+"\n";
+		for (int i = 0; i < this.weaponList.size(); i++) {
+			String lineTemp = i+": "+this.weaponList.get(i).getName()+"\n";
+			temp += lineTemp;
+		}
+		return temp;
+	}
+	public String getRoomList() {
+		String temp = "Rooms: "+"\n";
+		for (int i = 0; i < this.roomList.size(); i++) {
+			String lineTemp = i+": "+this.roomList.get(i).getName()+"\n";
+			temp += lineTemp;
+		}
+		return temp;
+	}
+
+
+
 
 }
