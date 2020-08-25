@@ -1,5 +1,8 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -9,14 +12,65 @@ public class SwingTest {
 
     public SwingTest() {
 
-        // set up the frame (basically the window?)
+        // set up the frame (basically the window?) (yes the window)
         JFrame frame = new JFrame("Cluedo");
         frame.setSize(960,720);
         frame.setLayout(null);
 
+        setMenuBar(frame);
+
         frame.setVisible(true);
 
         chooseCharacters(frame);
+    }
+
+    /**
+     * Example implementation of a MenuBar implementation (easily adapted to include actual functions)
+     * @param parentFrame - The frame we'll put the MenuBar in
+     */
+    public void setMenuBar(JFrame parentFrame) {
+
+        // creates the JMenuBar object (the bar itself)
+        JMenuBar menuBar = new JMenuBar();
+
+        // creates drop-down menus
+        JMenu menu1 = new JMenu("Drop-Down Menu 1");
+        JMenu menu2 = new JMenu("Drop-Down Menu 2");
+
+        // adds menus to the bar
+        menuBar.add(menu1);
+        menuBar.add(menu2);
+
+        // creates JMenuItems to add to the JMenu objects (creating buttons in a drop-down menu)
+        JMenuItem item1 = new JMenuItem("Start Game");
+        JMenuItem item2 = new JMenuItem("Item 2");
+        JMenuItem item3 = new JMenuItem("Item 3");
+        JMenuItem item4 = new JMenuItem("Item 4");
+        JMenuItem item5 = new JMenuItem("Item 5");
+        menu1.add(item1);
+        menu1.add(item2);
+        menu2.add(item3);
+        menu2.add(item4);
+        menu2.add(item5);
+
+        // sets accelerator keystrokes to JMenuItems (performs the action without the button being visible)
+        // ALT + item number will activate that button
+        item1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
+        item2.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.ALT_MASK));
+        item3.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3, ActionEvent.ALT_MASK));
+        item4.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4, ActionEvent.ALT_MASK));
+        item5.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_5, ActionEvent.ALT_MASK));
+
+        // adds an action listener to a button (starts the game when first button is pressed
+        item1.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                chooseCharacters(parentFrame);
+            }
+        });
+
+        // adds the finalised JMenuBar to the overall frame
+        parentFrame.setJMenuBar(menuBar);
+
     }
 
     public void chooseCharacters(JFrame parentFrame) {
