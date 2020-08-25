@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.awt.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -10,29 +11,42 @@ public class SwingTest {
 
         // set up the frame (basically the window?)
         JFrame frame = new JFrame("Cluedo");
-        frame.setSize(400,400);
+        frame.setSize(960,720);
         frame.setLayout(null);
 
-        AtomicReference<Integer> playerNum = new AtomicReference<>(1);
+        frame.setVisible(true);
+
+        chooseCharacters(frame);
+    }
+
+    public void chooseCharacters(JFrame parentFrame) {
+        int numPlayers = getIntegerInput(parentFrame, "Welcome to Cludeo!\nHow many players do you have?",  "Welcome", 3,6);
+
+        // set up the frame (basically the window?)
+        JDialog dialog = new JDialog(parentFrame, "Choose Characters", true);
+        dialog.setSize(400,400);
+        dialog.setLayout(null);
+
+        AtomicReference<Integer> playerCount = new AtomicReference<>(1);
 
         // text at the top
-        JLabel title = new JLabel("Choose character for player " + playerNum + ":");
+        JLabel title = new JLabel("Choose character for player " + playerCount + ":");
         title.setBounds(30,10,250,25);
-        frame.add(title);
+        dialog.add(title);
 
         // text field for inputting player's name
         JLabel chooseNameLabel = new JLabel("Player's name:");
         chooseNameLabel.setBounds(30,190,250,25);
-        frame.add(chooseNameLabel);
+        dialog.add(chooseNameLabel);
         JTextField textField = new JTextField();
         textField.setBounds(30,220,100,25);
-        frame.add(textField);
+        dialog.add(textField);
 
         // a continue button
         JButton continueButton = new JButton("Continue");
         continueButton.setBounds(30,260,100,25);
         continueButton.setEnabled(false);
-        frame.add(continueButton);
+        dialog.add(continueButton);
 
         // create the radio buttons, based on player name Strings
         int y = 10;
@@ -43,7 +57,7 @@ public class SwingTest {
             radioButton.setActionCommand(name);  // it will return this String
             radioButton.setBounds(30,y+=25,120,25);
             buttonGroup.add(radioButton);
-            frame.add(radioButton);
+            dialog.add(radioButton);
         }
 
         // add the selected player when button is pressed
@@ -55,19 +69,42 @@ public class SwingTest {
                     buttonGroup.clearSelection();
                     button.setEnabled(false);
                     continueButton.setEnabled(false);
-                    String playerName = textField.getText().equals("") ? "unnamed" : textField.getText();
+                    String playerName = textField.getText().equals("") ? "Player " + playerCount : textField.getText();
                     textField.setText("");
-                    System.out.printf("Player %d (%s) selected %s%n", playerNum.get(), playerName, button.getActionCommand());
+                    System.out.printf("Player %d (%s) selected %s%n", playerCount.get(), playerName, button.getActionCommand());
 
-                    playerNum.set(playerNum.get() + 1);
-                    title.setText("Choose character for player " + playerNum + ":");
+                    if (playerCount.getAndSet(playerCount.get() + 1) >= numPlayers)
+                        dialog.setVisible(false);
+                    title.setText("Choose character for player " + playerCount + ":");
                 }
             }
         });
 
         // NOTE: it seems to work better putting this at the end
         // otherwise some things aren't visible
-        frame.setVisible(true);
+        dialog.setVisible(true);
+    }
+
+
+    public int getIntegerInput(Component parentComponent, String question, String title, int lowerBound, int upperBound) {
+
+        boolean firstLoop = true;
+        String q = String.format("%s [%d-%d]", question, lowerBound, upperBound);
+
+        while (true) {
+            try {
+                int input = Integer.parseInt(JOptionPane.showInputDialog(parentComponent, q, title, JOptionPane.QUESTION_MESSAGE));
+
+                if (input >= lowerBound && input <= upperBound)
+                    return input;
+
+            } catch (Exception ignored) {}
+
+            if (firstLoop){
+                q += "\nPlease input a number between " + lowerBound + " and " + upperBound;
+                firstLoop = false;
+            }
+        }
     }
 
     public static void main(String[] args) {
