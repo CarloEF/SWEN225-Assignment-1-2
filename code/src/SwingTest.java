@@ -1,3 +1,6 @@
+import swen225.cluedo.Room;
+import swen225.cluedo.Weapon;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -8,7 +11,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class SwingTest {
 
-    public static String[] NAMES = {"Miss Scarlett", "Col. Mustard", "Mrs. White", "Mr. Green", "Mrs. Peacock", "Prof. Plum"};
+    public static String[] PLAYERS = {"Miss Scarlett", "Col. Mustard", "Mrs. White", "Mr. Green", "Mrs. Peacock", "Prof. Plum"};
+    public static String[] WEAPONS = {"Candlestick", "Dagger", "Lead Pipe", "Revolver", "Rope", "Spanner"};
+    public static String[] ROOMS = {"Kitchen", "Ball Room", "Conservatory", "Billiard Room", "Library", "Study", "Hall", "Lounge", "Dining Room"};
 
     public SwingTest() {
 
@@ -21,7 +26,7 @@ public class SwingTest {
 
         frame.setVisible(true);
 
-        chooseCharacters(frame);
+//        chooseCharacters(frame);
     }
 
     /**
@@ -44,7 +49,7 @@ public class SwingTest {
         // creates JMenuItems to add to the JMenu objects (creating buttons in a drop-down menu)
         JMenuItem item1 = new JMenuItem("Start Game");
         JMenuItem item2 = new JMenuItem("Item 2");
-        JMenuItem item3 = new JMenuItem("Item 3");
+        JMenuItem item3 = new JMenuItem("Make Accusation");
         JMenuItem item4 = new JMenuItem("Item 4");
         JMenuItem item5 = new JMenuItem("Item 5");
         menu1.add(item1);
@@ -62,11 +67,10 @@ public class SwingTest {
         item5.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_5, ActionEvent.ALT_MASK));
 
         // adds an action listener to a button (starts the game when first button is pressed
-        item1.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                chooseCharacters(parentFrame);
-            }
-        });
+        item1.addActionListener(e -> chooseCharacters(parentFrame));
+
+        // adds an action listener to a button
+        item3.addActionListener(e -> getAccusationCircumstances(parentFrame));
 
         // adds the finalised JMenuBar to the overall frame
         parentFrame.setJMenuBar(menuBar);
@@ -105,7 +109,7 @@ public class SwingTest {
         // create the radio buttons, based on player name Strings
         int y = 10;
         ButtonGroup buttonGroup = new ButtonGroup();
-        for (String name : NAMES) {
+        for (String name : PLAYERS) {
             JRadioButton radioButton = new JRadioButton(name);
             radioButton.addActionListener(e -> continueButton.setEnabled(true));
             radioButton.setActionCommand(name);  // it will return this String
@@ -159,6 +163,63 @@ public class SwingTest {
                 firstLoop = false;
             }
         }
+    }
+
+    // todo: figure out a way for this method to return the appropriate data
+    public void getAccusationCircumstances(JFrame parentFrame) {
+
+        JDialog dialog = new JDialog(parentFrame, "Make an Accusation", true);
+        dialog.setSize(400,400);
+        dialog.setLayout(null);
+
+        // text at the top
+        JLabel title = new JLabel("Make an accusation - select the murder circumstances");
+        title.setBounds(30,10,350,25);
+        dialog.add(title);
+
+        // combo box to choose a player
+        JLabel suspectLabel = new JLabel("Suspect:");
+        suspectLabel.setBounds(30,40,250,25);
+        dialog.add(suspectLabel);
+        JComboBox<String> suspectComboBox = new JComboBox<>(PLAYERS);
+        suspectComboBox.setBounds(30,70,100,25);
+        dialog.add(suspectComboBox);
+
+        // combo box to choose a weapon
+        JLabel weaponLabel = new JLabel("Weapon:");
+        weaponLabel.setBounds(30,100,250,25);
+        dialog.add(weaponLabel);
+        JComboBox<String> weaponComboBox = new JComboBox<>(WEAPONS);
+        weaponComboBox.setBounds(30,130,100,25);
+        dialog.add(weaponComboBox);
+
+        // combo box to choose a room
+        JLabel roomLabel = new JLabel("Crime scene:");
+        roomLabel.setBounds(30,160,250,25);
+        dialog.add(roomLabel);
+        JComboBox<String> roomComboBox = new JComboBox<>(ROOMS);
+        roomComboBox.setBounds(30,190,100,25);
+        dialog.add(roomComboBox);
+
+        // an accuse button
+        JButton accuseButton = new JButton("Accuse");
+        accuseButton.setBounds(30,250,100,25);
+        dialog.add(accuseButton);
+
+        // add the selected player when button is pressed
+        accuseButton.addActionListener(e -> {
+
+            // TODO: do something with this...
+            System.out.println("You chose:");
+            System.out.println((String)suspectComboBox.getSelectedItem());
+            System.out.println((String)weaponComboBox.getSelectedItem());
+            System.out.println((String)roomComboBox.getSelectedItem());
+            dialog.setVisible(false);
+        });
+
+        // NOTE: it seems to work better putting this at the end
+        // otherwise some things aren't visible
+        dialog.setVisible(true);
     }
 
     public static void main(String[] args) {
