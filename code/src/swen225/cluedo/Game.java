@@ -99,7 +99,6 @@ public class Game {
 	int playerNum;
 	Board board;
 
-
 	// Stores 
 	List<Card> cards;
 
@@ -148,7 +147,6 @@ public class Game {
 	public static void main(String[] args) {
 		Game game = new Game();
 		game.startGame();
-
 	}
 
 	/**
@@ -686,10 +684,6 @@ public class Game {
 		return (int)Math.floor(Math.random()*6+1);
 	}
 
-
-
-
-
 	public String getPlayerList() {
 		String temp = "Players: \n";
 		for (int i = 0; i < this.playerList.size(); i++) {
@@ -708,6 +702,7 @@ public class Game {
 		}
 		return temp;
 	}
+
 	public String getRoomList() {
 		String temp = "Rooms: "+"\n";
 		for (int i = 0; i < this.roomList.size(); i++) {
@@ -716,8 +711,4 @@ public class Game {
 		}
 		return temp;
 	}
-
-
-
-
 }
