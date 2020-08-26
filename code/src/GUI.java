@@ -10,24 +10,43 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class GUI {
 
+    public static final int WINDOW_WIDTH = 960;
+    public static final int WINDOW_HEIGHT = 720;
+
     public static String[] PLAYERS = {"Miss Scarlett", "Col. Mustard", "Mrs. White", "Mr. Green", "Mrs. Peacock", "Prof. Plum"};
     public static String[] WEAPONS = {"Candlestick", "Dagger", "Lead Pipe", "Revolver", "Rope", "Spanner"};
     public static String[] ROOMS = {"Kitchen", "Ball Room", "Conservatory", "Billiard Room", "Library", "Study", "Hall", "Lounge", "Dining Room"};
 
-    private Game game;
+    private Game game = new Game();
 
     public GUI() {
 
         // set up the window
         JFrame frame = new JFrame("Cluedo");
-        frame.setSize(960,720);
-        frame.setLayout(null);
 
+        // setup JPanel (the canvas, except canvas is an old awt thing, this is better)
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0)); // the flow layout removes padding
+        panel.add(new GameBoardComponent());
+        frame.add(panel);
+
+        frame.pack();   // make the frame take on the size of the panel
         setMenuBar(frame);
 
         frame.setVisible(true);
 
         chooseCharacters(frame);    // let the player choose the characters, initialise the Game
+    }
+
+    class GameBoardComponent extends JComponent {
+
+        GameBoardComponent() {
+            setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            game.draw(g);
+        }
     }
 
     /**
@@ -138,7 +157,7 @@ public class GUI {
                     System.out.printf("Player %d (%s) selected %s%n", playerCount.get(), playerName, button.getActionCommand());
 
                     if (playerCount.getAndSet(playerCount.get() + 1) >= numPlayers) {
-                        game = new Game(players);
+                        game.startGame(players);
                         dialog.setVisible(false);
                     }
                     title.setText("Choose character for player " + playerCount + ":");
@@ -151,7 +170,7 @@ public class GUI {
         dialog.setVisible(true);
     }
 
-
+    // TODO: you can't close the dialog, it will just keep opening new ones (this probably shouldn't happen)
     public int getIntegerInput(Component parentComponent, String question, String title, int lowerBound, int upperBound) {
 
         boolean firstLoop = true;

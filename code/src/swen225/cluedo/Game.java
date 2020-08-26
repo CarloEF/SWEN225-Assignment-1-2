@@ -1,6 +1,9 @@
 package swen225.cluedo;
 
+import java.awt.*;
+import java.awt.font.GraphicAttribute;
 import java.util.*;
+import java.util.List;
 
 // Hello, World!
 
@@ -118,7 +121,7 @@ public class Game {
 	/**
 	 * Constructs the game, sets up stuff
 	 */
-	public Game(Map<String, String> playerNames) {
+	public Game() {
 		cards = new ArrayList<Card>();
 
 		players = new LinkedHashMap<>();
@@ -129,8 +132,12 @@ public class Game {
 		roomList = new ArrayList<Room>();
 
 		input = new Scanner(System.in);
+	}
 
-		startGame(playerNames);
+	public void draw(Graphics g) {
+		g.fillRect(0, 0, 960, 720);
+		g.setColor(Color.WHITE);
+		g.drawString("Testing drawing to the canvas", 100, 100);
 	}
 
 //	/**
@@ -270,7 +277,6 @@ public class Game {
 			roomsLeft.remove(random);
 			weaponsLeft.remove(0);
 		}
-
 	}
 
 	/**
@@ -288,11 +294,10 @@ public class Game {
 		initHumanPlayers(playerNames);
 		dealCards();
 
-		System.out.println(humanPlayers);
-
-		while(isRunning)
-			for (Player currentPlayer : humanPlayers)
-				startPlayerTurn(currentPlayer);
+		//todo: I commented out the game loop because waiting for user input stops the GUI from drawing
+//		while(isRunning)
+//			for (Player currentPlayer : humanPlayers)
+//				startPlayerTurn(currentPlayer);
 	}
 
 	/**
@@ -309,7 +314,6 @@ public class Game {
 				humanPlayers.add(player);
 			}
 		}
-		System.out.println(humanPlayers);
 	}
 
 	/**
