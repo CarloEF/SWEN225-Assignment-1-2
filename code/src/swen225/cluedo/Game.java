@@ -92,31 +92,31 @@ public class Game {
 
 	// Stores number of players
 //	int playerNum;
-	Board board;
+	public Board board;
 
 	// Stores 
-	List<Card> cards;
+	public List<Card> cards;
 
 	// Stores a map of every Player, Weapon and Room
-	Map<String, Player> players;
-	Map<String, Weapon> weapons;
-	Map<String, Room> rooms;
+	public Map<String, Player> players;
+	public Map<String, Weapon> weapons;
+	public Map<String, Room> rooms;
 
-	List<Player> playerList;
-	List<Weapon> weaponList;
-	List<Room> roomList;
+	public List<Player> playerList;
+	public List<Weapon> weaponList;
+	public List<Room> roomList;
 
-	Player murderer = null;
-	Weapon murderWeapon = null;
-	Room murderRoom = null;
+	public Player murderer = null;
+	public Weapon murderWeapon = null;
+	public Room murderRoom = null;
 
 	// Ordered List of all Players
-	List<Player> humanPlayers;
+	public List<Player> humanPlayers;
 
-	boolean isRunning = true;
+	public boolean isRunning = true;
 
 	//get all input from this scanner
-	Scanner input;
+	public Scanner input;
 
 	/**
 	 * Constructs the game, sets up stuff

@@ -17,6 +17,8 @@ public class GUI {
     public static String[] WEAPONS = {"Candlestick", "Dagger", "Lead Pipe", "Revolver", "Rope", "Spanner"};
     public static String[] ROOMS = {"Kitchen", "Ball Room", "Conservatory", "Billiard Room", "Library", "Study", "Hall", "Lounge", "Dining Room"};
 
+    String accSuspect;
+
     private Game game = new Game();
 
     public GUI() {
@@ -68,7 +70,7 @@ public class GUI {
 
         // creates JMenuItems to add to the JMenu objects (creating buttons in a drop-down menu)
         JMenuItem item1 = new JMenuItem("Start Game");
-        JMenuItem item2 = new JMenuItem("Item 2");
+        JMenuItem item2 = new JMenuItem("DEBUG: View Murder");
         JMenuItem item3 = new JMenuItem("Make Accusation");
         JMenuItem item4 = new JMenuItem("Item 4");
         JMenuItem item5 = new JMenuItem("Item 5");
@@ -88,6 +90,10 @@ public class GUI {
 
         // adds an action listener to a button (starts the game when first button is pressed
         item1.addActionListener(e -> chooseCharacters(parentFrame));
+
+        // For debugging: Returns Murder circumstances
+        item2.addActionListener(e -> getMurderCircumstances(parentFrame));
+
 
         // adds an action listener to a button
         item3.addActionListener(e -> getAccusationCircumstances(parentFrame));
@@ -256,11 +262,25 @@ public class GUI {
         // add the selected player when button is pressed
         accuseButton.addActionListener(e -> {
 
-            // TODO: do something with this...
             System.out.println("You chose:");
-            System.out.println((String)suspectComboBox.getSelectedItem());
-            System.out.println((String)weaponComboBox.getSelectedItem());
-            System.out.println((String)roomComboBox.getSelectedItem());
+            String accSuspect = (String)suspectComboBox.getSelectedItem();
+            String accWeapon = (String)weaponComboBox.getSelectedItem();
+            String accRoom = (String)roomComboBox.getSelectedItem();
+            System.out.println(accSuspect);
+            System.out.println(accWeapon);
+            System.out.println(accRoom);
+
+            if (game.players.get(accSuspect) == game.murderer &&
+                    game.weapons.get(accWeapon) == game.murderWeapon &&
+                    game.rooms.get(accRoom) == game.murderRoom) {
+                System.out.println("Congratulations, you won!");
+                // TODO: End the game.
+            }
+            else {
+                System.out.println("Oops, that was not correct, you can no longer suggest/accuse");
+                // player.setCanAccuse(false);
+            }
+
             dialog.setVisible(false);
         });
 
@@ -268,6 +288,31 @@ public class GUI {
         // otherwise some things aren't visible
         dialog.setVisible(true);
     }
+
+    private void getMurderCircumstances(JFrame parentframe) {
+        String murdererString = "EMPTY";
+        for (String key : game.players.keySet()) {
+            if (game.players.get(key).equals(game.murderer)) {
+                murdererString = key;
+            }
+        }
+        String murderWeaponString = "EMPTY";
+        for (String key : game.weapons.keySet()) {
+            if (game.weapons.get(key).equals(game.murderWeapon)) {
+                murderWeaponString = key;
+            }
+        }
+        String murderRoomString = "EMPTY";
+        for (String key : game.rooms.keySet()) {
+            if (game.rooms.get(key).equals(game.murderRoom)) {
+                murderRoomString = key;
+            }
+        }
+        System.out.println("Murderer: "+murdererString);
+        System.out.println("Weapon: "+murderWeaponString);
+        System.out.println("Room: "+murderRoomString);
+    }
+
 
     public static void main(String[] args) {
         new GUI();
