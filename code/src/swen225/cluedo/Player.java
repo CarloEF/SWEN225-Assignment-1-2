@@ -7,6 +7,7 @@ public class Player implements CluedoObject {
 	private List<Card> hand;
 	private String name;
 	private String tileValue;
+	private String username;	// the name of the person controlling this player (or null)
 	private Tile tile;
 	
 	private boolean allowedAccuse = true;
@@ -16,9 +17,10 @@ public class Player implements CluedoObject {
 	 * @param name
 	 * @param tile
 	 */
-	public Player(String name, String tileValue) {
+	public Player(String name, String tileValue, String username) {
 		this.name = name;
 		this.tileValue = tileValue;
+		this.username = username;
 		this.hand = new ArrayList<Card>();
 		this.tile = null;
 	}
@@ -100,6 +102,12 @@ public class Player implements CluedoObject {
 	public String getName() {
 		return name;
 	}
+
+	/**
+	 * Setter for username
+	 * @param username The name of the human controlling this player
+	 */
+	public void setUsername(String username) { this.username = username; }
 	
 	/**
 	 * Moves the player to the room

@@ -1,23 +1,24 @@
-import swen225.cluedo.Room;
-import swen225.cluedo.Weapon;
+import swen225.cluedo.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class SwingTest {
+public class GUI {
 
     public static String[] PLAYERS = {"Miss Scarlett", "Col. Mustard", "Mrs. White", "Mr. Green", "Mrs. Peacock", "Prof. Plum"};
     public static String[] WEAPONS = {"Candlestick", "Dagger", "Lead Pipe", "Revolver", "Rope", "Spanner"};
     public static String[] ROOMS = {"Kitchen", "Ball Room", "Conservatory", "Billiard Room", "Library", "Study", "Hall", "Lounge", "Dining Room"};
 
-    public SwingTest() {
+    private Game game;
 
-        // set up the frame (basically the window?) (yes the window)
+    public GUI() {
+
+        // set up the window
         JFrame frame = new JFrame("Cluedo");
         frame.setSize(960,720);
         frame.setLayout(null);
@@ -26,7 +27,7 @@ public class SwingTest {
 
         frame.setVisible(true);
 
-//        chooseCharacters(frame);
+        chooseCharacters(frame);    // let the player choose the characters, initialise the Game
     }
 
     /**
@@ -78,6 +79,9 @@ public class SwingTest {
     }
 
     public void chooseCharacters(JFrame parentFrame) {
+
+        Map<String, String> players = new HashMap<>();
+
         int numPlayers = getIntegerInput(parentFrame, "Welcome to Cludeo!\nHow many players do you have?",  "Welcome", 3,6);
 
         // set up the frame (basically the window?)
@@ -129,10 +133,14 @@ public class SwingTest {
                     continueButton.setEnabled(false);
                     String playerName = textField.getText().equals("") ? "Player " + playerCount : textField.getText();
                     textField.setText("");
+
+                    players.put(button.getActionCommand(), playerName);
                     System.out.printf("Player %d (%s) selected %s%n", playerCount.get(), playerName, button.getActionCommand());
 
-                    if (playerCount.getAndSet(playerCount.get() + 1) >= numPlayers)
+                    if (playerCount.getAndSet(playerCount.get() + 1) >= numPlayers) {
+                        game = new Game(players);
                         dialog.setVisible(false);
+                    }
                     title.setText("Choose character for player " + playerCount + ":");
                 }
             }
@@ -223,6 +231,6 @@ public class SwingTest {
     }
 
     public static void main(String[] args) {
-        new SwingTest();
+        new GUI();
     }
 }

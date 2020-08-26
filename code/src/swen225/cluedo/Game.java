@@ -1,14 +1,6 @@
 package swen225.cluedo;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 // Hello, World!
 
@@ -96,7 +88,7 @@ public class Game {
 					"9/8/8/8/8/12/0/13/0/9/8/8/8/8/12/0/13/0/9/8/8/8/8/12/";
 
 	// Stores number of players
-	int playerNum;
+//	int playerNum;
 	Board board;
 
 	// Stores 
@@ -116,7 +108,7 @@ public class Game {
 	Room murderRoom = null;
 
 	// Ordered List of all Players
-	List<Player> playersOrdered;
+	List<Player> humanPlayers;
 
 	boolean isRunning = true;
 
@@ -126,28 +118,28 @@ public class Game {
 	/**
 	 * Constructs the game, sets up stuff
 	 */
-	public Game() {
+	public Game(Map<String, String> playerNames) {
 		cards = new ArrayList<Card>();
 
-		players = new HashMap<String, Player>();
+		players = new LinkedHashMap<>();
 		playerList = new ArrayList<Player>();
 		weapons = new HashMap<String, Weapon>();
 		weaponList = new ArrayList<Weapon>();
 		rooms = new HashMap<String, Room>();
 		roomList = new ArrayList<Room>();
 
-		playersOrdered = new ArrayList<Player>();
-
 		input = new Scanner(System.in);
+
+		startGame(playerNames);
 	}
 
-	/**
-	 * Main method, initiates the game and starts it
-	 */
-	public static void main(String[] args) {
-		Game game = new Game();
-		game.startGame();
-	}
+//	/**
+//	 * Main method, initiates the game and starts it
+//	 */
+//	public static void main(String[] args) {
+//		Game game = new Game();
+//		game.startGame();
+//	}
 
 	/**
 	 * Initiates the board
@@ -163,12 +155,12 @@ public class Game {
 	 */
 	private void initCards() {
 
-		addPlayer(new Player("Miss Scarlett", "S"));
-		addPlayer(new Player("Col. Mustard", "M"));
-		addPlayer(new Player("Mrs. White", "W"));
-		addPlayer(new Player("Mr. Green", "G"));
-		addPlayer(new Player("Mrs. Peacock", "P"));
-		addPlayer(new Player("Prof. Plum", "p"));
+		addPlayer(new Player("Miss Scarlett", "S", null));
+		addPlayer(new Player("Col. Mustard", "M", null));
+		addPlayer(new Player("Mrs. White", "W", null));
+		addPlayer(new Player("Mr. Green", "G", null));
+		addPlayer(new Player("Mrs. Peacock", "P", null));
+		addPlayer(new Player("Prof. Plum", "p", null));
 
 		addWeapon(new Weapon("Candlestick", "C"));
 		addWeapon(new Weapon("Dagger", "D"));
@@ -284,7 +276,7 @@ public class Game {
 	/**
 	 * Handles all the logic at the start of the game
 	 */
-	public void startGame() {
+	public void startGame(Map<String, String> playerNames) {
 		initCards();
 		initBoard();
 		addRoomExits();
@@ -293,77 +285,60 @@ public class Game {
 
 		System.out.println("Hello, welcome to Cluedo!");
 
-		playerNum = getPlayerNum();
-
-		orderPlayers();
+		initHumanPlayers(playerNames);
 		dealCards();
 
-		//could be random
-		int currentPlayerIndex = 0;
+		System.out.println(humanPlayers);
 
-		while(isRunning) {
-			Player currentPlayer = playersOrdered.get(currentPlayerIndex);
-			startPlayerTurn(currentPlayer);
-
-			currentPlayerIndex = (currentPlayerIndex + 1) % playerNum;
-		}
+		while(isRunning)
+			for (Player currentPlayer : humanPlayers)
+				startPlayerTurn(currentPlayer);
 	}
 
 	/**
-	 * Orders the players depending on how many players there are
+	 * Puts the human player list in the correct order
 	 */
-	private void orderPlayers() {
-		for (int i=0;i<playerNum;i++) {
-			playersOrdered.add(players.get(PLAYER_ORDER[i]));
+	private void initHumanPlayers(Map<String, String> usernames) {
+
+		humanPlayers = new ArrayList<>();
+
+		for (String name : players.keySet()) {
+			if (usernames.containsKey(name)) {
+				Player player = players.get(name);
+				player.setUsername(usernames.get(name));
+				humanPlayers.add(player);
+			}
 		}
+		System.out.println(humanPlayers);
 	}
 
 	/**
 	 * Deals cards out, including picking the murder cards
 	 */
 	private void dealCards() {
+
 		Collections.shuffle(cards);
 
-		// Take out 1 player, 1 weapon, 1 room cards for the murder circumstance
-		int index = 0;
-		while(murderer == null || murderWeapon == null || murderRoom == null) {
-			Card card = cards.get(index);
+		Iterator<Player> playerIterator = humanPlayers.iterator();
 
-			if (murderer == null && card instanceof Player) {
+		// start iterator at random position (random "dealer" so Miss Scarlet doesn't get all the cards :P)
+		for (int i = 0; i < Math.random() * humanPlayers.size(); i++)
+			playerIterator.next();
+
+		for (Card card : cards) {
+
+			if (card.getClass() == Player.class && murderer == null) {
 				murderer = (Player)card;
-				cards.remove(index);
-				continue;
-			}
-			if (murderWeapon == null && card instanceof Weapon) {
+			} else if (card.getClass() == Weapon.class && murderWeapon == null) {
 				murderWeapon = (Weapon)card;
-				cards.remove(index);
-				continue;
-			}
-			if (murderRoom == null && card instanceof Room) {
+			} else if (card.getClass() == Room.class && murderRoom == null) {
 				murderRoom = (Room)card;
-				cards.remove(index);
-				continue;
+			} else {
+				if (!playerIterator.hasNext())
+					playerIterator = humanPlayers.iterator();
+				playerIterator.next().addCard(card);
 			}
-			index++;
 		}
-
-		//deal the other cards out
-		for (int i=0, len=cards.size();i<len;i++) {
-			Player player = playersOrdered.get(i % playerNum);
-
-			player.addCard(cards.get(i));
-		}
-	}
-
-	/**
-	 * Gets input about the number of players.
-	 * @return the number of players
-	 */
-	private int getPlayerNum() {
-
-		System.out.println("How many players are playing?");
-
-		return getNum(3, 6);
 	}
 
 	/**
@@ -548,11 +523,16 @@ public class Game {
 		board.movePlayer(murdererSugg, room);
 		board.moveWeapon(weaponSugg, room);
 
-		//go through all the players in order
-		int playerIndex = playersOrdered.indexOf(player);
+		Iterator<Player> playerIterator = humanPlayers.iterator();
+		while (playerIterator.next() != player) {
+		}     // start iterator at currentPlayer
 
-		for (int index = (playerIndex + 1) % playerNum; index != playerIndex; index++, index %= playerNum) {
-			Player currPlayer = playersOrdered.get(index);
+		// for each player clockwise of currentPlayer, check if they can refute the suggestion
+		for (int i = 0; i < humanPlayers.size() - 1; i++) {
+			if (!playerIterator.hasNext())
+				playerIterator = humanPlayers.iterator();
+
+			Player currPlayer = playerIterator.next();
 			List<Card> refuteCards = currPlayer.getRefutes(murdererSugg, weaponSugg, room);
 
 			if (refuteCards.size() == 0) {
@@ -561,12 +541,10 @@ public class Game {
 				System.out.printf("%s refuted the murder suggestion with %s.\n", currPlayer.getName(), refuteCards.get(0).getName());
 				break;
 			} else {
-
-
 				System.out.printf("%s needs to choose a card to refute.\n", currPlayer.getName());
 				System.out.println("Choose a card to use:");
-				for (int i=0;i<refuteCards.size();i++) {
-					System.out.printf("%d: %s\n", i, refuteCards.get(i).getName());
+				for (int j=0;j<refuteCards.size();j++) {
+					System.out.printf("%d: %s\n", j, refuteCards.get(j).getName());
 				}
 
 				Card inputCard = refuteCards.get(getNum(0, refuteCards.size()-1));
@@ -606,7 +584,7 @@ public class Game {
 		int playersLeft = 0;
 		Player last = null;
 
-		for (Player p : playersOrdered) {
+		for (Player p : humanPlayers) {
 			if (p.canAccuse()) {
 				playersLeft++;
 				last = p;

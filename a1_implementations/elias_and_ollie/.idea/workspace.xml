@@ -21,6 +21,9 @@
   <component name="ChangeListManager">
     <list default="true" id="eb583eac-d889-4e56-a9f4-2b5493f757fa" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../code/src/SwingTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../code/src/GUI.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../code/src/swen225/cluedo/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../code/src/swen225/cluedo/Game.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../code/src/swen225/cluedo/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../code/src/swen225/cluedo/Player.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,7 +43,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../code" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RunManager">
     <configuration name="Unnamed" type="Application" factoryName="Application" nameIsGenerated="true">
@@ -50,13 +53,15 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
+    <configuration default="true" type="ArquillianTestNG" factoryName="" nameIsGenerated="true">
       <option name="arquillianRunConfiguration">
         <value>
           <option name="containerStateName" value="" />
         </value>
       </option>
-      <option name="TEST_OBJECT" value="class" />
+      <option name="TEST_OBJECT" value="CLASS" />
+      <properties />
+      <listeners />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -73,6 +78,7 @@
       <workItem from="1598239914647" duration="22000" />
       <workItem from="1598240253674" duration="178000" />
       <workItem from="1598241345209" duration="21000" />
+      <workItem from="1598400424874" duration="2077000" />
     </task>
     <servers />
   </component>
