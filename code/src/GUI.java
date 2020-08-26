@@ -103,7 +103,7 @@ public class GUI {
 
         //int numPlayers = getIntegerInput(parentFrame, "Welcome to Cludeo!\nHow many players do you have?",  "Welcome", 3,6);
         int numPlayers = getIntegerInput(parentFrame);
-		if(numPlayers == -1) return; //User closed dialog
+	if(numPlayers == -1) return; //User closed dialog
 
         // set up the frame (basically the window?)
         JDialog dialog = new JDialog(parentFrame, "Choose Characters", true);
@@ -195,22 +195,22 @@ public class GUI {
 //     }
     
     /*
-	 * Construct a dialog to ask for the number of players.
-	 */
-	public int getIntegerInput(Component parentComponent) {
-		String title = "Welcome to Cludeo!";
-		String question = "How many players do you have?";
-		Object[] fixed_option = { "3", "4", "5", "6" };
+     * Construct a dialog to ask for the number of players.
+     */
+    public int getIntegerInput(Component parentComponent) {
+	String title = "Welcome to Cludeo!";
+	String question = "How many players do you have?";
+	Object[] fixed_option = { "3", "4", "5", "6" };
 
-		String input = (String) JOptionPane.showInputDialog(parentComponent, question, title,
-				JOptionPane.INFORMATION_MESSAGE, null, fixed_option, fixed_option[0]);
+	String input = (String) JOptionPane.showInputDialog(parentComponent, question, title,
+			JOptionPane.INFORMATION_MESSAGE, null, fixed_option, fixed_option[0]);
 
-		//when user close dialog
-		if (input == null)
-			return -1;
+	//when user close dialog
+	if (input == null)
+		return -1;
 
-		return Integer.parseInt(input);
-	}
+	return Integer.parseInt(input);
+    }
 
     // todo: figure out a way for this method to return the appropriate data
     public void getAccusationCircumstances(JFrame parentFrame) {
