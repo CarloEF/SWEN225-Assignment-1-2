@@ -1,5 +1,6 @@
 package swen225.cluedo;
 
+import java.awt.*;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -25,6 +26,49 @@ public class Board {
 		this.height = height;
 
 		this.board = new Tile[width][height];
+	}
+
+	public void draw(Graphics2D g) {
+
+		int tileSize = 23;
+		g.setColor(Color.WHITE);
+		for (int row = 0; row < board[0].length; row++) {
+			for (int col = 0; col < board.length; col++) {
+				int x = col * tileSize;
+				int y = row * tileSize;
+
+				// draw backgrounds of cells
+				Tile tile = board[col][row];
+				if (tile instanceof InaccessibleTile)
+					continue;
+
+				if (tile instanceof HallwayTile) {
+					g.setColor(Color.LIGHT_GRAY);
+					g.fillRect(x, y, tileSize, tileSize);
+					g.setColor(Color.GRAY);
+					g.drawRect(x, y, tileSize, tileSize);
+				} else if (tile instanceof RoomTile) {
+					g.setColor(Color.GRAY);
+					g.fillRect(x, y, tileSize, tileSize);
+					g.setColor(Color.LIGHT_GRAY);
+					g.drawRect(x, y, tileSize, tileSize);
+				}
+
+				// draw walls as thicker lines
+				 g.setColor(Color.BLACK);
+				g.setStroke(new BasicStroke(3));
+				if (tile.hasDownWall())
+					g.drawLine(x, y + tileSize, x + tileSize, y + tileSize);
+				if (tile.hasUpWall())
+					g.drawLine(x, y, x + tileSize, y);
+				if (tile.hasLeftWall())
+					g.drawLine(x, y, x, y + tileSize);
+				if (tile.hasRightWall())
+					g.drawLine(x + tileSize, y, x + tileSize, y + tileSize);
+
+				g.setStroke(new BasicStroke(1));	// set the stroke back to normal
+			}
+		}
 	}
 
 	/**

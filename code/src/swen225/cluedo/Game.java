@@ -123,6 +123,7 @@ public class Game {
 	 */
 	public Game() {
 		cards = new ArrayList<Card>();
+		board = new Board(BOARD_WIDTH, BOARD_HEIGHT);
 
 		players = new LinkedHashMap<>();
 		playerList = new ArrayList<Player>();
@@ -134,10 +135,11 @@ public class Game {
 		input = new Scanner(System.in);
 	}
 
-	public void draw(Graphics g) {
-		g.fillRect(0, 0, 960, 720);
+	public void draw(Graphics2D g) {
 		g.setColor(Color.WHITE);
-		g.drawString("Testing drawing to the canvas", 100, 100);
+		g.fillRect(0, 0, 960, 720);
+
+		board.draw(g);
 	}
 
 //	/**
@@ -152,9 +154,7 @@ public class Game {
 	 * Initiates the board
 	 */
 	private void initBoard() {
-		board = new Board(BOARD_WIDTH, BOARD_HEIGHT);
 
-		board.setBoard(ROOM_BOARD, WALL_BOARD, rooms);
 	}
 
 	/**
@@ -284,7 +284,7 @@ public class Game {
 	 */
 	public void startGame(Map<String, String> playerNames) {
 		initCards();
-		initBoard();
+		board.setBoard(ROOM_BOARD, WALL_BOARD, rooms);
 		addRoomExits();
 		setPlayerTiles();
 		setWeaponTiles();

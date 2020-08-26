@@ -32,9 +32,9 @@ public class GUI {
         frame.pack();   // make the frame take on the size of the panel
         setMenuBar(frame);
 
-        frame.setVisible(true);
-
         chooseCharacters(frame);    // let the player choose the characters, initialise the Game
+
+        frame.setVisible(true);
     }
 
     class GameBoardComponent extends JComponent {
@@ -45,7 +45,7 @@ public class GUI {
 
         @Override
         protected void paintComponent(Graphics g) {
-            game.draw(g);
+            game.draw((Graphics2D)g);
         }
     }
 
