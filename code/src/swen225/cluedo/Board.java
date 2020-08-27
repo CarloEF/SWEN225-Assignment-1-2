@@ -42,12 +42,10 @@ public class Board {
 		else
 			tileSize = height / 25;
 
-		int centre = (width / 2) - (12 * tileSize);
-
 		g.setColor(Color.WHITE);
 		for (int row = 0; row < board[0].length; row++) {
 			for (int col = 0; col < board.length; col++) {
-				int x = (col * tileSize) + centre;
+				int x = (col * tileSize);
 				int y = row * tileSize;
 
 				// draw backgrounds of cells
