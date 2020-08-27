@@ -128,49 +128,62 @@ public class GUI {
         JMenuBar menuBar = new JMenuBar();
 
         // creates drop-down menus
-        JMenu menu1 = new JMenu("Drop-Down Menu 1");
-        JMenu menu2 = new JMenu("Drop-Down Menu 2");
+        JMenu gameMenu = new JMenu("Game");
+        JMenu actionMenu = new JMenu("Actions");
+        JMenu helpMenu = new JMenu("Help");
+        JMenu debugMenu = new JMenu("Debug");
 
         // adds menus to the bar
-        menuBar.add(menu1);
-        menuBar.add(menu2);
+        menuBar.add(gameMenu);
+        menuBar.add(actionMenu);
+        menuBar.add(helpMenu);
+        menuBar.add(debugMenu);
 
         // creates JMenuItems to add to the JMenu objects (creating buttons in a drop-down menu)
-        JMenuItem item1 = new JMenuItem("Start Game");
-        JMenuItem item2 = new JMenuItem("DEBUG: View Murder");
-        JMenuItem item3 = new JMenuItem("Make Accusation");
-        JMenuItem item4 = new JMenuItem("Make Suggestion");
-        JMenuItem item5 = new JMenuItem("Redraw(Testing)");
-        JMenuItem item6 = new JMenuItem("End Turn");
-        menu1.add(item1);
-        menu1.add(item2);
-        menu2.add(item3);
-        menu2.add(item4);
-        menu2.add(item5);
-        menu2.add(item6);
-        // TODO: Add another MenuItem to end turn. Simply turns turnEnded to true.
+        JMenuItem startGame = new JMenuItem("Start Game");
+        JMenuItem showMurder = new JMenuItem("View Murder");
+        JMenuItem makeAccusation = new JMenuItem("Make Accusation");
+        JMenuItem makeSuggestion = new JMenuItem("Make Suggestion");
+        JMenuItem endTurn = new JMenuItem("End turn");
+        JMenuItem rulesButton = new JMenuItem("Rules");
+        JMenuItem readmeButton = new JMenuItem("ReadMe");
+        JMenuItem redrawButton = new JMenuItem("Redraw");
+        gameMenu.add(startGame);
+        actionMenu.add(makeAccusation);
+        actionMenu.add(makeSuggestion);
+        actionMenu.add(endTurn);
+        helpMenu.add(rulesButton);
+        helpMenu.add(readmeButton);
+        debugMenu.add(showMurder);
+        debugMenu.add(redrawButton);
 
         // sets accelerator keystrokes to JMenuItems (performs the action without the button being visible)
         // ALT + item number will activate that button
-        item1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
-        item2.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.ALT_MASK));
-        item3.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3, ActionEvent.ALT_MASK));
-        item4.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4, ActionEvent.ALT_MASK));
-        item5.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_5, ActionEvent.ALT_MASK));
-        item6.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_6, ActionEvent.ALT_MASK));
+        startGame.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
+        makeAccusation.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.CTRL_MASK));
+        makeSuggestion.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+        endTurn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK));
+        rulesButton.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.CTRL_MASK));
+        readmeButton.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H, ActionEvent.CTRL_MASK));
+        showMurder.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.ALT_MASK));
 
         // adds an action listener to a button (starts the game when first button is pressed
-        item1.addActionListener(e -> chooseCharacters(parentFrame));
+        startGame.addActionListener(e -> chooseCharacters(parentFrame));
         // For debugging: Returns Murder circumstances
-        item2.addActionListener(e -> getMurderCircumstances(parentFrame));
+        showMurder.addActionListener(e -> getMurderCircumstances(parentFrame));
         // For accusing
-        item3.addActionListener(e -> getAccusationCircumstances(parentFrame));
+        makeAccusation.addActionListener(e -> getAccusationCircumstances(parentFrame));
         // For suggesting
-        item4.addActionListener(e -> doGUISuggestion(parentFrame));
+        makeSuggestion.addActionListener(e -> doGUISuggestion(parentFrame));
         // For redrawing
-        item5.addActionListener(e -> redraw());
+        redrawButton.addActionListener(e -> redraw());
         // For ending turn
-        item6.addActionListener(e -> endTurn());
+        endTurn.addActionListener(e -> endTurn());
+        // For showing rules
+        rulesButton.addActionListener(e -> displayRules(parentFrame));
+        // For showing readme
+        readmeButton.addActionListener(e -> displayReadme(parentFrame));
+
         // adds the finalised JMenuBar to the overall frame
         parentFrame.setJMenuBar(menuBar);
 
@@ -486,6 +499,68 @@ public class GUI {
         currentPlayer = playerQueue.poll();
         playerQueue.add(lastPlayer);
         initializeTurn();
+    }
+
+    public void displayRules(JFrame parentFrame) {
+        //TODO: Bother writing HTML to make this nicer formatted, or otherwise cleaning it up, adapt to use JEditorPane?
+        String text = "Object:\nWelcome to Tudor Mansion. Your host, Mr. John Boddy, has met and untimely end - he's " +
+                "the victim of foul play. To win this game, you must determine the answer to these three questions: "  +
+                "Who done it? Where? And with what Weapon?\n\nGameplay:\nYour turn consists of up to three actions: "  +
+                "Moving Your Character Pawn, Making a Suggestion, and Making an Accusation.\n\nMoving Your Character"  +
+                " Pawn:\nRoll the dice and move your character pawn the number of squares you rolled. You may not move"+
+                " diagonally. You may change directions as many times as you like, but may not enter the same square " +
+                "twice on the same turn. You cannot land in a square that's occupied by another suspect. Your valid "  +
+                "moves will be highlighted in green on the board, and you can move to a square by clicking on it.\n\n" +
+                "Making a Suggestion:\nAs soon as you enter a Room, you are prompted to make a Suggestion. Suggestions"+
+                " allow you to determine which three cards are the murder circumstances. To make a Suggestion, pick a "+
+                "Suspect and a Weapon. The Room you are currently in will be the Room in your suggestion, and the "    +
+                "Suspect and Weapon will be moved into that Room with you.\n\nRefuting a Suggestion:\nAs soon as a "   +
+                "Suggestion is made, opposing players have the opportunity to refute the Suggestion, in turn order. "  +
+                "If the first player in turn order has any of the cards named in the Suggestion, they must show "      +
+                "the card to the suggesting player. If the refuting player has more than one of the cards, they get "  +
+                "to choose which card is shown to the suggesting player. If the refuting player has none of the "      +
+                "suggested cards, the opportunity to refute is passed on to the next player in turn order. As "        +
+                "soon as one player refutes the suggestion, it is proof that the card cannot be in the envelope, and " +
+                "the presented murder is incorrect. Other players can no longer refute once the Suggestion has been "  +
+                "successfully Refuted. If no one can successfully refute the Suggestion, the suggesting player may "   +
+                "either end their turn or make an Accusation.\n\nMaking an Accusation:\nOnce you've gathered enough "  +
+                "information to know the murder circumstances, make an Accusation. Select any Suspect, Weapon, and "   +
+                "Room combination. This will be compared to the true murder circumstances, and if all three match, "   +
+                "you win the game. If any don't match, you are considered out of the game. You can only make one "     +
+                "Accusation per game of Cluedo.\n\nWinning the Game:\nWinning the game is done by successfully making" +
+                " an Accusation that matches all three of the pre-selected murder circumstance cards. This can be"     +
+                "done through process of elimination, figuring out what cards other players have that cannot be the"   +
+                "murder circumstances.";
+
+        displayTextDialog(text, "Rules", parentFrame);
+    }
+
+    public void displayReadme(JFrame parentFrame) {
+        //TODO: Add text to readme
+        String text = "Readme:";
+
+        displayTextDialog(text, "Rules", parentFrame);
+    }
+
+    public void displayTextDialog(String text, String title, JFrame parentFrame) {
+        // Sets up dialog box
+        JDialog rules = new JDialog(parentFrame, title, true);
+        rules.setSize(400, 400);
+
+        // Formatting for Text Box
+        JTextArea textBox = new JTextArea(text);
+        textBox.setLineWrap(true);
+        textBox.setWrapStyleWord(true);
+        textBox.setEditable(false);
+
+        // Scroll Bar Implementation & Formatting
+        JScrollPane scroll = new JScrollPane(textBox);
+        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+        // Add scrolling pane to dialog box & display box
+        rules.add(scroll);
+        rules.setVisible(true);
     }
 
     public static void main(String[] args) {
