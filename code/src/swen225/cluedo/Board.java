@@ -17,6 +17,8 @@ public class Board {
 	int width;
 	int height;
 
+	public static int TILE_SIZE;
+
 	/**
 	 * Constructs the board
 	 * 
@@ -32,21 +34,19 @@ public class Board {
 
 	public void draw(Graphics2D g) {
 
-		int tileSize;
-
 		int width = GUI.CURRENT_WINDOW_WIDTH;
     	int height = GUI.CURRENT_WINDOW_HEIGHT - 25;
 		
 		if (width < height)
-			tileSize = width / 24;
+			TILE_SIZE = width / 24;
 		else
-			tileSize = height / 25;
+			TILE_SIZE = height / 25;
 
 		g.setColor(Color.WHITE);
 		for (int row = 0; row < board[0].length; row++) {
 			for (int col = 0; col < board.length; col++) {
-				int x = (col * tileSize);
-				int y = row * tileSize;
+				int x = (col * TILE_SIZE);
+				int y = row * TILE_SIZE;
 
 				// draw backgrounds of cells
 				Tile tile = board[col][row];
@@ -55,27 +55,27 @@ public class Board {
 
 				if (tile instanceof HallwayTile) {
 					g.setColor(Color.LIGHT_GRAY);
-					g.fillRect(x, y, tileSize, tileSize);
+					g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 					g.setColor(Color.GRAY);
-					g.drawRect(x, y, tileSize, tileSize);
+					g.drawRect(x, y, TILE_SIZE, TILE_SIZE);
 				} else if (tile instanceof RoomTile) {
 					g.setColor(Color.GRAY);
-					g.fillRect(x, y, tileSize, tileSize);
+					g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 					g.setColor(Color.LIGHT_GRAY);
-					g.drawRect(x, y, tileSize, tileSize);
+					g.drawRect(x, y, TILE_SIZE, TILE_SIZE);
 				}
 
 				// draw walls as thicker lines
 				g.setColor(Color.BLACK);
 				g.setStroke(new BasicStroke(3));
 				if (tile.hasDownWall())
-					g.drawLine(x, y + tileSize, x + tileSize, y + tileSize);
+					g.drawLine(x, y + TILE_SIZE, x + TILE_SIZE, y + TILE_SIZE);
 				if (tile.hasUpWall())
-					g.drawLine(x, y, x + tileSize, y);
+					g.drawLine(x, y, x + TILE_SIZE, y);
 				if (tile.hasLeftWall())
-					g.drawLine(x, y, x, y + tileSize);
+					g.drawLine(x, y, x, y + TILE_SIZE);
 				if (tile.hasRightWall())
-					g.drawLine(x + tileSize, y, x + tileSize, y + tileSize);
+					g.drawLine(x + TILE_SIZE, y, x + TILE_SIZE, y + TILE_SIZE);
 
 				g.setStroke(new BasicStroke(1)); // set the stroke back to normal
 			}

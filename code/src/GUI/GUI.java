@@ -93,6 +93,9 @@ public class GUI {
 				Component c = (Component)e.getSource();
 				CURRENT_WINDOW_WIDTH = c.getWidth();
 				CURRENT_WINDOW_HEIGHT = c.getHeight();
+
+				// TODO: This resizes the pane for the board. Breaks sometimes? Look at it. - Elias
+				component.setPreferredSize(new Dimension(CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT));
 			}
 		});
 
@@ -120,57 +123,59 @@ public class GUI {
         @Override
         protected void paintComponent(Graphics g) {
             game.draw((Graphics2D) g);
-            drawCards((Graphics2D) g);
+            // TODO: reinstate this when drawCards displays properly
+            // drawCards((Graphics2D) g);
         }
     }
 
-    // TODO: should probably move this stuff to GUI class
-    public void drawCards(Graphics2D g) {
-
-        List<Card> playersCards = currentPlayer.getCards();
-
-        for (int i=0; i<6; i++)
-            drawACard(i < playersCards.size() ? playersCards.get(i) : null, i, g);
-    }
-
-    public void drawACard(Card card, int index, Graphics2D g) {
-
-        int CARDS_LEFT = 600;
-        int CARDS_TOP = 360;
-        int CARD_WIDTH = 110;
-        int CARD_HEIGHT = 160;
-        int CARD_PADDING = 10;
-        int INNER_PADDING = 10;
-
-        int x = CARDS_LEFT + (index % 3) * (CARD_WIDTH + CARD_PADDING);
-        int y = CARDS_TOP + (index < 3 ? 0 : 1) * (CARD_HEIGHT + CARD_PADDING);
-        Rectangle iconArea = new Rectangle(x + INNER_PADDING, y + INNER_PADDING, CARD_WIDTH - 2 * INNER_PADDING, CARD_HEIGHT - 4*INNER_PADDING);
-
-        // if there's no card to be drawn here, draw outline and return
-        if (card == null) {
-            g.setColor(Color.LIGHT_GRAY);
-            g.drawRoundRect(x, y, CARD_WIDTH, CARD_HEIGHT, 10, 10);
-            return;
-        }
-
-        g.setColor(new Color(0xFF01579B));
-        g.fillRoundRect(x, y, CARD_WIDTH, CARD_HEIGHT, 10, 10);
-
-        g.setColor(Color.WHITE);
-        g.fillRect(iconArea.x, iconArea.y, iconArea.width, iconArea.height);
-
-        Image icon = card instanceof Weapon ? WEAPON_IMG : card instanceof Player ? PLAYER_IMG : ROOM_IMG;
-        int iconXOffset = (CARD_WIDTH - icon.getWidth(null)) / 2;
-        int iconYOffset = INNER_PADDING + (iconArea.height - icon.getHeight(null)) / 2;
-        g.drawImage(icon, x + iconXOffset, y + iconYOffset,null);
-
-        String cardName = card.getName();
-        Font font = new Font("SansSerif", Font.BOLD, 13);
-        FontMetrics fontMetrics = g.getFontMetrics(font);
-        int textXOffset = (CARD_WIDTH - fontMetrics.stringWidth(cardName)) / 2;
-        g.setFont(font);
-        g.drawString(cardName, x + textXOffset, y + CARD_HEIGHT-CARD_PADDING);
-    }
+    // TODO: should probably move this stuff to GUI class (is it not already in the GUI class?)
+    //  also get this to scale properly with the display, so it doesn't overlap with the board
+//    public void drawCards(Graphics2D g) {
+//
+//        List<Card> playersCards = currentPlayer.getCards();
+//
+//        for (int i=0; i<6; i++)
+//            drawACard(i < playersCards.size() ? playersCards.get(i) : null, i, g);
+//    }
+//
+//    public void drawACard(Card card, int index, Graphics2D g) {
+//
+//        int CARDS_LEFT = 600;
+//        int CARDS_TOP = 360;
+//        int CARD_WIDTH = 110;
+//        int CARD_HEIGHT = 160;
+//        int CARD_PADDING = 10;
+//        int INNER_PADDING = 10;
+//
+//        int x = CARDS_LEFT + (index % 3) * (CARD_WIDTH + CARD_PADDING);
+//        int y = CARDS_TOP + (index < 3 ? 0 : 1) * (CARD_HEIGHT + CARD_PADDING);
+//        Rectangle iconArea = new Rectangle(x + INNER_PADDING, y + INNER_PADDING, CARD_WIDTH - 2 * INNER_PADDING, CARD_HEIGHT - 4*INNER_PADDING);
+//
+//        // if there's no card to be drawn here, draw outline and return
+//        if (card == null) {
+//            g.setColor(Color.LIGHT_GRAY);
+//            g.drawRoundRect(x, y, CARD_WIDTH, CARD_HEIGHT, 10, 10);
+//            return;
+//        }
+//
+//        g.setColor(new Color(0xFF01579B));
+//        g.fillRoundRect(x, y, CARD_WIDTH, CARD_HEIGHT, 10, 10);
+//
+//        g.setColor(Color.WHITE);
+//        g.fillRect(iconArea.x, iconArea.y, iconArea.width, iconArea.height);
+//
+//        Image icon = card instanceof Weapon ? WEAPON_IMG : card instanceof Player ? PLAYER_IMG : ROOM_IMG;
+//        int iconXOffset = (CARD_WIDTH - icon.getWidth(null)) / 2;
+//        int iconYOffset = INNER_PADDING + (iconArea.height - icon.getHeight(null)) / 2;
+//        g.drawImage(icon, x + iconXOffset, y + iconYOffset,null);
+//
+//        String cardName = card.getName();
+//        Font font = new Font("SansSerif", Font.BOLD, 13);
+//        FontMetrics fontMetrics = g.getFontMetrics(font);
+//        int textXOffset = (CARD_WIDTH - fontMetrics.stringWidth(cardName)) / 2;
+//        g.setFont(font);
+//        g.drawString(cardName, x + textXOffset, y + CARD_HEIGHT-CARD_PADDING);
+//    }
     
     /*
      * return dimension of component
@@ -182,6 +187,8 @@ public class GUI {
     
     public void redraw() {
     	frame.repaint();
+    	panel.revalidate();
+    	panel.repaint();
     }
 
     /**
@@ -610,6 +617,12 @@ public class GUI {
         displayTextDialog(text, "Rules", parentFrame);
     }
 
+    /**
+     * A generic method to make a dialog box filled with scrollable text.
+     * @param text - Text to put in text box
+     * @param title - Title for dialog window
+     * @param parentFrame - Main frame of the program
+     */
     public void displayTextDialog(String text, String title, JFrame parentFrame) {
         // Sets up dialog box
         JDialog rules = new JDialog(parentFrame, title, true);
@@ -629,6 +642,10 @@ public class GUI {
         // Add scrolling pane to dialog box & display box
         rules.add(scroll);
         rules.setVisible(true);
+    }
+
+    public void doMouse() {
+
     }
 
     public static void main(String[] args) {
