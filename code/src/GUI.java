@@ -17,7 +17,7 @@ public class GUI {
     public static String[] WEAPONS = {"Candlestick", "Dagger", "Lead Pipe", "Revolver", "Rope", "Spanner"};
     public static String[] ROOMS = {"Kitchen", "Ball Room", "Conservatory", "Billiard Room", "Library", "Study", "Hall", "Lounge", "Dining Room"};
 
-    String accSuspect;
+    private Player currentPlayer;
 
     private Game game = new Game();
 
@@ -37,6 +37,12 @@ public class GUI {
         chooseCharacters(frame);    // let the player choose the characters, initialise the Game
 
         frame.setVisible(true);
+
+        while (game.getIsRunning()) {
+            for (Player player : game.getHumanPlayers()) {
+                game.startPlayerTurn(player);
+            }
+        }
     }
 
     class GameBoardComponent extends JComponent {
@@ -47,12 +53,13 @@ public class GUI {
 
         @Override
         protected void paintComponent(Graphics g) {
-            game.draw((Graphics2D)g);
+            game.draw((Graphics2D) g);
         }
     }
 
     /**
      * Example implementation of a MenuBar implementation (easily adapted to include actual functions)
+     *
      * @param parentFrame - The frame we'll put the MenuBar in
      */
     public void setMenuBar(JFrame parentFrame) {
@@ -72,7 +79,7 @@ public class GUI {
         JMenuItem item1 = new JMenuItem("Start Game");
         JMenuItem item2 = new JMenuItem("DEBUG: View Murder");
         JMenuItem item3 = new JMenuItem("Make Accusation");
-        JMenuItem item4 = new JMenuItem("Item 4");
+        JMenuItem item4 = new JMenuItem("Make Suggestion");
         JMenuItem item5 = new JMenuItem("Item 5");
         menu1.add(item1);
         menu1.add(item2);
@@ -98,6 +105,9 @@ public class GUI {
         // adds an action listener to a button
         item3.addActionListener(e -> getAccusationCircumstances(parentFrame));
 
+        // adds an action listener to a button
+        item4.addActionListener(e -> doGUISuggestion(parentFrame));
+
         // adds the finalised JMenuBar to the overall frame
         parentFrame.setJMenuBar(menuBar);
 
@@ -107,33 +117,32 @@ public class GUI {
 
         Map<String, String> players = new HashMap<>();
 
-        //int numPlayers = getIntegerInput(parentFrame, "Welcome to Cludeo!\nHow many players do you have?",  "Welcome", 3,6);
         int numPlayers = getIntegerInput(parentFrame);
-	if(numPlayers == -1) return; //User closed dialog
+        if (numPlayers == -1) return; //User closed dialog
 
         // set up the frame (basically the window?)
         JDialog dialog = new JDialog(parentFrame, "Choose Characters", true);
-        dialog.setSize(400,400);
+        dialog.setSize(400, 400);
         dialog.setLayout(null);
 
         AtomicReference<Integer> playerCount = new AtomicReference<>(1);
 
         // text at the top
         JLabel title = new JLabel("Choose character for player " + playerCount + ":");
-        title.setBounds(30,10,250,25);
+        title.setBounds(30, 10, 250, 25);
         dialog.add(title);
 
         // text field for inputting player's name
         JLabel chooseNameLabel = new JLabel("Player's name:");
-        chooseNameLabel.setBounds(30,190,250,25);
+        chooseNameLabel.setBounds(30, 190, 250, 25);
         dialog.add(chooseNameLabel);
         JTextField textField = new JTextField();
-        textField.setBounds(30,220,100,25);
+        textField.setBounds(30, 220, 100, 25);
         dialog.add(textField);
 
         // a continue button
         JButton continueButton = new JButton("Continue");
-        continueButton.setBounds(30,260,100,25);
+        continueButton.setBounds(30, 260, 100, 25);
         continueButton.setEnabled(false);
         dialog.add(continueButton);
 
@@ -144,7 +153,7 @@ public class GUI {
             JRadioButton radioButton = new JRadioButton(name);
             radioButton.addActionListener(e -> continueButton.setEnabled(true));
             radioButton.setActionCommand(name);  // it will return this String
-            radioButton.setBounds(30,y+=25,120,25);
+            radioButton.setBounds(30, y += 25, 120, 25);
             buttonGroup.add(radioButton);
             dialog.add(radioButton);
         }
@@ -199,84 +208,106 @@ public class GUI {
 //             }
 //         }
 //     }
-    
+
     /*
      * Construct a dialog to ask for the number of players.
      */
     public int getIntegerInput(Component parentComponent) {
-	String title = "Welcome to Cludeo!";
-	String question = "How many players do you have?";
-	Object[] fixed_option = { "3", "4", "5", "6" };
+        String title = "Welcome to Cludeo!";
+        String question = "How many players do you have?";
+        Object[] fixed_option = {"3", "4", "5", "6"};
 
-	String input = (String) JOptionPane.showInputDialog(parentComponent, question, title,
-			JOptionPane.INFORMATION_MESSAGE, null, fixed_option, fixed_option[0]);
+        String input = (String) JOptionPane.showInputDialog(parentComponent, question, title,
+                JOptionPane.INFORMATION_MESSAGE, null, fixed_option, fixed_option[0]);
 
-	//when user close dialog
-	if (input == null)
-		return -1;
+        //when user close dialog
+        if (input == null)
+            return -1;
 
-	return Integer.parseInt(input);
+        return Integer.parseInt(input);
     }
 
-    // todo: figure out a way for this method to return the appropriate data
+    private void getMurderCircumstances(JFrame parentframe) {
+        String murdererString = "EMPTY";
+        for (String key : game.getPlayerMap().keySet()) {
+            if (game.getPlayerMap().get(key).equals(game.getMurderer())) {
+                murdererString = key;
+            }
+        }
+        String murderWeaponString = "EMPTY";
+        for (String key : game.getWeaponMap().keySet()) {
+            if (game.getWeaponMap().get(key).equals(game.getMurderWeapon())) {
+                murderWeaponString = key;
+            }
+        }
+        String murderRoomString = "EMPTY";
+        for (String key : game.getRoomMap().keySet()) {
+            if (game.getRoomMap().get(key).equals(game.getMurderRoom())) {
+                murderRoomString = key;
+            }
+        }
+        System.out.println("Murderer: " + murdererString);
+        System.out.println("Weapon: " + murderWeaponString);
+        System.out.println("Room: " + murderRoomString);
+    }
+
     public void getAccusationCircumstances(JFrame parentFrame) {
 
         JDialog dialog = new JDialog(parentFrame, "Make an Accusation", true);
-        dialog.setSize(400,400);
+        dialog.setSize(400, 400);
         dialog.setLayout(null);
 
         // text at the top
         JLabel title = new JLabel("Make an accusation - select the murder circumstances");
-        title.setBounds(30,10,350,25);
+        title.setBounds(30, 10, 350, 25);
         dialog.add(title);
 
         // combo box to choose a player
         JLabel suspectLabel = new JLabel("Suspect:");
-        suspectLabel.setBounds(30,40,250,25);
+        suspectLabel.setBounds(30, 40, 250, 25);
         dialog.add(suspectLabel);
         JComboBox<String> suspectComboBox = new JComboBox<>(PLAYERS);
-        suspectComboBox.setBounds(30,70,100,25);
+        suspectComboBox.setBounds(30, 70, 100, 25);
         dialog.add(suspectComboBox);
 
         // combo box to choose a weapon
         JLabel weaponLabel = new JLabel("Weapon:");
-        weaponLabel.setBounds(30,100,250,25);
+        weaponLabel.setBounds(30, 100, 250, 25);
         dialog.add(weaponLabel);
         JComboBox<String> weaponComboBox = new JComboBox<>(WEAPONS);
-        weaponComboBox.setBounds(30,130,100,25);
+        weaponComboBox.setBounds(30, 130, 100, 25);
         dialog.add(weaponComboBox);
 
         // combo box to choose a room
         JLabel roomLabel = new JLabel("Crime scene:");
-        roomLabel.setBounds(30,160,250,25);
+        roomLabel.setBounds(30, 160, 250, 25);
         dialog.add(roomLabel);
         JComboBox<String> roomComboBox = new JComboBox<>(ROOMS);
-        roomComboBox.setBounds(30,190,100,25);
+        roomComboBox.setBounds(30, 190, 100, 25);
         dialog.add(roomComboBox);
 
         // an accuse button
         JButton accuseButton = new JButton("Accuse");
-        accuseButton.setBounds(30,250,100,25);
+        accuseButton.setBounds(30, 250, 100, 25);
         dialog.add(accuseButton);
 
         // add the selected player when button is pressed
         accuseButton.addActionListener(e -> {
 
             System.out.println("You chose:");
-            String accSuspect = (String)suspectComboBox.getSelectedItem();
-            String accWeapon = (String)weaponComboBox.getSelectedItem();
-            String accRoom = (String)roomComboBox.getSelectedItem();
+            String accSuspect = (String) suspectComboBox.getSelectedItem();
+            String accWeapon = (String) weaponComboBox.getSelectedItem();
+            String accRoom = (String) roomComboBox.getSelectedItem();
             System.out.println(accSuspect);
             System.out.println(accWeapon);
             System.out.println(accRoom);
 
-            if (game.players.get(accSuspect) == game.murderer &&
-                    game.weapons.get(accWeapon) == game.murderWeapon &&
-                    game.rooms.get(accRoom) == game.murderRoom) {
+            if (game.getPlayerMap().get(accSuspect) == game.getMurderer() &&
+                    game.getWeaponMap().get(accWeapon) == game.getMurderWeapon() &&
+                    game.getRoomMap().get(accRoom) == game.getMurderRoom()) {
                 System.out.println("Congratulations, you won!");
                 // TODO: End the game.
-            }
-            else {
+            } else {
                 System.out.println("Oops, that was not correct, you can no longer suggest/accuse");
                 // player.setCanAccuse(false);
             }
@@ -289,29 +320,99 @@ public class GUI {
         dialog.setVisible(true);
     }
 
-    private void getMurderCircumstances(JFrame parentframe) {
-        String murdererString = "EMPTY";
-        for (String key : game.players.keySet()) {
-            if (game.players.get(key).equals(game.murderer)) {
-                murdererString = key;
+    private void doGUISuggestion(JFrame parentFrame) {
+
+        JDialog dialog = new JDialog(parentFrame, "Make a Suggestion", true);
+        dialog.setSize(400, 400);
+        dialog.setLayout(null);
+
+        Room sugRoom = ((RoomTile) currentPlayer.getTile()).getRoom();
+        // text at the top
+        JLabel title = new JLabel("Make a suggestion within the current room: " + sugRoom.getName());
+        title.setBounds(30, 10, 350, 25);
+        dialog.add(title);
+
+        // combo box to choose a player
+        JLabel suspectLabel = new JLabel("Suspect:");
+        suspectLabel.setBounds(30, 40, 250, 25);
+        dialog.add(suspectLabel);
+        JComboBox<String> suspectComboBox = new JComboBox<>(PLAYERS);
+        suspectComboBox.setBounds(30, 70, 100, 25);
+        dialog.add(suspectComboBox);
+
+        // combo box to choose a weapon
+        JLabel weaponLabel = new JLabel("Weapon:");
+        weaponLabel.setBounds(30, 100, 250, 25);
+        dialog.add(weaponLabel);
+        JComboBox<String> weaponComboBox = new JComboBox<>(WEAPONS);
+        weaponComboBox.setBounds(30, 130, 100, 25);
+        dialog.add(weaponComboBox);
+
+        // a Suggest button
+        JButton suggestButton = new JButton("Suggest");
+        suggestButton.setBounds(30, 250, 100, 25);
+        dialog.add(suggestButton);
+
+        suggestButton.addActionListener(e -> {
+            System.out.println("You chose:");
+            String susSuspect = (String) suspectComboBox.getSelectedItem();
+            String susWeapon = (String) weaponComboBox.getSelectedItem();
+            String susRoom = sugRoom.getName();
+
+            System.out.println(susSuspect);
+            System.out.println(susWeapon);
+            System.out.println(susRoom);
+
+            Player suggestedPlayer = game.getPlayerMap().get(susSuspect);
+            Weapon suggestedWeapon = game.getWeaponMap().get(susWeapon);
+            Room suggestedRoom = game.getRoomMap().get(susRoom);
+
+            game.getBoard().movePlayer(suggestedPlayer, sugRoom);
+            game.getBoard().moveWeapon(suggestedWeapon, sugRoom);
+            // TODO: Update the board
+
+            boolean refuted = false;
+            Iterator<Player> playerIterator = game.getHumanPlayers().iterator();
+            while (playerIterator.next() != currentPlayer) {
+            }     // start iterator at currentPlayer
+
+            // for each player clockwise of currentPlayer, check if they can refute the suggestion
+            for (int i = 0; i < game.getHumanPlayers().size() - 1; i++) {
+                if (!playerIterator.hasNext())
+                    playerIterator = game.getHumanPlayers().iterator();
+
+                Player currentRefuter = playerIterator.next();
+                List<Card> refuteCards = currentRefuter.getRefutes(suggestedPlayer, suggestedWeapon, suggestedRoom);
+
+                if (refuteCards.size() == 0) {
+                    System.out.printf("%s cannot refute the murder suggestion.\n", currentRefuter.getName());
+                } else {
+                    refute(currentRefuter, susSuspect, susWeapon, susRoom, parentFrame);
+                    refuted = true;
+                }
             }
-        }
-        String murderWeaponString = "EMPTY";
-        for (String key : game.weapons.keySet()) {
-            if (game.weapons.get(key).equals(game.murderWeapon)) {
-                murderWeaponString = key;
+            if (!refuted) {
+                System.out.println("The Suggestion was unable to be refuted by the other players.");
+                System.out.println("Would you like to make an accusation?");
+                // TODO: Instead of ending the turn, allow the player to make an accusation.
+
             }
-        }
-        String murderRoomString = "EMPTY";
-        for (String key : game.rooms.keySet()) {
-            if (game.rooms.get(key).equals(game.murderRoom)) {
-                murderRoomString = key;
-            }
-        }
-        System.out.println("Murderer: "+murdererString);
-        System.out.println("Weapon: "+murderWeaponString);
-        System.out.println("Room: "+murderRoomString);
+
+            dialog.setVisible(false);
+        });
+
+        // NOTE: it seems to work better putting this at the end
+        // otherwise some things aren't visible
+        dialog.setVisible(true);
+
     }
+
+    // TODO: Add a JRadioButton for all 3 cards. If the player selects a card they don't have, ask again.
+    public void refute(Player refuter, String suggestedPlayer, String suggestedWeapon, String suggestedRoom, JFrame parentFrame) {
+
+
+    }
+
 
 
     public static void main(String[] args) {
