@@ -287,7 +287,7 @@ public class GUI {
                 murderRoomString = key;
             }
         }
-        System.out.println("Murderer: " + murdererString);
+        System.out.println("\nMurderer: " + murdererString);
         System.out.println("Weapon: " + murderWeaponString);
         System.out.println("Room: " + murderRoomString);
     }
@@ -351,7 +351,9 @@ public class GUI {
                 return;
             } else {
                 System.out.println("Oops, that was not correct, you can no longer suggest/accuse");
-                // player.setCanAccuse(false);
+                // TODO: Remove player from turn list, without removing them from Queue
+                currentPlayer.setCanAccuse(false);
+                endTurn();
             }
 
             dialog.setVisible(false);
@@ -368,100 +370,105 @@ public class GUI {
         dialog.setSize(400, 400);
         dialog.setLayout(null);
 
-        Room sugRoom = ((RoomTile) currentPlayer.getTile()).getRoom();
-        // text at the top
-        JLabel title = new JLabel("Make a suggestion within the current room: " + sugRoom.getName());
-        title.setBounds(30, 10, 350, 25);
-        dialog.add(title);
+        if (currentPlayer.getTile() instanceof RoomTile) {
+            Room sugRoom = ((RoomTile) currentPlayer.getTile()).getRoom();
 
-        // combo box to choose a player
-        JLabel suspectLabel = new JLabel("Suspect:");
-        suspectLabel.setBounds(30, 40, 250, 25);
-        dialog.add(suspectLabel);
-        JComboBox<String> suspectComboBox = new JComboBox<>(PLAYERS);
-        suspectComboBox.setBounds(30, 70, 100, 25);
-        dialog.add(suspectComboBox);
 
-        // combo box to choose a weapon
-        JLabel weaponLabel = new JLabel("Weapon:");
-        weaponLabel.setBounds(30, 100, 250, 25);
-        dialog.add(weaponLabel);
-        JComboBox<String> weaponComboBox = new JComboBox<>(WEAPONS);
-        weaponComboBox.setBounds(30, 130, 100, 25);
-        dialog.add(weaponComboBox);
+            JLabel title = new JLabel("Make a suggestion within the current room: " + sugRoom.getName());
+            title.setBounds(30, 10, 350, 25);
+            dialog.add(title);
 
-        // a Suggest button
-        JButton suggestButton = new JButton("Suggest");
-        suggestButton.setBounds(30, 250, 100, 25);
-        dialog.add(suggestButton);
+            // combo box to choose a player
+            JLabel suspectLabel = new JLabel("Suspect:");
+            suspectLabel.setBounds(30, 40, 250, 25);
+            dialog.add(suspectLabel);
+            JComboBox<String> suspectComboBox = new JComboBox<>(PLAYERS);
+            suspectComboBox.setBounds(30, 70, 100, 25);
+            dialog.add(suspectComboBox);
 
-        suggestButton.addActionListener(e -> {
-            System.out.println("You chose:");
-            String susSuspect = (String) suspectComboBox.getSelectedItem();
-            String susWeapon = (String) weaponComboBox.getSelectedItem();
-            String susRoom = sugRoom.getName();
+            // combo box to choose a weapon
+            JLabel weaponLabel = new JLabel("Weapon:");
+            weaponLabel.setBounds(30, 100, 250, 25);
+            dialog.add(weaponLabel);
+            JComboBox<String> weaponComboBox = new JComboBox<>(WEAPONS);
+            weaponComboBox.setBounds(30, 130, 100, 25);
+            dialog.add(weaponComboBox);
 
-            System.out.println(susSuspect);
-            System.out.println(susWeapon);
-            System.out.println(susRoom);
+            // a Suggest button
+            JButton suggestButton = new JButton("Suggest");
+            suggestButton.setBounds(30, 250, 100, 25);
+            dialog.add(suggestButton);
 
-            Player suggestedPlayer = game.getPlayerMap().get(susSuspect);
-            Weapon suggestedWeapon = game.getWeaponMap().get(susWeapon);
-            Room suggestedRoom = game.getRoomMap().get(susRoom);
+            suggestButton.addActionListener(e -> {
+                System.out.println("You chose:");
+                String susSuspect = (String) suspectComboBox.getSelectedItem();
+                String susWeapon = (String) weaponComboBox.getSelectedItem();
+                String susRoom = sugRoom.getName();
 
-            game.getBoard().movePlayer(suggestedPlayer, sugRoom);
-            game.getBoard().moveWeapon(suggestedWeapon, sugRoom);
-            // TODO: Update the board
+                System.out.println(susSuspect);
+                System.out.println(susWeapon);
+                System.out.println(susRoom);
 
-            boolean refuted = false;
-            Iterator<Player> playerIterator = game.getHumanPlayers().iterator();
-            while (playerIterator.next() != currentPlayer) {
-            }     // start iterator at currentPlayer
+                Player suggestedPlayer = game.getPlayerMap().get(susSuspect);
+                Weapon suggestedWeapon = game.getWeaponMap().get(susWeapon);
+                Room suggestedRoom = game.getRoomMap().get(susRoom);
 
-            // for each player clockwise of currentPlayer, check if they can refute the suggestion
-            for (int i = 0; i < game.getHumanPlayers().size() - 1; i++) {
-                if (!playerIterator.hasNext())
-                    playerIterator = game.getHumanPlayers().iterator();
+                game.getBoard().movePlayer(suggestedPlayer, sugRoom);
+                game.getBoard().moveWeapon(suggestedWeapon, sugRoom);
+                // TODO: Update the board
 
-                Player currentRefuter = playerIterator.next();
-                List<Card> refuteCards = currentRefuter.getRefutes(suggestedPlayer, suggestedWeapon, suggestedRoom);
+                boolean refuted = false;
+                Queue<Player> refuterQueue = new ArrayDeque<>();
+                Queue<Player> tempQueue = new ArrayDeque<>(playerQueue);
 
-                if (refuteCards.size() == 0) {
-                    System.out.printf("%s cannot refute the murder suggestion.\n", currentRefuter.getName());
-                } else {
-                    refute(currentRefuter, susSuspect, susWeapon, susRoom, parentFrame);
-                    refuted = true;
-                    return;
+                // For loop to only include players that are not the currentPlayer
+                for (int i = 0; i < game.getHumanPlayers().size()-1; i++) {
+                    refuterQueue.add(tempQueue.poll());
                 }
-            }
-            if (!refuted) {
-                System.out.println("The Suggestion was unable to be refuted by the other players.");
-                System.out.println("Would you like to make an accusation?");
-                // TODO: Instead of ending the turn, allow the player to make an accusation.
 
-            }
+                for (int i = 0; i < refuterQueue.size(); i++) {
+                    Player currentRefuter = refuterQueue.poll();
+                    List<Card> refuteCards = currentRefuter.getRefutes(suggestedPlayer, suggestedWeapon, suggestedRoom);
 
-            dialog.setVisible(false);
-        });
+                    if (refuteCards.size() == 0) {
+                        System.out.printf("%s cannot refute the murder suggestion.\n", currentRefuter.getName());
+                    } else {
+                        refute(currentRefuter, susSuspect, susWeapon, susRoom, parentFrame);
+                        refuted = true;
+                        break;
+                    }
 
-        // NOTE: it seems to work better putting this at the end
-        // otherwise some things aren't visible
-        dialog.setVisible(true);
+                }
 
+                if (!refuted) {
+                    System.out.println("The Suggestion was unable to be refuted by the other players.");
+                    System.out.println("Would you like to make an accusation?");
+                    // TODO: Instead of ending the turn, allow the player to make an accusation.
+
+                }
+                dialog.setVisible(false);
+            });
+
+            // NOTE: it seems to work better putting this at the end
+            // otherwise some things aren't visible
+            dialog.setVisible(true);
+        }
+        else {      // Player is not in a room
+            System.out.println("You are not in a room!");
+        }
 
     }
 
     // TODO: Add a JRadioButton for all 3 cards. If the player selects a card they don't have, ask again.
     public void refute(Player refuter, String suggestedPlayer, String suggestedWeapon, String suggestedRoom, JFrame parentFrame) {
 
-
     }
 
     public void initializeTurn() {
-        System.out.printf("%s's turn:\n", currentPlayer.getName()); // Should be changed to UI name
+        System.out.printf("\n%s's turn:\n", currentPlayer.getName()); // Should be changed to UI name
         int step1 = game.diceRoll();
         int step2 = game.diceRoll();
-        int stepNum = step1 + step2;       // Should be shown in UI name
+        int stepNum = step1 + step2;       // Should be shown in UI dice
         int playerX = currentPlayer.getTile().getX() + 1;
         int playerY = game.BOARD_HEIGHT - currentPlayer.getTile().getY();
 
@@ -474,6 +481,7 @@ public class GUI {
 
     }
     private void endTurn() {
+        System.out.println(currentPlayer.getName() + " has ended their turn.");
         Player lastPlayer = currentPlayer;
         currentPlayer = playerQueue.poll();
         playerQueue.add(lastPlayer);
