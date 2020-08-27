@@ -73,7 +73,7 @@ public class Room implements Card {
 	public String getName() {
 		return name;
 	}
-	
+
 	/**
 	 * This room's representation on the board
 	 * @return tile value

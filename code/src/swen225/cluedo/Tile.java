@@ -109,7 +109,7 @@ public abstract class Tile {
 	public boolean isAccessible() {
 		return object == null;
 	}
-	
+
 	/**
 	 * Overridden but used by sub classes if necessary
 	 */

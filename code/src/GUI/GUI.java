@@ -24,7 +24,13 @@ public class GUI {
     public static String[] PLAYERS = {"Miss Scarlett", "Col. Mustard", "Mrs. White", "Mr. Green", "Mrs. Peacock", "Prof. Plum"};
     public static String[] WEAPONS = {"Candlestick", "Dagger", "Lead Pipe", "Revolver", "Rope", "Spanner"};
     public static String[] ROOMS = {"Kitchen", "Ball Room", "Conservatory", "Billiard Room", "Library", "Study", "Hall", "Lounge", "Dining Room"};
-    
+
+    Set<Tile> validTiles = new HashSet<Tile>();
+    Set<Room> validRooms = new HashSet<Room>();
+
+    private Player currentPlayer;
+    private Queue<Player> playerQueue = new ArrayDeque<Player>();
+
     /*
      * The window
      */
@@ -39,8 +45,6 @@ public class GUI {
      * Drawing components
      */
     private static JComponent component;
-    
-    private Player currentPlayer;
 
     private Game game = new Game();
 
@@ -79,11 +83,14 @@ public class GUI {
 			}
 		});
 
-        while (game.getIsRunning()) {
-            for (Player player : game.getHumanPlayers()) {
-                game.startPlayerTurn(player);
-            }
+        // Initializes Queue of players for turns
+        for (Player player : game.getHumanPlayers()) {
+            playerQueue.add(player);
         }
+        // Sets up the first player's turn.
+        // Something similar to this will be called only whenever a turn is ended.
+        currentPlayer = playerQueue.poll();
+        initializeTurn();
     }
 
     class GameBoardComponent extends JComponent {
@@ -134,11 +141,14 @@ public class GUI {
         JMenuItem item3 = new JMenuItem("Make Accusation");
         JMenuItem item4 = new JMenuItem("Make Suggestion");
         JMenuItem item5 = new JMenuItem("Redraw(Testing)");
+        JMenuItem item6 = new JMenuItem("End Turn");
         menu1.add(item1);
         menu1.add(item2);
         menu2.add(item3);
         menu2.add(item4);
         menu2.add(item5);
+        menu2.add(item6);
+        // TODO: Add another MenuItem to end turn. Simply turns turnEnded to true.
 
         // sets accelerator keystrokes to JMenuItems (performs the action without the button being visible)
         // ALT + item number will activate that button
@@ -147,22 +157,20 @@ public class GUI {
         item3.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3, ActionEvent.ALT_MASK));
         item4.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4, ActionEvent.ALT_MASK));
         item5.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_5, ActionEvent.ALT_MASK));
+        item6.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_6, ActionEvent.ALT_MASK));
 
         // adds an action listener to a button (starts the game when first button is pressed
         item1.addActionListener(e -> chooseCharacters(parentFrame));
-
         // For debugging: Returns Murder circumstances
         item2.addActionListener(e -> getMurderCircumstances(parentFrame));
-
-
-        // adds an action listener to a button
+        // For accusing
         item3.addActionListener(e -> getAccusationCircumstances(parentFrame));
-
-        // adds an action listener to a button
+        // For suggesting
         item4.addActionListener(e -> doGUISuggestion(parentFrame));
-        
+        // For redrawing
         item5.addActionListener(e -> redraw());
-
+        // For ending turn
+        item6.addActionListener(e -> endTurn());
         // adds the finalised JMenuBar to the overall frame
         parentFrame.setJMenuBar(menuBar);
 
@@ -338,8 +346,9 @@ public class GUI {
             if (game.getPlayerMap().get(accSuspect) == game.getMurderer() &&
                     game.getWeaponMap().get(accWeapon) == game.getMurderWeapon() &&
                     game.getRoomMap().get(accRoom) == game.getMurderRoom()) {
-                System.out.println("Congratulations, you won!");
-                // TODO: End the game.
+                System.out.printf("Congratulations to player %s, you won!\n", currentPlayer.toString());
+                game.setEnd();
+                return;
             } else {
                 System.out.println("Oops, that was not correct, you can no longer suggest/accuse");
                 // player.setCanAccuse(false);
@@ -422,6 +431,7 @@ public class GUI {
                 } else {
                     refute(currentRefuter, susSuspect, susWeapon, susRoom, parentFrame);
                     refuted = true;
+                    return;
                 }
             }
             if (!refuted) {
@@ -438,6 +448,7 @@ public class GUI {
         // otherwise some things aren't visible
         dialog.setVisible(true);
 
+
     }
 
     // TODO: Add a JRadioButton for all 3 cards. If the player selects a card they don't have, ask again.
@@ -446,7 +457,28 @@ public class GUI {
 
     }
 
+    public void initializeTurn() {
+        System.out.printf("%s's turn:\n", currentPlayer.getName()); // Should be changed to UI name
+        int step1 = game.diceRoll();
+        int step2 = game.diceRoll();
+        int stepNum = step1 + step2;       // Should be shown in UI name
+        int playerX = currentPlayer.getTile().getX() + 1;
+        int playerY = game.BOARD_HEIGHT - currentPlayer.getTile().getY();
 
+        // Gets all valid tiles and rooms the player can go to and puts them into the sets
+        game.getBoard().getValidMoves(stepNum, currentPlayer, validTiles, validRooms);
+
+        System.out.printf("You rolled a %d and a %d.\n", step1, step2);
+        System.out.printf("Your possible moves have been highlighted as green tiles, or orange tiles for rooms.\n");
+        // TODO: Update the board
+
+    }
+    private void endTurn() {
+        Player lastPlayer = currentPlayer;
+        currentPlayer = playerQueue.poll();
+        playerQueue.add(lastPlayer);
+        initializeTurn();
+    }
 
     public static void main(String[] args) {
         new GUI();

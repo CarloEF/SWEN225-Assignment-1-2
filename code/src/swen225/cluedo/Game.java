@@ -664,7 +664,7 @@ public class Game {
      *
      * @return a random number between 1 and 6
      */
-    private int diceRoll() {
+    public int diceRoll() {
         return (int) Math.floor(Math.random() * 6 + 1);
     }
 
@@ -762,6 +762,9 @@ public class Game {
 
     public boolean getIsRunning() {
         return isRunning;
+    }
+    public void setEnd() {
+        isRunning = false;
     }
 
 
