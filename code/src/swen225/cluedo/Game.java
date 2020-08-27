@@ -114,9 +114,6 @@ public class Game {
     //get all input from this scanner
     Scanner input;
 
-    private static Set<Room> validRooms = new HashSet<Room>();
-    private static Set<Tile> validTiles = new HashSet<Tile>();
-
     /**
      * Constructs the game, sets up stuff
      */
@@ -144,21 +141,6 @@ public class Game {
         board.draw(g);
     }
 
-    public static Set<Room> getValidRooms() {
-        return validRooms;
-    }
-
-    public static Set<Tile> getValidTiles() {
-        return validTiles;
-    }
-
-    public static void addToValidRooms(Room room) {
-        validRooms.add(room);
-    }
-
-    public static void AddToValidTiles(Tile tile) {
-        validTiles.add(tile);
-    }
 
 //	/**
 //	 * Main method, initiates the game and starts it
@@ -414,8 +396,8 @@ public class Game {
         int playerX = player.getTile().getX() + 1;
         int playerY = BOARD_HEIGHT - player.getTile().getY();
 
-        validTiles = new HashSet<Tile>();
-        validRooms = new HashSet<Room>();
+        Set<Tile> validTiles = new HashSet<Tile>();
+        Set<Room> validRooms = new HashSet<Room>();
 
         //gets all valid tiles and rooms the player can go to and puts them into the sets
         board.getValidMoves(diceRoll, player, validTiles, validRooms);
@@ -726,13 +708,13 @@ public class Game {
         int playerX = player.getTile().getX() + 1;
         int playerY = BOARD_HEIGHT - player.getTile().getY();
 
-        Set<Tile> VALID_TILES = new HashSet<Tile>();
-        Set<Room> VALID_ROOMS = new HashSet<Room>();
+        Set<Tile> validTiles = new HashSet<Tile>();
+        Set<Room> validRooms = new HashSet<Room>();
 
         // Gets all valid tiles and rooms the player can go to and puts them into the sets
-        board.getValidMoves(stepNum, player, VALID_TILES, VALID_ROOMS);
+        board.getValidMoves(stepNum, player, validTiles, validRooms);
 
-        if (VALID_TILES.size() == 0 && VALID_ROOMS.size() == 0) {
+        if (validTiles.size() == 0 && validRooms.size() == 0) {
             System.out.println("You are blocked and cannot move!"); // Should not be reachable.
             return;
         }

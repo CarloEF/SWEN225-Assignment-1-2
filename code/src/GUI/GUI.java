@@ -123,6 +123,7 @@ public class GUI {
         @Override
         protected void paintComponent(Graphics g) {
             game.draw((Graphics2D) g);
+            game.getBoard().drawValidTiles((Graphics2D) g, validTiles, validRooms);
             // TODO: reinstate this when drawCards displays properly
             // drawCards((Graphics2D) g);
         }
@@ -176,7 +177,7 @@ public class GUI {
 //        g.setFont(font);
 //        g.drawString(cardName, x + textXOffset, y + CARD_HEIGHT-CARD_PADDING);
 //    }
-    
+
     /*
      * return dimension of component
      */
@@ -184,11 +185,12 @@ public class GUI {
     	return component.getSize();
     	}
 
-    
+
     public void redraw() {
     	frame.repaint();
     	panel.revalidate();
     	panel.repaint();
+    	// TODO: Add board.drawValidTiles();
     }
 
     /**
@@ -503,7 +505,7 @@ public class GUI {
 
                 game.getBoard().movePlayer(suggestedPlayer, sugRoom);
                 game.getBoard().moveWeapon(suggestedWeapon, sugRoom);
-                // TODO: Update the board
+                redraw();
 
                 boolean refuted = false;
                 Queue<Player> refuterQueue = new ArrayDeque<>();
@@ -530,7 +532,7 @@ public class GUI {
 
                 if (!refuted) {
                     System.out.println("The Suggestion was unable to be refuted by the other players.");
-                    System.out.println("Would you like to make an accusation?");
+                    System.out.println("Would you like to make an accusation?");        // // TODO: Update the UI, instead of a System.out
                     // TODO: Instead of ending the turn, allow the player to make an accusation.
 
                 }
@@ -542,7 +544,7 @@ public class GUI {
             dialog.setVisible(true);
         }
         else {      // Player is not in a room
-            System.out.println("You are not in a room!");
+            System.out.println("You are not in a room!");   // TODO: Update the UI, instead of a System.out
         }
 
     }
@@ -565,7 +567,8 @@ public class GUI {
 
         System.out.printf("You rolled a %d and a %d.\n", step1, step2);
         System.out.printf("Your possible moves have been highlighted as green tiles, or orange tiles for rooms.\n");
-        // TODO: Update the board
+        // TODO: Update the board with the validTiles highlighted
+        redraw();
 
     }
     private void endTurn() {
@@ -573,6 +576,8 @@ public class GUI {
         Player lastPlayer = currentPlayer;
         currentPlayer = playerQueue.poll();
         playerQueue.add(lastPlayer);
+        validTiles.clear();
+        validRooms.clear();
         initializeTurn();
     }
 
@@ -645,7 +650,7 @@ public class GUI {
     }
 
     public void doMouse() {
-
+        // TODO: do validTiles.clear(); and validRooms.clear(), to show that the player has moved.
     }
 
     public static void main(String[] args) {
