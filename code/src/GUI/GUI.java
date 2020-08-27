@@ -1,4 +1,5 @@
 package GUI;
+
 import swen225.cluedo.*;
 
 import javax.imageio.ImageIO;
@@ -23,7 +24,7 @@ public class GUI {
     public static final int WINDOW_HEIGHT = 720;
     public static int CURRENT_WINDOW_WIDTH = 960;
     public static int CURRENT_WINDOW_HEIGHT = 720;
-    
+
     public static String[] PLAYERS = {"Miss Scarlett", "Col. Mustard", "Mrs. White", "Mr. Green", "Mrs. Peacock", "Prof. Plum"};
     public static String[] WEAPONS = {"Candlestick", "Dagger", "Lead Pipe", "Revolver", "Rope", "Spanner"};
     public static String[] ROOMS = {"Kitchen", "Ball Room", "Conservatory", "Billiard Room", "Library", "Study", "Hall", "Lounge", "Dining Room"};
@@ -33,6 +34,7 @@ public class GUI {
 
     private Player currentPlayer;
     private Queue<Player> playerQueue = new ArrayDeque<Player>();
+    private ArrayList<Player> validPlayers = new ArrayList<Player>();
 
     public static Image WEAPON_IMG;
     public static Image PLAYER_IMG;
@@ -42,12 +44,12 @@ public class GUI {
      * The window
      */
     private JFrame frame;
-    
+
     /*
-     * Panel 
+     * Panel
      */
     private JPanel panel;
-    
+
     /*
      * Drawing components
      */
@@ -65,13 +67,13 @@ public class GUI {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         // setup JComponent 
-        component  = new GameBoardComponent();
+        component = new GameBoardComponent();
         component.setVisible(true);
-        
-        component.addMouseListener(new MouseAdapter() {	
-            public void mouseReleased(MouseEvent mouseEvent) {	//redraw after mouseRelease
+
+        component.addMouseListener(new MouseAdapter() {
+            public void mouseReleased(MouseEvent mouseEvent) {    //redraw after mouseRelease
                 redraw();
             }
         });
@@ -79,29 +81,30 @@ public class GUI {
         // setup JPanel (the canvas, except canvas is an old awt thing, this is better)
         panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0)); // the flow layout removes padding        
         panel.add(component);
-        
+
         // set up the window
         frame = new JFrame("Cluedo");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.add(panel);
-        
+
         setMenuBar(frame);
         chooseCharacters(frame);    // let the player choose the characters, initialise the Game
-        
-        frame.getContentPane().addComponentListener(new ComponentAdapter(){ //Current Window Size
-			public void componentResized(ComponentEvent e) {
-				Component c = (Component)e.getSource();
-				CURRENT_WINDOW_WIDTH = c.getWidth();
-				CURRENT_WINDOW_HEIGHT = c.getHeight();
 
-				// TODO: This resizes the pane for the board. Breaks sometimes? Look at it. - Elias
-				component.setPreferredSize(new Dimension(CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT));
-			}
-		});
+        frame.getContentPane().addComponentListener(new ComponentAdapter() { //Current Window Size
+            public void componentResized(ComponentEvent e) {
+                Component c = (Component) e.getSource();
+                CURRENT_WINDOW_WIDTH = c.getWidth();
+                CURRENT_WINDOW_HEIGHT = c.getHeight();
+
+                // TODO: This resizes the pane for the board. Breaks sometimes? Look at it. - Elias
+                component.setPreferredSize(new Dimension(CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT));
+            }
+        });
 
         // Initializes Queue of players for turns
         for (Player player : game.getHumanPlayers()) {
             playerQueue.add(player);
+            validPlayers.add(player);
         }
         // Sets up the first player's turn.
         // Something similar to this will be called only whenever a turn is ended.
@@ -182,15 +185,15 @@ public class GUI {
      * return dimension of component
      */
     public static Dimension getComponentDimension() {
-    	return component.getSize();
-    	}
+        return component.getSize();
+    }
 
 
     public void redraw() {
-    	frame.repaint();
-    	panel.revalidate();
-    	panel.repaint();
-    	// TODO: Add board.drawValidTiles();
+        frame.repaint();
+        panel.revalidate();
+        panel.repaint();
+        // TODO: Add board.drawValidTiles();
     }
 
     /**
@@ -441,7 +444,7 @@ public class GUI {
                 return;
             } else {
                 System.out.println("Oops, that was not correct, you can no longer suggest/accuse");
-                // TODO: Remove player from turn list, without removing them from Queue
+                validPlayers.remove(currentPlayer);
                 currentPlayer.setCanAccuse(false);
                 endTurn();
             }
@@ -512,7 +515,7 @@ public class GUI {
                 Queue<Player> tempQueue = new ArrayDeque<>(playerQueue);
 
                 // For loop to only include players that are not the currentPlayer
-                for (int i = 0; i < game.getHumanPlayers().size()-1; i++) {
+                for (int i = 0; i < game.getHumanPlayers().size() - 1; i++) {
                     refuterQueue.add(tempQueue.poll());
                 }
 
@@ -542,8 +545,7 @@ public class GUI {
             // NOTE: it seems to work better putting this at the end
             // otherwise some things aren't visible
             dialog.setVisible(true);
-        }
-        else {      // Player is not in a room
+        } else {      // Player is not in a room
             System.out.println("You are not in a room!");   // TODO: Update the UI, instead of a System.out
         }
 
@@ -571,45 +573,67 @@ public class GUI {
         redraw();
 
     }
+
     private void endTurn() {
-        System.out.println(currentPlayer.getName() + " has ended their turn.");
+        // If endTurn is called, and 1 player is left.
+        // TODO: Fix this to actually detect
+        if (validPlayers.size() == 1) {
+            System.out.printf("\nPlayer %s has won by default, as they are the only player left!\n", currentPlayer.toString());
+            validRooms.clear();
+            validRooms.clear();
+            redraw();
+            game.setEnd();
+            return;
+
+        }
+        if (currentPlayer.canAccuse()) {
+            System.out.println(currentPlayer.getName() + " has ended their turn.");
+        } else {
+            System.out.println(currentPlayer.getName() + " cannot play any more, as they have made a failed accusation.");
+        }
+
         Player lastPlayer = currentPlayer;
         currentPlayer = playerQueue.poll();
         playerQueue.add(lastPlayer);
         validTiles.clear();
         validRooms.clear();
-        initializeTurn();
+        if (currentPlayer.canAccuse()) {
+            initializeTurn();
+        }
+        else {
+            endTurn();
+        }
     }
 
     public void displayRules(JFrame parentFrame) {
         //TODO: Bother writing HTML to make this nicer formatted, or otherwise cleaning it up, adapt to use JEditorPane?
         String text = "Object:\nWelcome to Tudor Mansion. Your host, Mr. John Boddy, has met and untimely end - he's " +
-                "the victim of foul play. To win this game, you must determine the answer to these three questions: "  +
-                "Who done it? Where? And with what Weapon?\n\nGameplay:\nYour turn consists of up to three actions: "  +
-                "Moving Your Character Pawn, Making a Suggestion, and Making an Accusation.\n\nMoving Your Character"  +
-                " Pawn:\nRoll the dice and move your character pawn the number of squares you rolled. You may not move"+
+                "the victim of foul play. To win this game, you must determine the answer to these three questions: " +
+                "Who done it? Where? And with what Weapon?\n\nGameplay:\nYour turn consists of up to three actions: " +
+                "Moving Your Character Pawn, Making a Suggestion, and Making an Accusation.\n\nMoving Your Character" +
+                " Pawn:\nRoll the dice and move your character pawn the number of squares you rolled. You may not move" +
                 " diagonally. You may change directions as many times as you like, but may not enter the same square " +
-                "twice on the same turn. You cannot land in a square that's occupied by another suspect. Your valid "  +
+                "twice on the same turn. You cannot land in a square that's occupied by another suspect. Your valid " +
                 "moves will be highlighted in green on the board, and you can move to a square by clicking on it.\n\n" +
-                "Making a Suggestion:\nAs soon as you enter a Room, you are prompted to make a Suggestion. Suggestions"+
-                " allow you to determine which three cards are the murder circumstances. To make a Suggestion, pick a "+
-                "Suspect and a Weapon. The Room you are currently in will be the Room in your suggestion, and the "    +
-                "Suspect and Weapon will be moved into that Room with you.\n\nRefuting a Suggestion:\nAs soon as a "   +
-                "Suggestion is made, opposing players have the opportunity to refute the Suggestion, in turn order. "  +
-                "If the first player in turn order has any of the cards named in the Suggestion, they must show "      +
-                "the card to the suggesting player. If the refuting player has more than one of the cards, they get "  +
-                "to choose which card is shown to the suggesting player. If the refuting player has none of the "      +
-                "suggested cards, the opportunity to refute is passed on to the next player in turn order. As "        +
+                "Making a Suggestion:\nAs soon as you enter a Room, you are prompted to make a Suggestion. Suggestions" +
+                " allow you to determine which three cards are the murder circumstances. To make a Suggestion, pick a " +
+                "Suspect and a Weapon. The Room you are currently in will be the Room in your suggestion, and the " +
+                "Suspect and Weapon will be moved into that Room with you.\n\nRefuting a Suggestion:\nAs soon as a " +
+                "Suggestion is made, opposing players have the opportunity to refute the Suggestion, in turn order. " +
+                "If the first player in turn order has any of the cards named in the Suggestion, they must show " +
+                "the card to the suggesting player. If the refuting player has more than one of the cards, they get " +
+                "to choose which card is shown to the suggesting player. If the refuting player has none of the " +
+                "suggested cards, the opportunity to refute is passed on to the next player in turn order. As " +
                 "soon as one player refutes the suggestion, it is proof that the card cannot be in the envelope, and " +
-                "the presented murder is incorrect. Other players can no longer refute once the Suggestion has been "  +
-                "successfully Refuted. If no one can successfully refute the Suggestion, the suggesting player may "   +
-                "either end their turn or make an Accusation.\n\nMaking an Accusation:\nOnce you've gathered enough "  +
-                "information to know the murder circumstances, make an Accusation. Select any Suspect, Weapon, and "   +
-                "Room combination. This will be compared to the true murder circumstances, and if all three match, "   +
-                "you win the game. If any don't match, you are considered out of the game. You can only make one "     +
+                "the presented murder is incorrect. Other players can no longer refute once the Suggestion has been " +
+                "successfully Refuted. If no one can successfully refute the Suggestion, the suggesting player may " +
+                "either end their turn or make an Accusation.\n\nMaking an Accusation:\nOnce you've gathered enough " +
+                "information to know the murder circumstances, make an Accusation. Select any Suspect, Weapon, and " +
+                "Room combination. This will be compared to the true murder circumstances, and if all three match, " +
+                "you win the game. If any don't match, you are considered out of the game. You can only make one " +
                 "Accusation per game of Cluedo.\n\nWinning the Game:\nWinning the game is done by successfully making" +
-                " an Accusation that matches all three of the pre-selected murder circumstance cards. This can be"     +
-                "done through process of elimination, figuring out what cards other players have that cannot be the"   +
+                " an Accusation that matches all three of the pre-selected murder circumstance cards. This can be" +
+                "done through process of elimination, figuring out what cards other players have that cannot be the" +
                 "murder circumstances.";
 
         displayTextDialog(text, "Rules", parentFrame);
@@ -624,8 +648,9 @@ public class GUI {
 
     /**
      * A generic method to make a dialog box filled with scrollable text.
-     * @param text - Text to put in text box
-     * @param title - Title for dialog window
+     *
+     * @param text        - Text to put in text box
+     * @param title       - Title for dialog window
      * @param parentFrame - Main frame of the program
      */
     public void displayTextDialog(String text, String title, JFrame parentFrame) {
