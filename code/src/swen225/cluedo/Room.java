@@ -74,6 +74,10 @@ public class Room implements Card {
 		return name;
 	}
 
+	public List<RoomTile> getTiles() {
+		return this.tiles;
+	}
+
 	/**
 	 * This room's representation on the board
 	 * @return tile value
