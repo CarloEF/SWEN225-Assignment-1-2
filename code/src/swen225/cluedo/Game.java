@@ -5,6 +5,8 @@ import java.awt.font.GraphicAttribute;
 import java.util.*;
 import java.util.List;
 
+import GUI.GUI;
+
 // Hello, World!
 
 /**
@@ -130,9 +132,12 @@ public class Game {
     }
 
     public void draw(Graphics2D g) {
+    	
+    	int width = GUI.CURRENT_WINDOW_WIDTH;
+    	int height = GUI.CURRENT_WINDOW_HEIGHT;
+    	
         g.setColor(Color.WHITE);
-        g.fillRect(0, 0, 960, 720);
-
+        g.fillRect(0, 0, width, height);
         board.draw(g);
     }
 

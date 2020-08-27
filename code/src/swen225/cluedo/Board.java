@@ -6,6 +6,8 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.Stack;
 
+import GUI.GUI;
+
 /**
  * Class representing the board
  * 
@@ -18,7 +20,7 @@ public class Board {
 	/**
 	 * Constructs the board
 	 * 
-	 * @param width of the board
+	 * @param width  of the board
 	 * @param height of the board
 	 */
 	public Board(int width, int height) {
@@ -30,11 +32,22 @@ public class Board {
 
 	public void draw(Graphics2D g) {
 
-		int tileSize = 23;
+		int tileSize;
+
+		int width = GUI.CURRENT_WINDOW_WIDTH;
+    	int height = GUI.CURRENT_WINDOW_HEIGHT - 25;
+		
+		if (width < height)
+			tileSize = width / 24;
+		else
+			tileSize = height / 25;
+
+		int centre = (width / 2) - (12 * tileSize);
+
 		g.setColor(Color.WHITE);
 		for (int row = 0; row < board[0].length; row++) {
 			for (int col = 0; col < board.length; col++) {
-				int x = col * tileSize;
+				int x = (col * tileSize) + centre;
 				int y = row * tileSize;
 
 				// draw backgrounds of cells
@@ -55,7 +68,7 @@ public class Board {
 				}
 
 				// draw walls as thicker lines
-				 g.setColor(Color.BLACK);
+				g.setColor(Color.BLACK);
 				g.setStroke(new BasicStroke(3));
 				if (tile.hasDownWall())
 					g.drawLine(x, y + tileSize, x + tileSize, y + tileSize);
@@ -66,7 +79,7 @@ public class Board {
 				if (tile.hasRightWall())
 					g.drawLine(x + tileSize, y, x + tileSize, y + tileSize);
 
-				g.setStroke(new BasicStroke(1));	// set the stroke back to normal
+				g.setStroke(new BasicStroke(1)); // set the stroke back to normal
 			}
 		}
 	}
@@ -86,6 +99,7 @@ public class Board {
 
 	/**
 	 * Moves a player to a room
+	 * 
 	 * @param player
 	 * @param newRoom
 	 */
@@ -95,6 +109,7 @@ public class Board {
 
 	/**
 	 * Moves a weapon to a room
+	 * 
 	 * @param weapon
 	 * @param newRoom
 	 */
@@ -104,15 +119,16 @@ public class Board {
 
 	/**
 	 * Sets the board's rooms and walls from strings
+	 * 
 	 * @param roomText - text representing the tiles
 	 * @param wallText - bitfield text representing the walls on the tiles
-	 * @param rooms - a map containing the rooms
+	 * @param rooms    - a map containing the rooms
 	 */
 	public void setBoard(String roomText, String wallText, Map<String, Room> rooms) {
 		Scanner scan = new Scanner(wallText);
 		scan.useDelimiter("/");
 
-		for (int i=0, len=roomText.length();i<len;i++) {
+		for (int i = 0, len = roomText.length(); i < len; i++) {
 			int wallNum = scan.nextInt();
 
 			boolean left = false;
@@ -140,7 +156,7 @@ public class Board {
 
 			Tile tile = null;
 
-			switch(room) {
+			switch (room) {
 			case 'i':
 				tile = new InaccessibleTile(x, y);
 				break;
@@ -182,13 +198,14 @@ public class Board {
 		}
 		scan.close();
 
-		//System.out.println(this);
+		// System.out.println(this);
 	}
 
 	/**
 	 * Gets all valid moves and adds them to sets
-	 * @param diceRoll - the number of moves to use, determined by a dice roll
-	 * @param player - the player to move
+	 * 
+	 * @param diceRoll   - the number of moves to use, determined by a dice roll
+	 * @param player     - the player to move
 	 * @param validTiles - the set which all the valid tiles are added to
 	 * @param validRooms - the set which all the valid rooms are added to
 	 * @return
@@ -199,10 +216,10 @@ public class Board {
 
 		Stack<Tile> visitedTiles = new Stack<Tile>();
 
-		//if player is in a room, they can leave from any of the exits
+		// if player is in a room, they can leave from any of the exits
 		if (playerTile instanceof RoomTile) {
 
-			Room room = ((RoomTile)playerTile).getRoom();
+			Room room = ((RoomTile) playerTile).getRoom();
 
 			visitedTiles.addAll(room.getExitTiles());
 		} else {
@@ -214,9 +231,10 @@ public class Board {
 
 	/**
 	 * Recursive method to determine whether move is valid
-	 * @param moveNum - number of moves used so far
-	 * @param diceRoll - the number of moves to use, determined by a dice roll
-	 * @param visited - a stack of tiles already visited
+	 * 
+	 * @param moveNum    - number of moves used so far
+	 * @param diceRoll   - the number of moves to use, determined by a dice roll
+	 * @param visited    - a stack of tiles already visited
 	 * @param validTiles - the set which all the valid tiles are added to
 	 * @param validRooms - the set which all the valid rooms are added to
 	 * @return
@@ -224,89 +242,89 @@ public class Board {
 	private void validMove(int moveNum, int diceRoll, Stack<Tile> visited, Set<Tile> validTiles, Set<Room> validRooms) {
 		Tile lastTile = visited.peek();
 
-		//if used up all moves, current tile is a valid tile so add to set and stop
+		// if used up all moves, current tile is a valid tile so add to set and stop
 		if (moveNum == diceRoll) {
 			validTiles.add(lastTile);
 			return;
 		}
 
-		//see if we can go to upper tile
-		//can't go to invalid tiles or through walls
+		// see if we can go to upper tile
+		// can't go to invalid tiles or through walls
 		if (lastTile.getY() > 0 && !lastTile.hasUpWall()) {
-			Tile upperTile = getTile(lastTile.getX(), lastTile.getY()-1);
+			Tile upperTile = getTile(lastTile.getX(), lastTile.getY() - 1);
 
 			if (upperTile instanceof RoomTile) {
-				validRooms.add(((RoomTile)upperTile).getRoom());
+				validRooms.add(((RoomTile) upperTile).getRoom());
 			}
 
-			//can't access inaccessible tiles or already visited tiles
-			//also can't go through room tiles
+			// can't access inaccessible tiles or already visited tiles
+			// also can't go through room tiles
 			if (upperTile.isAccessible() && !visited.contains(upperTile)) {
 				visited.add(upperTile);
 
-				validMove(moveNum+1, diceRoll, visited, validTiles, validRooms);
+				validMove(moveNum + 1, diceRoll, visited, validTiles, validRooms);
 				visited.pop();
 			}
 		}
 
-		//see if we can go to lower tile
-		//can't go to invalid tiles or through walls
-		if (lastTile.getY() < height-1 && !lastTile.hasDownWall()) {
-			Tile lowerTile = getTile(lastTile.getX(), lastTile.getY()+1);
+		// see if we can go to lower tile
+		// can't go to invalid tiles or through walls
+		if (lastTile.getY() < height - 1 && !lastTile.hasDownWall()) {
+			Tile lowerTile = getTile(lastTile.getX(), lastTile.getY() + 1);
 
 			if (lowerTile instanceof RoomTile) {
-				validRooms.add(((RoomTile)lowerTile).getRoom());
+				validRooms.add(((RoomTile) lowerTile).getRoom());
 			}
 
-			//can't access inaccessible tiles or already visited tiles
+			// can't access inaccessible tiles or already visited tiles
 			if (lowerTile.isAccessible() && !visited.contains(lowerTile)) {
 				visited.add(lowerTile);
 
-				validMove(moveNum+1, diceRoll, visited, validTiles, validRooms);
+				validMove(moveNum + 1, diceRoll, visited, validTiles, validRooms);
 				visited.pop();
 			}
 		}
 
-		//see if we can go to left tile
-		//can't go to invalid tiles or through walls
+		// see if we can go to left tile
+		// can't go to invalid tiles or through walls
 		if (lastTile.getX() > 0 && !lastTile.hasLeftWall()) {
-			Tile leftTile = getTile(lastTile.getX()-1, lastTile.getY());
+			Tile leftTile = getTile(lastTile.getX() - 1, lastTile.getY());
 
 			if (leftTile instanceof RoomTile) {
-				validRooms.add(((RoomTile)leftTile).getRoom());
+				validRooms.add(((RoomTile) leftTile).getRoom());
 			}
 
-			//can't access inaccessible tiles or already visited tiles
+			// can't access inaccessible tiles or already visited tiles
 			if (leftTile.isAccessible() && !visited.contains(leftTile)) {
 				visited.add(leftTile);
 
-				validMove(moveNum+1, diceRoll, visited, validTiles, validRooms);
+				validMove(moveNum + 1, diceRoll, visited, validTiles, validRooms);
 				visited.pop();
 			}
 		}
 
-		//see if we can go to right tile
-		//can't go to invalid tiles or through walls
-		if (lastTile.getX() < width-1 && !lastTile.hasRightWall()) {
-			Tile rightTile = getTile(lastTile.getX()+1, lastTile.getY());
+		// see if we can go to right tile
+		// can't go to invalid tiles or through walls
+		if (lastTile.getX() < width - 1 && !lastTile.hasRightWall()) {
+			Tile rightTile = getTile(lastTile.getX() + 1, lastTile.getY());
 
 			if (rightTile instanceof RoomTile) {
-				validRooms.add(((RoomTile)rightTile).getRoom());
+				validRooms.add(((RoomTile) rightTile).getRoom());
 			}
 
-			//can't access inaccessible tiles or already visited tiles
+			// can't access inaccessible tiles or already visited tiles
 			if (rightTile.isAccessible() && !visited.contains(rightTile)) {
 				visited.add(rightTile);
 
-				validMove(moveNum+1, diceRoll, visited, validTiles, validRooms);
+				validMove(moveNum + 1, diceRoll, visited, validTiles, validRooms);
 				visited.pop();
 			}
 		}
 	}
 
 	/**
-	 * Returns the tile at a point (x, y)
-	 * returns null if invalid x or y
+	 * Returns the tile at a point (x, y) returns null if invalid x or y
+	 * 
 	 * @param x
 	 * @param y
 	 * @return
@@ -322,12 +340,12 @@ public class Board {
 	 * Draws the board
 	 */
 	public String toString() {
-		//string that contains the board
+		// string that contains the board
 		String text = "";
-		for (int y=0;y<height;y++) {
-			//adds horizontal wall
+		for (int y = 0; y < height; y++) {
+			// adds horizontal wall
 			text += "    ";
-			for (int x=0;x<width;x++) {
+			for (int x = 0; x < width; x++) {
 				if (board[x][y].hasUpWall()) {
 					text += "-";
 				} else {
@@ -338,14 +356,14 @@ public class Board {
 			}
 			text += "\n";
 
-			//add y coords on left
-			text += (height-y);
-			if (height-y < 10) {
+			// add y coords on left
+			text += (height - y);
+			if (height - y < 10) {
 				text += " ";
 			}
 			text += " ";
-			//adds walls in between tiles
-			for (int x=0;x<width;x++) {
+			// adds walls in between tiles
+			for (int x = 0; x < width; x++) {
 				if (board[x][y].hasLeftWall()) {
 					text += "|";
 				} else {
@@ -353,17 +371,17 @@ public class Board {
 				}
 				text += board[x][y];
 			}
-			//adds the walls on the right if they are there
-			if (board[width-1][y].hasRightWall()) {
+			// adds the walls on the right if they are there
+			if (board[width - 1][y].hasRightWall()) {
 				text += "|";
 			}
 			text += "\n";
 		}
 
-		//adds the walls on the bottom
+		// adds the walls on the bottom
 		text += "    ";
-		for (int x=0;x<width;x++) {
-			if (board[x][height-1].hasDownWall()) {
+		for (int x = 0; x < width; x++) {
+			if (board[x][height - 1].hasDownWall()) {
 				text += "-";
 			} else {
 				text += " ";
@@ -374,12 +392,12 @@ public class Board {
 		text += "\n";
 
 		text += "    ";
-		//add numbers on the bottom
-		for (int i=0;i<width;i++) {
-			if (i+1 < 10) {
-				text += (i+1) + " ";
+		// add numbers on the bottom
+		for (int i = 0; i < width; i++) {
+			if (i + 1 < 10) {
+				text += (i + 1) + " ";
 			} else {
-				text += i+1;
+				text += i + 1;
 			}
 		}
 		return text;
