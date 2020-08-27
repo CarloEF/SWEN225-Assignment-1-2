@@ -1,6 +1,7 @@
 package GUI;
 import swen225.cluedo.*;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import java.awt.*;
@@ -10,6 +11,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -31,6 +34,10 @@ public class GUI {
     private Player currentPlayer;
     private Queue<Player> playerQueue = new ArrayDeque<Player>();
 
+    public static Image WEAPON_IMG;
+    public static Image PLAYER_IMG;
+    public static Image ROOM_IMG;
+
     /*
      * The window
      */
@@ -49,6 +56,15 @@ public class GUI {
     private Game game = new Game();
 
     public GUI() {
+
+        // load images for cards, there's a better way of doing this but I forgot what it is - Ollie
+        try {
+            PLAYER_IMG = ImageIO.read(new File("images/player-icon.png"));
+            WEAPON_IMG = ImageIO.read(new File("images/weapon-icon.png"));
+            ROOM_IMG = ImageIO.read(new File("images/room-icon.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         
         // setup JComponent 
         component  = new GameBoardComponent();
@@ -68,12 +84,9 @@ public class GUI {
         frame = new JFrame("Cluedo");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.add(panel);
-        frame.pack();   // make the frame take on the size of the panel
         
         setMenuBar(frame);
         chooseCharacters(frame);    // let the player choose the characters, initialise the Game
-
-        frame.setVisible(true);
         
         frame.getContentPane().addComponentListener(new ComponentAdapter(){ //Current Window Size
 			public void componentResized(ComponentEvent e) {
@@ -91,6 +104,11 @@ public class GUI {
         // Something similar to this will be called only whenever a turn is ended.
         currentPlayer = playerQueue.poll();
         initializeTurn();
+
+        // these methods have to be called at the end, otherwise horrific things happen - Ollie
+        redraw();
+        frame.pack();   // make the frame take on the size of the panel
+        frame.setVisible(true);
     }
 
     class GameBoardComponent extends JComponent {
@@ -102,7 +120,56 @@ public class GUI {
         @Override
         protected void paintComponent(Graphics g) {
             game.draw((Graphics2D) g);
+            drawCards((Graphics2D) g);
         }
+    }
+
+    // TODO: should probably move this stuff to GUI class
+    public void drawCards(Graphics2D g) {
+
+        List<Card> playersCards = currentPlayer.getCards();
+
+        for (int i=0; i<6; i++)
+            drawACard(i < playersCards.size() ? playersCards.get(i) : null, i, g);
+    }
+
+    public void drawACard(Card card, int index, Graphics2D g) {
+
+        int CARDS_LEFT = 600;
+        int CARDS_TOP = 360;
+        int CARD_WIDTH = 110;
+        int CARD_HEIGHT = 160;
+        int CARD_PADDING = 10;
+        int INNER_PADDING = 10;
+
+        int x = CARDS_LEFT + (index % 3) * (CARD_WIDTH + CARD_PADDING);
+        int y = CARDS_TOP + (index < 3 ? 0 : 1) * (CARD_HEIGHT + CARD_PADDING);
+        Rectangle iconArea = new Rectangle(x + INNER_PADDING, y + INNER_PADDING, CARD_WIDTH - 2 * INNER_PADDING, CARD_HEIGHT - 4*INNER_PADDING);
+
+        // if there's no card to be drawn here, draw outline and return
+        if (card == null) {
+            g.setColor(Color.LIGHT_GRAY);
+            g.drawRoundRect(x, y, CARD_WIDTH, CARD_HEIGHT, 10, 10);
+            return;
+        }
+
+        g.setColor(new Color(0xFF01579B));
+        g.fillRoundRect(x, y, CARD_WIDTH, CARD_HEIGHT, 10, 10);
+
+        g.setColor(Color.WHITE);
+        g.fillRect(iconArea.x, iconArea.y, iconArea.width, iconArea.height);
+
+        Image icon = card instanceof Weapon ? WEAPON_IMG : card instanceof Player ? PLAYER_IMG : ROOM_IMG;
+        int iconXOffset = (CARD_WIDTH - icon.getWidth(null)) / 2;
+        int iconYOffset = INNER_PADDING + (iconArea.height - icon.getHeight(null)) / 2;
+        g.drawImage(icon, x + iconXOffset, y + iconYOffset,null);
+
+        String cardName = card.getName();
+        Font font = new Font("SansSerif", Font.BOLD, 13);
+        FontMetrics fontMetrics = g.getFontMetrics(font);
+        int textXOffset = (CARD_WIDTH - fontMetrics.stringWidth(cardName)) / 2;
+        g.setFont(font);
+        g.drawString(cardName, x + textXOffset, y + CARD_HEIGHT-CARD_PADDING);
     }
     
     /*

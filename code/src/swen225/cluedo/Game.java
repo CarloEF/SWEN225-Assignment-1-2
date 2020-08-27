@@ -141,6 +141,7 @@ public class Game {
         board.draw(g);
     }
 
+
 //	/**
 //	 * Main method, initiates the game and starts it
 //	 */
@@ -300,6 +301,8 @@ public class Game {
 //		while(isRunning)
 //			for (Player currentPlayer : humanPlayers)
 //				startPlayerTurn(currentPlayer);
+
+
     }
 
     /**
