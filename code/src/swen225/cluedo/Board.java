@@ -54,12 +54,21 @@ public class Board {
 					continue;
 
 				if (tile instanceof HallwayTile) {
-					g.setColor(Color.LIGHT_GRAY);
+					if (Game.getValidTiles().contains(tile)) {
+						g.setColor(Color.GREEN);
+					} else {
+						g.setColor(Color.LIGHT_GRAY);
+						System.out.println(Game.getValidTiles().size());
+					}
 					g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 					g.setColor(Color.GRAY);
 					g.drawRect(x, y, TILE_SIZE, TILE_SIZE);
 				} else if (tile instanceof RoomTile) {
-					g.setColor(Color.GRAY);
+					if (Game.getValidRooms().contains(((RoomTile) tile).getRoom())) {
+						g.setColor(Color.ORANGE);
+					} else {
+						g.setColor(Color.GRAY);
+					}
 					g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 					g.setColor(Color.LIGHT_GRAY);
 					g.drawRect(x, y, TILE_SIZE, TILE_SIZE);
@@ -242,7 +251,8 @@ public class Board {
 
 		// if used up all moves, current tile is a valid tile so add to set and stop
 		if (moveNum == diceRoll) {
-			validTiles.add(lastTile);
+			System.out.println("GOT HERE");
+			Game.AddToValidTiles(lastTile);
 			return;
 		}
 
@@ -252,9 +262,9 @@ public class Board {
 			Tile upperTile = getTile(lastTile.getX(), lastTile.getY() - 1);
 
 			if (upperTile instanceof RoomTile) {
-				validRooms.add(((RoomTile) upperTile).getRoom());
+				Game.addToValidRooms(((RoomTile) upperTile).getRoom());
 			}
-
+			System.out.println(visited.size());
 			// can't access inaccessible tiles or already visited tiles
 			// also can't go through room tiles
 			if (upperTile.isAccessible() && !visited.contains(upperTile)) {
@@ -271,7 +281,7 @@ public class Board {
 			Tile lowerTile = getTile(lastTile.getX(), lastTile.getY() + 1);
 
 			if (lowerTile instanceof RoomTile) {
-				validRooms.add(((RoomTile) lowerTile).getRoom());
+				Game.addToValidRooms(((RoomTile) lowerTile).getRoom());
 			}
 
 			// can't access inaccessible tiles or already visited tiles
@@ -289,7 +299,7 @@ public class Board {
 			Tile leftTile = getTile(lastTile.getX() - 1, lastTile.getY());
 
 			if (leftTile instanceof RoomTile) {
-				validRooms.add(((RoomTile) leftTile).getRoom());
+				Game.addToValidRooms(((RoomTile) leftTile).getRoom());
 			}
 
 			// can't access inaccessible tiles or already visited tiles
@@ -307,7 +317,7 @@ public class Board {
 			Tile rightTile = getTile(lastTile.getX() + 1, lastTile.getY());
 
 			if (rightTile instanceof RoomTile) {
-				validRooms.add(((RoomTile) rightTile).getRoom());
+				Game.addToValidRooms(((RoomTile) rightTile).getRoom());
 			}
 
 			// can't access inaccessible tiles or already visited tiles
