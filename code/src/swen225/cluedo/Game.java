@@ -173,8 +173,6 @@ public class Game {
             player.draw(g);
         }
 
-        GUI.drawDice(g);
-        drawCards(g);
     }
 
     /**

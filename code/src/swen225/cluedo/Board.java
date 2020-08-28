@@ -40,7 +40,7 @@ public class Board {
 
     public void draw(Graphics2D g) {
 
-        int width = GUI.CURRENT_WINDOW_WIDTH;
+        int width = (int)(GUI.CURRENT_WINDOW_WIDTH*0.6);
         int height = GUI.CURRENT_WINDOW_HEIGHT - 25;
 
         if (width < height)
@@ -52,7 +52,6 @@ public class Board {
         g.setColor(Color.GRAY);
         g.fillRect(LEFT + 2*TILE_SIZE, TOP + 2*TILE_SIZE, TILE_SIZE * (board.length - 4), TILE_SIZE * (board[0].length - 4));
 
-        g.setColor(Color.WHITE);
         for (int row = 0; row < board[0].length; row++) {
             for (int col = 0; col < board.length; col++) {
                 int x = LEFT + col * TILE_SIZE;

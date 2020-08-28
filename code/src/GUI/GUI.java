@@ -10,6 +10,8 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.awt.GridBagConstraints.BOTH;
+
 public class GUI {
 
     public static final int WINDOW_WIDTH = 960;
@@ -40,7 +42,7 @@ public class GUI {
     /*
      * Drawing components
      */
-    private static JComponent component;
+    private static JComponent boardComponent, logComponent, cardsComponent, diceComponent;
 
     private Game game;
 
@@ -48,20 +50,92 @@ public class GUI {
 
         game = new Game(this);
 
-        // setup JComponent 
-        component = new GameBoardComponent();
-        component.setVisible(true);
-        component.addMouseListener(new GameBoardMouseListener());
+        // setup JPanel (the canvas, except canvas is an old awt thing, this is better)
+        panel = new JPanel(new GridBagLayout()); // GBL allows easy scaling
 
-        component.addMouseListener(new MouseAdapter() {
+        // constraints for adding to GBL panel
+        GridBagConstraints gbc = new GridBagConstraints();
+
+        // setup boardComponent
+        boardComponent = new GameBoardComponent();
+        boardComponent.setVisible(true);
+        boardComponent.setBackground(Color.CYAN);
+        boardComponent.addMouseListener(new GameBoardMouseListener());
+
+        boardComponent.addMouseListener(new MouseAdapter() {
             public void mouseReleased(MouseEvent mouseEvent) {    //redraw after mouseRelease
                 redraw();
             }
         });
 
-        // setup JPanel (the canvas, except canvas is an old awt thing, this is better)
-        panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0)); // the flow layout removes padding        
-        panel.add(component);
+        // constraints set for boardComponent
+        gbc.fill = BOTH;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridheight = 4;
+        gbc.weightx = 0.6;
+        gbc.weighty = 1;
+        // add boardComponent with constraints to panel
+        panel.add(boardComponent, gbc);
+
+        // setup diceComponent
+        diceComponent = new DiceComponent();
+        diceComponent.setVisible(true);
+        diceComponent.setBackground(Color.black);
+        // constraints changed for diceComponent
+        gbc.gridx = 1;
+        gbc.gridheight = 1;
+        gbc.weightx = 0.1;
+        gbc.weighty = 0.1;
+        // add diceComponent with constraints to panel
+        panel.add(diceComponent, gbc);
+
+        // sets up an End Turn Button
+        JButton endTurnButton = new JButton("End Turn");
+        endTurnButton.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        // constraints changed for endTurnButton
+        gbc.gridx = 2;
+        // add endTurnButton with constraints to panel
+        panel.add(endTurnButton, gbc);
+
+        // sets up a suggestionButton
+        JButton suggestionButton = new JButton("Make Suggestion");
+        suggestionButton.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        // constraints changed for suggestionButton
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        // add suggestionButton with constraints to panel
+        panel.add(suggestionButton, gbc);
+
+        // sets up an accusationButton
+        JButton accusationButton = new JButton("Make Accusation");
+        accusationButton.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        // constraints changed for accusationButton
+        gbc.gridx = 2;
+        // add accusationButton with constraints to panel
+        panel.add(accusationButton, gbc);
+
+        // setup logComponent
+        logComponent = new LogComponent();
+        logComponent.setVisible(true);
+        logComponent.setBackground(Color.blue);
+        // constraints changed for logComponent
+        gbc.weightx = 0.2;
+        gbc.weighty = 0.4;
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        // add logComponent with constraints to panel
+        panel.add(logComponent, gbc);
+
+        // setup cardsComponent
+        cardsComponent = new CardsComponent();
+        cardsComponent.setVisible(true);
+        cardsComponent.setBackground(Color.red);
+        // constraints changed for logComponent
+        gbc.gridy = 3;
+        // add cardsComponent with constraints to panel
+        panel.add(cardsComponent, gbc);
 
         // set up the window
         frame = new JFrame("Cluedo");
@@ -78,20 +152,19 @@ public class GUI {
                 CURRENT_WINDOW_HEIGHT = c.getHeight();
 
                 // TODO: This resizes the pane for the board. Breaks sometimes? Look at it. - Elias
-                component.setPreferredSize(new Dimension(CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT));
             }
         });
 
         // these methods have to be called at the end, otherwise horrific things happen - Ollie
         redraw();
-        frame.pack();   // make the frame take on the size of the panel
+        //frame.pack();   // make the frame take on the size of the panel
         frame.setVisible(true);
     }
 
     class GameBoardComponent extends JComponent {
 
         GameBoardComponent() {
-            setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
+            setPreferredSize(new Dimension(100000000, 10000000));
         }
 
         @Override
@@ -123,6 +196,44 @@ public class GUI {
         @Override
         public void mouseExited(MouseEvent e) {
 
+        }
+    }
+
+    class LogComponent extends JComponent {
+
+        LogComponent() {
+            setPreferredSize(new Dimension(CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT));
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT);
+        }
+    }
+
+    class DiceComponent extends JComponent {
+
+        DiceComponent() {
+            setPreferredSize(new Dimension(CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT));
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            g.setColor(Color.RED);
+            g.fillRect(0, 0, CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT);
+        }
+    }
+    class CardsComponent extends JComponent {
+
+        CardsComponent() {
+            setPreferredSize(new Dimension(CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT));
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            g.setColor(Color.BLUE);
+            g.fillRect(0, 0, CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT);
         }
     }
 
