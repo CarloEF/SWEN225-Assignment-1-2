@@ -623,6 +623,7 @@ public class GUI {
 
                 if (!game.checkAccusationIsTrue(accSuspect, accWeapon, accRoom)) {
                     log("\nOops, that was not correct, " + game.getCurrentPlayer().getName() + " can no longer suggest/accuse\n");
+                    game.playerLost();
                 } else {
                     log("Congratulations to player " + game.getCurrentPlayer().getName() + ", you won!\n");
                 }
@@ -742,20 +743,20 @@ public class GUI {
         dialog.add(refuteButton);
 
         JRadioButton characterButton = new JRadioButton(suggestedPlayer);
-        characterButton.setBounds(30, 35, 100, 25);
+        characterButton.setBounds(30, 35, 200, 25);
         characterButton.setMnemonic(KeyEvent.VK_C);
         characterButton.setActionCommand(suggestedPlayer);
         characterButton.setSelected(true);
         dialog.add(characterButton);
 
         JRadioButton weaponButton = new JRadioButton(suggestedWeapon);
-        weaponButton.setBounds(30, 60, 100, 25);
+        weaponButton.setBounds(30, 60, 200, 25);
         weaponButton.setMnemonic(KeyEvent.VK_W);
         weaponButton.setActionCommand(suggestedWeapon);
         dialog.add(weaponButton);
 
         JRadioButton roomButton = new JRadioButton(suggestedRoom);
-        roomButton.setBounds(30, 85, 100, 25);
+        roomButton.setBounds(30, 85, 200, 25);
         roomButton.setMnemonic(KeyEvent.VK_R);
         roomButton.setActionCommand(suggestedRoom);
         dialog.add(roomButton);

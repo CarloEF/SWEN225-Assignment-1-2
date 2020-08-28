@@ -403,10 +403,6 @@ public class Game {
             isRunning = false;
             return true;
         }
-
-        validPlayers.remove(currentPlayer);
-        currentPlayer.setCanAccuse(false);
-        endTurn();
         return false;
     }
 
@@ -438,7 +434,7 @@ public class Game {
 
     public void initializeTurn() {
         goToState(State.ROLLING_DICE);
-        GUI.log("\n"+currentPlayer.getName() + "'s turn: ");
+        GUI.log("\n" + currentPlayer.getName() + "'s turn: ");
         die1 = diceRoll();
         die2 = diceRoll();
         // Kept at 12 for debugging, for easy room traversal.
@@ -466,14 +462,7 @@ public class Game {
 
         // Only allows turns to end while game is still running.
         if (isRunning) {
-            // If endTurn is called, and 1 player is left.
-            if (validPlayers.size() == 1) {
-                GUI.log(currentPlayer.toString() + " has won by default, as they are the only player left!\n");
-                getBoard().clearValidRoomsAndTiles();
-                GUI.redraw();
-                isRunning = false;
-                return;
-            }
+
             // This if-statement is called most of the time.
             if (currentPlayer.canAccuse()) {
                 GUI.log(currentPlayer.getName() + " has ended their turn.\n");
@@ -491,6 +480,20 @@ public class Game {
                 endTurn();
             }
         }
+    }
+
+    public void playerLost() {
+        validPlayers.remove(currentPlayer);
+        currentPlayer.setCanAccuse(false);
+        // If endTurn is called, and 1 player is left.
+        if (validPlayers.size() == 1) {
+            GUI.log(validPlayers.get(0).getName() + " has won by default, as they are the only player left!\n");
+            getBoard().clearValidRoomsAndTiles();
+            GUI.redraw();
+            isRunning = false;
+            return;
+        }
+        endTurn();
     }
 
     /**
@@ -541,10 +544,10 @@ public class Game {
     public int[] getDice() {
         return new int[]{die1, die2};
     }
+
     public boolean getIsRunning() {
         return isRunning;
     }
-
 
 
 }
