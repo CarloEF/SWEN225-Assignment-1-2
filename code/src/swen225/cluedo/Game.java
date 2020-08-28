@@ -327,12 +327,6 @@ public class Game {
         currentPlayer = playerQueue.poll();
         initializeTurn();
 
-        //todo: I commented out the game loop because waiting for user input stops the GUI from drawing
-//		while(isRunning)
-//			for (Player currentPlayer : humanPlayers)
-//				startPlayerTurn(currentPlayer);
-
-
     }
 
     /**
@@ -444,10 +438,12 @@ public class Game {
 
     public void initializeTurn() {
         goToState(State.ROLLING_DICE);
-        GUI.log(currentPlayer.getName() + "'s turn: ");
+        GUI.log("\n"+currentPlayer.getName() + "'s turn: ");
         die1 = diceRoll();
         die2 = diceRoll();
-        int stepNum = 6 + 6;       // Should be shown in UI dice
+        // Kept at 12 for debugging, for easy room traversal.
+        // int stepNum = 6 + 6;
+        int stepNum = die1 + die2;
 
         // Gets all valid tiles and rooms the player can go to and puts them into the sets
         getBoard().getValidMoves(stepNum, currentPlayer);
@@ -463,35 +459,37 @@ public class Game {
     public void endTurn() {
 
         // TODO: is this what we agreed on? or do you not have to make a suggestion?
-        if (state.value() <= State.SUGGESTING.value()) {
-            GUI.log("Cannot end turn without making a suggestion");
-            return;
-        }
+        //if (state.value() <= State.SUGGESTING.value()) {
+        //    GUI.log("Cannot end turn without making a suggestion");
+        //    return;
+        //}
 
-        // If endTurn is called, and 1 player is left.
-        if (validPlayers.size() == 1) {
-            GUI.log(currentPlayer.toString() + " has won by default, as they are the only player left!\n");
+        // Only allows turns to end while game is still running.
+        if (isRunning) {
+            // If endTurn is called, and 1 player is left.
+            if (validPlayers.size() == 1) {
+                GUI.log(currentPlayer.toString() + " has won by default, as they are the only player left!\n");
+                getBoard().clearValidRoomsAndTiles();
+                GUI.redraw();
+                isRunning = false;
+                return;
+            }
+            // This if-statement is called most of the time.
+            if (currentPlayer.canAccuse()) {
+                GUI.log(currentPlayer.getName() + " has ended their turn.\n");
+            } else {    // Only called right after when it rolls back around to a player who has lost.
+                GUI.log("\n" + currentPlayer.getName() + " cannot play any more, as they have made a failed accusation.\n");
+            }
+
+            Player lastPlayer = currentPlayer;
+            currentPlayer = playerQueue.poll();
+            playerQueue.add(lastPlayer);
             getBoard().clearValidRoomsAndTiles();
-            GUI.redraw();
-            isRunning = false;
-            return;
-
-        }
-        // This if-statement is called most of the time.
-        if (currentPlayer.canAccuse()) {
-            GUI.log(currentPlayer.getName() + " has ended their turn.\n");
-        } else {    // Only called right after when it rolls back around to a player who has lost.
-            GUI.log("\n" + currentPlayer.getName() + " cannot play any more, as they have made a failed accusation.\n");
-        }
-
-        Player lastPlayer = currentPlayer;
-        currentPlayer = playerQueue.poll();
-        playerQueue.add(lastPlayer);
-        getBoard().clearValidRoomsAndTiles();
-        if (currentPlayer.canAccuse()) {
-            initializeTurn();
-        } else {
-            endTurn();
+            if (currentPlayer.canAccuse()) {
+                initializeTurn();
+            } else {
+                endTurn();
+            }
         }
     }
 
@@ -543,5 +541,10 @@ public class Game {
     public int[] getDice() {
         return new int[]{die1, die2};
     }
+    public boolean getIsRunning() {
+        return isRunning;
+    }
+
+
 
 }

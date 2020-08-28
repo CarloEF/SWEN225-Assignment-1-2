@@ -215,9 +215,13 @@ public class GUI {
         frame.setVisible(true);
     }
 
+    public static int getBoardComponentWidth() {
+        return boardComponent.getWidth();
     }
 
     public static int getBoardComponentHeight() {
+        return boardComponent.getHeight();
+    }
 
     class GameBoardComponent extends JComponent {
 
@@ -566,85 +570,14 @@ public class GUI {
             return;
         }
 
-        JDialog dialog = new JDialog(parentFrame, "Make an Accusation", true);
-        dialog.setSize(400, 400);
-        dialog.setLayout(null);
+        // Only allow accusations if the game is still running.
+        if (game.getIsRunning()) {
+            JDialog dialog = new JDialog(parentFrame, "Make an Accusation", true);
+            dialog.setSize(400, 400);
+            dialog.setLayout(null);
 
-        // text at the top
-        JLabel title = new JLabel("Make an accusation - select the murder circumstances");
-        title.setBounds(30, 10, 350, 25);
-        dialog.add(title);
-
-        // combo box to choose a player
-        JLabel suspectLabel = new JLabel("Suspect:");
-        suspectLabel.setBounds(30, 40, 250, 25);
-        dialog.add(suspectLabel);
-        JComboBox<String> suspectComboBox = new JComboBox<>(Card.PLAYERS);
-        suspectComboBox.setBounds(30, 70, 100, 25);
-        dialog.add(suspectComboBox);
-
-        // combo box to choose a weapon
-        JLabel weaponLabel = new JLabel("Weapon:");
-        weaponLabel.setBounds(30, 100, 250, 25);
-        dialog.add(weaponLabel);
-        JComboBox<String> weaponComboBox = new JComboBox<>(Card.WEAPONS);
-        weaponComboBox.setBounds(30, 130, 100, 25);
-        dialog.add(weaponComboBox);
-
-        // combo box to choose a room
-        JLabel roomLabel = new JLabel("Crime scene:");
-        roomLabel.setBounds(30, 160, 250, 25);
-        dialog.add(roomLabel);
-        JComboBox<String> roomComboBox = new JComboBox<>(Card.ROOMS);
-        roomComboBox.setBounds(30, 190, 100, 25);
-        dialog.add(roomComboBox);
-
-        // an accuse button
-        JButton accuseButton = new JButton("Accuse");
-        accuseButton.setBounds(30, 250, 100, 25);
-        dialog.add(accuseButton);
-
-        // add the selected player when button is pressed
-        accuseButton.addActionListener(e -> {
-
-            gameLog += ("\n" + game.getCurrentPlayer().getName() + " chose to accuse: ");
-            String accSuspect = (String) suspectComboBox.getSelectedItem();
-            String accWeapon = (String) weaponComboBox.getSelectedItem();
-            String accRoom = (String) roomComboBox.getSelectedItem();
-            gameLog += (accSuspect + ", ");
-            gameLog += (accWeapon + ", ");
-            gameLog += (accRoom + "\n");
-
-            if (game.checkAccusationIsTrue(accSuspect, accWeapon, accRoom)) {
-                log("\nOops, that was not correct, " + game.getCurrentPlayer().getName() + " can no longer suggest/accuse\n");
-            } else {
-                log("Congratulations to player " + game.getCurrentPlayer().getName() + ", you won!\n");
-            }
-
-            dialog.setVisible(false);
-        });
-
-        // NOTE: it seems to work better putting this at the end
-        // otherwise some things aren't visible
-        dialog.setVisible(true);
-    }
-
-    private void doGUISuggestion(JFrame parentFrame) {
-
-        // TODO: grey out buttons so they can't suggest
-        if (game.state != Game.State.SUGGESTING) {
-            log("Not allowed to suggest right now");
-            return;
-        }
-
-        JDialog dialog = new JDialog(parentFrame, "Make a Suggestion", true);
-        dialog.setSize(400, 400);
-        dialog.setLayout(null);
-
-        if (game.getCurrentPlayer().getTile() instanceof RoomTile) {
-            Room sugRoom = ((RoomTile) game.getCurrentPlayer().getTile()).getRoom();
-
-            JLabel title = new JLabel("Make a suggestion within the current room: " + sugRoom.getName());
+            // text at the top
+            JLabel title = new JLabel("Make an accusation - select the murder circumstances");
             title.setBounds(30, 10, 350, 25);
             dialog.add(title);
 
@@ -664,25 +597,34 @@ public class GUI {
             weaponComboBox.setBounds(30, 130, 100, 25);
             dialog.add(weaponComboBox);
 
-            // a Suggest button
-            JButton suggestButton = new JButton("Suggest");
-            suggestButton.setBounds(30, 250, 100, 25);
-            dialog.add(suggestButton);
+            // combo box to choose a room
+            JLabel roomLabel = new JLabel("Crime scene:");
+            roomLabel.setBounds(30, 160, 250, 25);
+            dialog.add(roomLabel);
+            JComboBox<String> roomComboBox = new JComboBox<>(Card.ROOMS);
+            roomComboBox.setBounds(30, 190, 100, 25);
+            dialog.add(roomComboBox);
 
-            suggestButton.addActionListener(e -> {
-                gameLog += ("\n" + game.getCurrentPlayer().getName() + " chose to suggest:\n");
-                String susSuspect = (String) suspectComboBox.getSelectedItem();
-                String susWeapon = (String) weaponComboBox.getSelectedItem();
-                String susRoom = sugRoom.getName();
+            // an accuse button
+            JButton accuseButton = new JButton("Accuse");
+            accuseButton.setBounds(30, 250, 100, 25);
+            dialog.add(accuseButton);
 
-                gameLog += (susSuspect + ", ");
-                gameLog += (susWeapon + ", ");
-                gameLog += (susRoom + "\n\n");
+            // add the selected player when button is pressed
+            accuseButton.addActionListener(e -> {
 
-                if (game.canRefuteSuggestion(susSuspect, susWeapon, susRoom)) {
-                    log("\nYou may make an accusation before ending your turn.\n");
+                gameLog += ("\n" + game.getCurrentPlayer().getName() + " chose to accuse: ");
+                String accSuspect = (String) suspectComboBox.getSelectedItem();
+                String accWeapon = (String) weaponComboBox.getSelectedItem();
+                String accRoom = (String) roomComboBox.getSelectedItem();
+                gameLog += (accSuspect + ", ");
+                gameLog += (accWeapon + ", ");
+                gameLog += (accRoom + "\n");
+
+                if (!game.checkAccusationIsTrue(accSuspect, accWeapon, accRoom)) {
+                    log("\nOops, that was not correct, " + game.getCurrentPlayer().getName() + " can no longer suggest/accuse\n");
                 } else {
-                    log("\nThe Suggestion was unable to be refuted by the other players.\n");
+                    log("Congratulations to player " + game.getCurrentPlayer().getName() + ", you won!\n");
                 }
 
                 dialog.setVisible(false);
@@ -691,8 +633,76 @@ public class GUI {
             // NOTE: it seems to work better putting this at the end
             // otherwise some things aren't visible
             dialog.setVisible(true);
-        } else {      // Player is not in a room
-            gameLog += ("You are not in a room!\n");
+        }
+    }
+
+    private void doGUISuggestion(JFrame parentFrame) {
+
+        // TODO: grey out buttons so they can't suggest
+        if (game.state != Game.State.SUGGESTING) {
+            log("Not allowed to suggest right now");
+            return;
+        }
+
+        // Only allow suggestions while the game is still running.
+        if (game.getIsRunning()) {
+            JDialog dialog = new JDialog(parentFrame, "Make a Suggestion", true);
+            dialog.setSize(400, 400);
+            dialog.setLayout(null);
+
+            if (game.getCurrentPlayer().getTile() instanceof RoomTile) {
+                Room sugRoom = ((RoomTile) game.getCurrentPlayer().getTile()).getRoom();
+
+                JLabel title = new JLabel("Make a suggestion within the current room: " + sugRoom.getName());
+                title.setBounds(30, 10, 350, 25);
+                dialog.add(title);
+
+                // combo box to choose a player
+                JLabel suspectLabel = new JLabel("Suspect:");
+                suspectLabel.setBounds(30, 40, 250, 25);
+                dialog.add(suspectLabel);
+                JComboBox<String> suspectComboBox = new JComboBox<>(Card.PLAYERS);
+                suspectComboBox.setBounds(30, 70, 100, 25);
+                dialog.add(suspectComboBox);
+
+                // combo box to choose a weapon
+                JLabel weaponLabel = new JLabel("Weapon:");
+                weaponLabel.setBounds(30, 100, 250, 25);
+                dialog.add(weaponLabel);
+                JComboBox<String> weaponComboBox = new JComboBox<>(Card.WEAPONS);
+                weaponComboBox.setBounds(30, 130, 100, 25);
+                dialog.add(weaponComboBox);
+
+                // a Suggest button
+                JButton suggestButton = new JButton("Suggest");
+                suggestButton.setBounds(30, 250, 100, 25);
+                dialog.add(suggestButton);
+
+                suggestButton.addActionListener(e -> {
+                    gameLog += ("\n" + game.getCurrentPlayer().getName() + " chose to suggest:\n");
+                    String susSuspect = (String) suspectComboBox.getSelectedItem();
+                    String susWeapon = (String) weaponComboBox.getSelectedItem();
+                    String susRoom = sugRoom.getName();
+
+                    gameLog += (susSuspect + ", ");
+                    gameLog += (susWeapon + ", ");
+                    gameLog += (susRoom + "\n\n");
+
+                    if (game.canRefuteSuggestion(susSuspect, susWeapon, susRoom)) {
+                        log("\nYou may make an accusation before ending your turn.\n");
+                    } else {
+                        log("\nThe Suggestion was unable to be refuted by the other players.\n");
+                    }
+
+                    dialog.setVisible(false);
+                });
+
+                // NOTE: it seems to work better putting this at the end
+                // otherwise some things aren't visible
+                dialog.setVisible(true);
+            } else {      // Player is not in a room
+                gameLog += ("You are not in a room!\n");
+            }
         }
 
     }
