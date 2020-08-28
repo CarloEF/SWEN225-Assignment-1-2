@@ -38,7 +38,7 @@ public class Board {
 
     public void draw(Graphics2D g) {
 
-        int width = GUI.CURRENT_WINDOW_WIDTH;
+        int width = (int)(GUI.CURRENT_WINDOW_WIDTH*0.7);
         int height = GUI.CURRENT_WINDOW_HEIGHT - 25;
 
         if (width < height)
@@ -88,7 +88,7 @@ public class Board {
 
     public void drawValidTiles(Graphics2D g) {
 
-        int width = GUI.CURRENT_WINDOW_WIDTH;
+        int width = (int)(GUI.CURRENT_WINDOW_WIDTH*0.7);
         int height = GUI.CURRENT_WINDOW_HEIGHT - 25;
 
         if (width < height)

@@ -47,7 +47,7 @@ public class Player implements CluedoObject {
 	
 	/**
 	 * Gets the cards a player can use to refute a murder suggestion
-	 * @param murderSugg
+	 * @param murdererSugg
 	 * @param weaponSugg
 	 * @param roomSugg
 	 * @return

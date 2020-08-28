@@ -10,6 +10,9 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.awt.GridBagConstraints.BOTH;
+import static java.awt.GridBagConstraints.FIRST_LINE_START;
+
 public class GUI {
 
     public static final int WINDOW_WIDTH = 960;
@@ -36,26 +39,62 @@ public class GUI {
     /*
      * Drawing components
      */
-    private static JComponent component;
+    private static JComponent boardComponent;
+    private static JComponent cardsComponent;
+    private static JComponent controlsComponent;
 
     private Game game = new Game(this);
 
     public GUI() {
 
-        // setup JComponent 
-        component = new GameBoardComponent();
-        component.setVisible(true);
-        component.addMouseListener(new GameBoardMouseListener());
+        // setup JPanel (the canvas, except canvas is an old awt thing, this is better)
+        panel = new JPanel(new GridBagLayout());    // GridBagLayout allows for an easily scaling grid of components
+        GridBagConstraints constraints = new GridBagConstraints();
 
-        component.addMouseListener(new MouseAdapter() {
+        // setup board JComponent
+        boardComponent = new GameBoardComponent();
+        boardComponent.setVisible(true);
+        boardComponent.addMouseListener(new GameBoardMouseListener());
+
+        boardComponent.addMouseListener(new MouseAdapter() {
             public void mouseReleased(MouseEvent mouseEvent) {    //redraw after mouseRelease
                 redraw();
             }
         });
 
-        // setup JPanel (the canvas, except canvas is an old awt thing, this is better)
-        panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0)); // the flow layout removes padding        
-        panel.add(component);
+        constraints.weightx = 0.7;
+        constraints.weighty = 1;
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.gridheight = 2;
+        constraints.fill = BOTH;
+
+        panel.add(boardComponent, constraints);
+
+//        cardsComponent = new CardsComponent();
+//        cardsComponent.setVisible(true);
+
+        constraints.weightx = 0.3;
+        constraints.weighty = 0.5;
+        constraints.gridx = 1;
+        constraints.gridy = 0;
+        constraints.gridheight = 1;
+
+        JButton button1 = new JButton("HA");
+        button1.setSize(1000, 1000);
+
+        panel.add(button1, constraints);
+
+//        controlsComponent = new ControlsComponent();
+//        controlsComponent.setBackground(Color.BLACK);
+//        controlsComponent.setVisible(true);
+
+        JButton button = new JButton("HA");
+        button.setSize(1000, 1000);
+
+        constraints.gridy = 1;
+
+        panel.add(button, constraints);
 
         // set up the window
         frame = new JFrame("Cluedo");
@@ -72,20 +111,26 @@ public class GUI {
                 CURRENT_WINDOW_HEIGHT = c.getHeight();
 
                 // TODO: This resizes the pane for the board. Breaks sometimes? Look at it. - Elias
-                component.setPreferredSize(new Dimension(CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT));
+                //  also a bit of a weird implementation for now. Will look and making nicer.
+                boardComponent.setPreferredSize(new Dimension((int)(CURRENT_WINDOW_WIDTH*0.7), CURRENT_WINDOW_HEIGHT));
+                //cardsComponent.setPreferredSize(new Dimension((int)(CURRENT_WINDOW_WIDTH*0.3), (int)(CURRENT_WINDOW_HEIGHT*0.5)));
+                //controlsComponent.setPreferredSize(new Dimension((int)(CURRENT_WINDOW_WIDTH*0.3), (int)(CURRENT_WINDOW_HEIGHT*0.5)));
+                button.setSize(1000, 1000);
+                button1.setSize(1000, 1000);
             }
         });
 
         // these methods have to be called at the end, otherwise horrific things happen - Ollie
         redraw();
-        frame.pack();   // make the frame take on the size of the panel
+          // make the frame take on the size of the panel
         frame.setVisible(true);
     }
 
     class GameBoardComponent extends JComponent {
 
         GameBoardComponent() {
-            setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
+            // sets component size to 70% of the width and 100% of the height
+            setPreferredSize(new Dimension(CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT));
         }
 
         @Override
@@ -119,6 +164,31 @@ public class GUI {
 
         @Override
         public void mouseExited(MouseEvent e) {
+
+        }
+    }
+
+    class CardsComponent extends JComponent {
+
+        CardsComponent() {
+            setPreferredSize(new Dimension(CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT));
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            game.drawCards((Graphics2D) g);
+        }
+    }
+
+    class ControlsComponent extends JComponent {
+
+        ControlsComponent() {
+            setPreferredSize(new Dimension((int)(WINDOW_WIDTH*0.3), (int)(WINDOW_HEIGHT*0.5)));
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            //TODO: Do the drawing of buttons and stuff in here. This could also be done in the greater GridBagLayout panel.
 
         }
     }
