@@ -35,8 +35,8 @@ public class GUI {
     private static JComponent boardComponent, logComponent, cardsComponent, diceComponent;
 
     // the top/left position on screen where cards are drawn
-    public static final int CARDS_LEFT = 600;
-    public static final int CARDS_TOP = 360;
+    public static final int CARDS_LEFT = 0;
+    public static final int CARDS_TOP = 0;
 
     public static int DICE_SIZE;
     public static int DICE_TOP;
@@ -61,7 +61,7 @@ public class GUI {
         // setup boardComponent
         boardComponent = new GameBoardComponent();
         boardComponent.setVisible(true);
-        boardComponent.setBackground(Color.CYAN);
+        boardComponent.setBorder(BorderFactory.createLineBorder(Color.black));
         boardComponent.addMouseListener(new GameBoardMouseListener());
 
         boardComponent.addMouseListener(new MouseAdapter() {
@@ -83,7 +83,6 @@ public class GUI {
         // setup diceComponent
         diceComponent = new DiceComponent();
         diceComponent.setVisible(true);
-        diceComponent.setBackground(Color.black);
         diceComponent.setBorder(BorderFactory.createLineBorder(Color.black));
         // constraints changed for diceComponent
         gbc.gridx = 1;
@@ -93,9 +92,26 @@ public class GUI {
         // add diceComponent with constraints to panel
         panel.add(diceComponent, gbc);
 
+        // TODO: Need to ask someone about whether you can Accuse before Suggesting on your turn, or if you must make a
+        //  suggestion whenever you enter a new room, etc. Then enable/disable buttons according to game state.
+
         // sets up an End Turn Button
         JButton endTurnButton = new JButton("End Turn");
         endTurnButton.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        endTurnButton.addActionListener(e -> game.endTurn());
+        endTurnButton.setBackground(Color.WHITE);
+        endTurnButton.setBorder(BorderFactory.createLineBorder(Color.black));
+        // hover effect
+        endTurnButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                endTurnButton.setBorder(BorderFactory.createLineBorder(Color.blue));
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                endTurnButton.setBorder(BorderFactory.createLineBorder(Color.black));
+            }
+        });
         // constraints changed for endTurnButton
         gbc.gridx = 2;
         // add endTurnButton with constraints to panel
@@ -104,6 +120,20 @@ public class GUI {
         // sets up a suggestionButton
         JButton suggestionButton = new JButton("Make Suggestion");
         suggestionButton.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        suggestionButton.addActionListener(e -> doGUISuggestion(frame));
+        suggestionButton.setBackground(Color.WHITE);
+        suggestionButton.setBorder(BorderFactory.createLineBorder(Color.black));
+        // hover effects
+        suggestionButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                suggestionButton.setBorder(BorderFactory.createLineBorder(Color.blue));
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                suggestionButton.setBorder(BorderFactory.createLineBorder(Color.black));
+            }
+        });
         // constraints changed for suggestionButton
         gbc.gridx = 1;
         gbc.gridy = 1;
@@ -113,6 +143,20 @@ public class GUI {
         // sets up an accusationButton
         JButton accusationButton = new JButton("Make Accusation");
         accusationButton.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        accusationButton.addActionListener(e -> getAccusationCircumstances(frame));
+        accusationButton.setBackground(new Color(0xe1f5fe));
+        accusationButton.setBorder(BorderFactory.createLineBorder(Color.black));
+        // hover effects
+        accusationButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                accusationButton.setBorder(BorderFactory.createLineBorder(Color.blue));
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                accusationButton.setBorder(BorderFactory.createLineBorder(Color.black));
+            }
+        });
         // constraints changed for accusationButton
         gbc.gridx = 2;
         // add accusationButton with constraints to panel
@@ -121,7 +165,7 @@ public class GUI {
         // setup logComponent
         logComponent = new LogComponent();
         logComponent.setVisible(true);
-        logComponent.setBackground(Color.blue);
+        logComponent.setBorder(BorderFactory.createLineBorder(Color.black));
         // constraints changed for logComponent
         gbc.weightx = 0.2;
         gbc.weighty = 0.4;
@@ -134,7 +178,7 @@ public class GUI {
         // setup cardsComponent
         cardsComponent = new CardsComponent();
         cardsComponent.setVisible(true);
-        cardsComponent.setBackground(Color.red);
+        cardsComponent.setBorder(BorderFactory.createLineBorder(Color.black));
         // constraints changed for logComponent
         gbc.gridy = 3;
         // add cardsComponent with constraints to panel
@@ -243,8 +287,9 @@ public class GUI {
 
         @Override
         protected void paintComponent(Graphics g) {
-            g.setColor(Color.BLUE);
+            g.setColor(new Color(0xe1f5fe));
             g.fillRect(0, 0, CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT);
+            game.drawCards((Graphics2D) g);
         }
     }
 
