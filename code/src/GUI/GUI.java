@@ -36,6 +36,9 @@ public class GUI {
     private Queue<Player> playerQueue = new ArrayDeque<Player>();
     private ArrayList<Player> validPlayers = new ArrayList<Player>();
 
+    private String gameLog = "";
+    private int turn = 1;
+
     public static Image WEAPON_IMG;
     public static Image PLAYER_IMG;
     public static Image ROOM_IMG;
@@ -106,6 +109,7 @@ public class GUI {
             playerQueue.add(player);
             validPlayers.add(player);
         }
+
         // Sets up the first player's turn.
         // Something similar to this will be called only whenever a turn is ended.
         currentPlayer = playerQueue.poll();
@@ -220,6 +224,7 @@ public class GUI {
 
         // creates JMenuItems to add to the JMenu objects (creating buttons in a drop-down menu)
         JMenuItem startGame = new JMenuItem("Start Game");
+        JMenuItem viewLog = new JMenuItem("View Game Logs");
         JMenuItem showMurder = new JMenuItem("View Murder");
         JMenuItem makeAccusation = new JMenuItem("Make Accusation");
         JMenuItem makeSuggestion = new JMenuItem("Make Suggestion");
@@ -228,6 +233,7 @@ public class GUI {
         JMenuItem readmeButton = new JMenuItem("ReadMe");
         JMenuItem redrawButton = new JMenuItem("Redraw");
         gameMenu.add(startGame);
+        gameMenu.add(viewLog);
         actionMenu.add(makeAccusation);
         actionMenu.add(makeSuggestion);
         actionMenu.add(endTurn);
@@ -239,6 +245,7 @@ public class GUI {
         // sets accelerator keystrokes to JMenuItems (performs the action without the button being visible)
         // ALT + item number will activate that button
         startGame.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
+        viewLog.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK));
         makeAccusation.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.CTRL_MASK));
         makeSuggestion.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
         endTurn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK));
@@ -247,8 +254,10 @@ public class GUI {
         showMurder.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.ALT_MASK));
         redrawButton.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK));
 
-        // adds an action listener to a button (starts the game when first button is pressed
+        // Starts the game
         startGame.addActionListener(e -> chooseCharacters(parentFrame));
+        // View Log of current game
+        viewLog.addActionListener(e -> viewLog(parentFrame));
         // For debugging: Returns Murder circumstances
         showMurder.addActionListener(e -> getMurderCircumstances(parentFrame));
         // For accusing
@@ -327,7 +336,7 @@ public class GUI {
                     textField.setText("");
 
                     players.put(button.getActionCommand(), playerName);
-                    System.out.printf("Player %d (%s) selected %s%n", playerCount.get(), playerName, button.getActionCommand());
+                    gameLog+=("Player "+playerCount.get()+" ("+playerName+") selected "+button.getActionCommand()+"\n");
 
                     if (playerCount.getAndSet(playerCount.get() + 1) >= numPlayers) {
                         game.startGame(players);
@@ -360,8 +369,11 @@ public class GUI {
 
         return Integer.parseInt(input);
     }
+    private void viewLog(JFrame parentFrame) {
+        displayTextDialog(gameLog, "Game Log", parentFrame);
+    }
 
-    private void getMurderCircumstances(JFrame parentframe) {
+    private void getMurderCircumstances(JFrame parentFrame) {
         String murdererString = "EMPTY";
         for (String key : game.getPlayerMap().keySet()) {
             if (game.getPlayerMap().get(key).equals(game.getMurderer())) {
@@ -380,9 +392,9 @@ public class GUI {
                 murderRoomString = key;
             }
         }
-        System.out.println("\nMurderer: " + murdererString);
-        System.out.println("Weapon: " + murderWeaponString);
-        System.out.println("Room: " + murderRoomString);
+        gameLog+=("Murderer: "+murdererString+"\n");
+        gameLog+=("Weapon: "+murderWeaponString+"\n");
+        gameLog+=("Room: "+murderRoomString+"\n");
     }
 
     public void getAccusationCircumstances(JFrame parentFrame) {
@@ -428,22 +440,23 @@ public class GUI {
         // add the selected player when button is pressed
         accuseButton.addActionListener(e -> {
 
-            System.out.println("You chose:");
+            gameLog+=("You chose: ");
             String accSuspect = (String) suspectComboBox.getSelectedItem();
             String accWeapon = (String) weaponComboBox.getSelectedItem();
             String accRoom = (String) roomComboBox.getSelectedItem();
-            System.out.println(accSuspect);
-            System.out.println(accWeapon);
-            System.out.println(accRoom);
+            gameLog+=(accSuspect+", ");
+            gameLog+=(accWeapon+", ");
+            gameLog+=(accRoom+"\n");
 
             if (game.getPlayerMap().get(accSuspect) == game.getMurderer() &&
                     game.getWeaponMap().get(accWeapon) == game.getMurderWeapon() &&
                     game.getRoomMap().get(accRoom) == game.getMurderRoom()) {
-                System.out.printf("Congratulations to player %s, you won!\n", currentPlayer.toString());
+                gameLog+=("Congratulations to player "+currentPlayer.getName()+", you won!\n");
                 game.setEnd();
                 return;
             } else {
-                System.out.println("Oops, that was not correct, you can no longer suggest/accuse");
+                gameLog+=("Oops, that was not correct, "+currentPlayer.getName()+" can no longer suggest/accuse\n");
+                turn++;
                 validPlayers.remove(currentPlayer);
                 currentPlayer.setCanAccuse(false);
                 endTurn();
@@ -493,14 +506,14 @@ public class GUI {
             dialog.add(suggestButton);
 
             suggestButton.addActionListener(e -> {
-                System.out.println("You chose:");
+                gameLog+=("Player "+currentPlayer.getName()+" chose:\n");
                 String susSuspect = (String) suspectComboBox.getSelectedItem();
                 String susWeapon = (String) weaponComboBox.getSelectedItem();
                 String susRoom = sugRoom.getName();
 
-                System.out.println(susSuspect);
-                System.out.println(susWeapon);
-                System.out.println(susRoom);
+                gameLog+=(susSuspect+"\n");
+                gameLog+=(susWeapon+"\n");
+                gameLog+=(susRoom+"\n");
 
                 Player suggestedPlayer = game.getPlayerMap().get(susSuspect);
                 Weapon suggestedWeapon = game.getWeaponMap().get(susWeapon);
@@ -524,7 +537,7 @@ public class GUI {
                     List<Card> refuteCards = currentRefuter.getRefutes(suggestedPlayer, suggestedWeapon, suggestedRoom);
 
                     if (refuteCards.size() == 0) {
-                        System.out.printf("%s cannot refute the murder suggestion.\n", currentRefuter.getName());
+                        gameLog+=(currentRefuter.getName()+"cannot refute the murder suggestion.\n");
                     } else {
                         refute(currentRefuter, susSuspect, susWeapon, susRoom, parentFrame);
                         refuted = true;
@@ -534,8 +547,8 @@ public class GUI {
                 }
 
                 if (!refuted) {
-                    System.out.println("The Suggestion was unable to be refuted by the other players.");
-                    System.out.println("Would you like to make an accusation?");        // // TODO: Update the UI, instead of a System.out
+                    gameLog+=("The Suggestion was unable to be refuted by the other players.\n");
+                    gameLog+=("Would you like to make an accusation?\n");
                     // TODO: Instead of ending the turn, allow the player to make an accusation.
 
                 }
@@ -546,7 +559,7 @@ public class GUI {
             // otherwise some things aren't visible
             dialog.setVisible(true);
         } else {      // Player is not in a room
-            System.out.println("You are not in a room!");   // TODO: Update the UI, instead of a System.out
+            gameLog+=("You are not in a room!\n");
         }
 
     }
@@ -557,7 +570,8 @@ public class GUI {
     }
 
     public void initializeTurn() {
-        System.out.printf("\n%s's turn:\n", currentPlayer.getName()); // Should be changed to UI name
+        gameLog+=("\nTurn: "+turn+"\n");
+        gameLog+=(currentPlayer.getName()+"'s turn: ");
         int step1 = game.diceRoll();
         int step2 = game.diceRoll();
         int stepNum = step1 + step2;       // Should be shown in UI dice
@@ -567,18 +581,17 @@ public class GUI {
         // Gets all valid tiles and rooms the player can go to and puts them into the sets
         game.getBoard().getValidMoves(stepNum, currentPlayer, validTiles, validRooms);
 
-        System.out.printf("You rolled a %d and a %d.\n", step1, step2);
-        System.out.printf("Your possible moves have been highlighted as green tiles, or orange tiles for rooms.\n");
-        // TODO: Update the board with the validTiles highlighted
+        gameLog+=("They rolled a "+step1+" and a "+step2+".\n");
+        // Possibly remove:
+        // gameLog+=("Your possible moves have been highlighted as green tiles, or orange tiles for rooms.\n");
         redraw();
 
     }
 
     private void endTurn() {
         // If endTurn is called, and 1 player is left.
-        // TODO: Fix this to actually detect
         if (validPlayers.size() == 1) {
-            System.out.printf("\nPlayer %s has won by default, as they are the only player left!\n", currentPlayer.toString());
+            gameLog+=(currentPlayer.toString()+" has won by default, as they are the only player left!\n");
             validRooms.clear();
             validRooms.clear();
             redraw();
@@ -586,10 +599,12 @@ public class GUI {
             return;
 
         }
+        // This if-statement is called most of the time.
         if (currentPlayer.canAccuse()) {
-            System.out.println(currentPlayer.getName() + " has ended their turn.");
-        } else {
-            System.out.println(currentPlayer.getName() + " cannot play any more, as they have made a failed accusation.");
+            gameLog+=(currentPlayer.getName()+" has ended their turn.\n");
+            turn++;
+        } else {    // Only called right after when it rolls back around to a player who has lost.
+            gameLog+=("\n"+currentPlayer.getName()+" cannot play any more, as they have made a failed accusation.\n");
         }
 
         Player lastPlayer = currentPlayer;
@@ -599,8 +614,7 @@ public class GUI {
         validRooms.clear();
         if (currentPlayer.canAccuse()) {
             initializeTurn();
-        }
-        else {
+        } else {
             endTurn();
         }
     }
