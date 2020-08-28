@@ -35,7 +35,9 @@ public class Game {
         public int value() {
             return value;
         }
-    };
+    }
+
+    ;
 
     public State state = State.ROLLING_DICE;
 
@@ -161,10 +163,10 @@ public class Game {
     }
 
     public void draw(Graphics2D g) {
-    	
-    	int width = GUI.CURRENT_WINDOW_WIDTH;
-    	int height = GUI.CURRENT_WINDOW_HEIGHT;
-    	
+
+        int width = GUI.CURRENT_WINDOW_WIDTH;
+        int height = GUI.CURRENT_WINDOW_HEIGHT;
+
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, width, height);
         board.draw(g);
@@ -183,7 +185,7 @@ public class Game {
         addPlayer(new Player("Miss Scarlett", new Color(0xFFB71C1C), null));
         addPlayer(new Player("Col. Mustard", new Color(0xFFFFD600), null));
         addPlayer(new Player("Mrs. White", Color.WHITE, null));
-        addPlayer(new Player("Mr. Green", new Color(0xFF33691E),null));
+        addPlayer(new Player("Mr. Green", new Color(0xFF33691E), null));
         addPlayer(new Player("Mrs. Peacock", new Color(0xFF0D47A1), null));
         addPlayer(new Player("Prof. Plum", new Color(0xFF311B92), null));
 
@@ -309,7 +311,7 @@ public class Game {
         setPlayerTiles();
         setWeaponTiles();
 
-        System.out.println("Hello, welcome to Cluedo!");
+        GUI.log("Hello, welcome to Cluedo!\n");
 
         initHumanPlayers(playerNames);
         dealCards();
@@ -382,7 +384,7 @@ public class Game {
 
         List<Card> playersCards = currentPlayer.getCards();
 
-        for (int i=0; i<6; i++)
+        for (int i = 0; i < 6; i++)
             GUI.drawACard(i < playersCards.size() ? playersCards.get(i) : null, i, g);
     }
 
@@ -423,20 +425,14 @@ public class Game {
         board.moveWeapon(suggestedWeapon, suggestedRoom);
         GUI.redraw();
 
-        Queue<Player> refuterQueue = new ArrayDeque<>();
-        Queue<Player> tempQueue = new ArrayDeque<>(playerQueue);
-
-        // For loop to only include players that are not the currentPlayer
-        for (int i = 0; i < humanPlayers.size() - 1; i++) {
-            refuterQueue.add(tempQueue.poll());
-        }
-
-        for (int i = 0; i < refuterQueue.size(); i++) {
+        Queue<Player> refuterQueue = new ArrayDeque<>(playerQueue);
+        int refuters = refuterQueue.size();
+        for (int i = 0; i < refuters; i++) {
             Player currentRefuter = refuterQueue.poll();
             List<Card> refuteCards = currentRefuter.getRefutes(suggestedPlayer, suggestedWeapon, suggestedRoom);
 
             if (refuteCards.size() == 0) {
-                GUI.log("\n"+currentRefuter.getName()+" cannot refute the murder suggestion.\n");
+                GUI.log("" + currentRefuter.getName() + " cannot refute the murder suggestion.\n");
             } else {
                 GUI.refute(currentRefuter, sugSuspect, sugWeapon, sugRoom, false);
                 return true;
@@ -448,15 +444,15 @@ public class Game {
 
     public void initializeTurn() {
         goToState(State.ROLLING_DICE);
-        GUI.log(currentPlayer.getName()+"'s turn: ");
+        GUI.log(currentPlayer.getName() + "'s turn: ");
         die1 = diceRoll();
         die2 = diceRoll();
-        int stepNum = die1 + die2;       // Should be shown in UI dice
+        int stepNum = 6 + 6;       // Should be shown in UI dice
 
         // Gets all valid tiles and rooms the player can go to and puts them into the sets
         getBoard().getValidMoves(stepNum, currentPlayer);
 
-        GUI.log("They rolled a "+die1+" and a "+die2+".\n");
+        GUI.log("They rolled a " + die1 + " and a " + die2 + ".\n");
         // Possibly remove:
         // gameLog+=("Your possible moves have been highlighted as green tiles, or orange tiles for rooms.\n");
         GUI.redraw();
@@ -474,7 +470,7 @@ public class Game {
 
         // If endTurn is called, and 1 player is left.
         if (validPlayers.size() == 1) {
-            GUI.log(currentPlayer.toString()+" has won by default, as they are the only player left!\n");
+            GUI.log(currentPlayer.toString() + " has won by default, as they are the only player left!\n");
             getBoard().clearValidRoomsAndTiles();
             GUI.redraw();
             isRunning = false;
@@ -483,9 +479,9 @@ public class Game {
         }
         // This if-statement is called most of the time.
         if (currentPlayer.canAccuse()) {
-            GUI.log(currentPlayer.getName()+" has ended their turn.\n");
+            GUI.log(currentPlayer.getName() + " has ended their turn.\n");
         } else {    // Only called right after when it rolls back around to a player who has lost.
-            GUI.log("\n"+currentPlayer.getName()+" cannot play any more, as they have made a failed accusation.\n");
+            GUI.log("\n" + currentPlayer.getName() + " cannot play any more, as they have made a failed accusation.\n");
         }
 
         Player lastPlayer = currentPlayer;
@@ -515,6 +511,7 @@ public class Game {
     public List<Card> getCards() {
         return cards;
     }
+
     public Map<String, Player> getPlayerMap() {
         return this.players;
     }
@@ -530,17 +527,21 @@ public class Game {
     public Player getMurderer() {
         return murderer;
     }
+
     public Weapon getMurderWeapon() {
         return murderWeapon;
     }
+
     public Room getMurderRoom() {
         return murderRoom;
     }
 
-    public Player getCurrentPlayer() {return currentPlayer;}
+    public Player getCurrentPlayer() {
+        return currentPlayer;
+    }
 
     public int[] getDice() {
-        return new int[] {die1, die2};
+        return new int[]{die1, die2};
     }
 
 }

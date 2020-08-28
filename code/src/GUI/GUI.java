@@ -111,6 +111,7 @@ public class GUI {
             public void mouseEntered(MouseEvent e) {
                 endTurnButton.setBorder(BorderFactory.createLineBorder(Color.blue));
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 endTurnButton.setBorder(BorderFactory.createLineBorder(Color.black));
@@ -133,6 +134,7 @@ public class GUI {
             public void mouseEntered(MouseEvent e) {
                 suggestionButton.setBorder(BorderFactory.createLineBorder(Color.blue));
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 suggestionButton.setBorder(BorderFactory.createLineBorder(Color.black));
@@ -156,6 +158,7 @@ public class GUI {
             public void mouseEntered(MouseEvent e) {
                 accusationButton.setBorder(BorderFactory.createLineBorder(Color.blue));
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 accusationButton.setBorder(BorderFactory.createLineBorder(Color.black));
@@ -212,8 +215,9 @@ public class GUI {
         frame.setVisible(true);
     }
 
-    public static int getBoardComponentWidth() { return boardComponent.getWidth(); }
-    public static int getBoardComponentHeight() { return boardComponent.getHeight(); }
+    }
+
+    public static int getBoardComponentHeight() {
 
     class GameBoardComponent extends JComponent {
 
@@ -230,10 +234,12 @@ public class GUI {
     class GameBoardMouseListener implements MouseListener {
 
         @Override
-        public void mouseClicked(MouseEvent e) {}
+        public void mouseClicked(MouseEvent e) {
+        }
 
         @Override
-        public void mousePressed(MouseEvent e) {}
+        public void mousePressed(MouseEvent e) {
+        }
 
         @Override
         public void mouseReleased(MouseEvent e) {
@@ -279,10 +285,11 @@ public class GUI {
             DICE_SIZE = (int) (this.getWidth() > this.getHeight() ? this.getHeight() * 0.8 : this.getWidth() * 0.4);
             DICE_TOP = (int) (this.getHeight() * 0.1);
             DICE_LEFT = (int) (this.getWidth() * 0.1);
-            DICE_GAP = (int) (this.getWidth()*0.8 - 2 * DICE_SIZE);
+            DICE_GAP = (int) (this.getWidth() * 0.8 - 2 * DICE_SIZE);
             drawDice((Graphics2D) g);
         }
     }
+
     class CardsComponent extends JComponent {
 
         CardsComponent() {
@@ -294,10 +301,10 @@ public class GUI {
             g.setColor(new Color(0xe1f5fe));
             g.fillRect(0, 0, CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT);
 
-            int verticalSpace = (int) (this.getWidth()/2 - 0.05 * this.getWidth());
-            int horizontalSpace = (int) (this.getWidth()/3 - 0.03 * this.getWidth());
+            int verticalSpace = (int) (this.getWidth() / 2 - 0.05 * this.getWidth());
+            int horizontalSpace = (int) (this.getWidth() / 3 - 0.03 * this.getWidth());
 
-            System.out.println(verticalSpace + " " + horizontalSpace);
+            //System.out.println(verticalSpace + " " + horizontalSpace);
 
             // TODO: Fix this. Cards have 16:11:1 ratio - Height:Width:Padding
 
@@ -316,7 +323,7 @@ public class GUI {
         int x = CARDS_LEFT + (index % 3) * (CARD_WIDTH + CARD_OUTER_PADDING);
         int y = CARDS_TOP + (index < 3 ? 0 : 1) * (CARD_HEIGHT + CARD_OUTER_PADDING);
         Rectangle iconArea = new Rectangle(x + CARD_INNER_PADDING, y + CARD_INNER_PADDING, CARD_WIDTH -
-                2 * CARD_INNER_PADDING, CARD_HEIGHT - 4*CARD_INNER_PADDING);
+                2 * CARD_INNER_PADDING, CARD_HEIGHT - 4 * CARD_INNER_PADDING);
 
         // if there's no card to be drawn here, draw outline and return
         if (card == null) {
@@ -334,14 +341,14 @@ public class GUI {
         Image icon = card.getIcon();
         int iconXOffset = (CARD_WIDTH - icon.getWidth(null)) / 2;
         int iconYOffset = CARD_INNER_PADDING + (iconArea.height - icon.getHeight(null)) / 2;
-        g.drawImage(icon, x + iconXOffset, y + iconYOffset,null);
+        g.drawImage(icon, x + iconXOffset, y + iconYOffset, null);
 
         String cardName = card.getName();
         Font font = new Font("SansSerif", Font.BOLD, 13);
         FontMetrics fontMetrics = g.getFontMetrics(font);
         int textXOffset = (CARD_WIDTH - fontMetrics.stringWidth(cardName)) / 2;
         g.setFont(font);
-        g.drawString(cardName, x + textXOffset, y + CARD_HEIGHT-CARD_OUTER_PADDING);
+        g.drawString(cardName, x + textXOffset, y + CARD_HEIGHT - CARD_OUTER_PADDING);
     }
 
     public void redraw() {
@@ -488,7 +495,7 @@ public class GUI {
                     textField.setText("");
 
                     players.put(button.getActionCommand(), playerName);
-                    gameLog+=("Player "+playerCount.get()+" ("+playerName+") selected "+button.getActionCommand()+"\n");
+                    gameLog += ("Player " + playerCount.get() + " (" + playerName + ") selected " + button.getActionCommand() + "\n");
 
                     if (playerCount.getAndSet(playerCount.get() + 1) >= numPlayers) {
                         game.startGame(players);
@@ -545,9 +552,10 @@ public class GUI {
                 murderRoomString = key;
             }
         }
-        gameLog+=("Murderer: "+murdererString+"\n");
-        gameLog+=("Weapon: "+murderWeaponString+"\n");
-        gameLog+=("Room: "+murderRoomString+"\n");
+        log("\nDEBUG: Murder Circumstances:\n");
+        log("Murderer: " + murdererString + "\n");
+        log("Weapon: " + murderWeaponString + "\n");
+        log("Room: " + murderRoomString + "\n");
     }
 
     public void getAccusationCircumstances(JFrame parentFrame) {
@@ -599,18 +607,18 @@ public class GUI {
         // add the selected player when button is pressed
         accuseButton.addActionListener(e -> {
 
-            gameLog+=(game.getCurrentPlayer().getName()+" chose to accuse: ");
+            gameLog += ("\n" + game.getCurrentPlayer().getName() + " chose to accuse: ");
             String accSuspect = (String) suspectComboBox.getSelectedItem();
             String accWeapon = (String) weaponComboBox.getSelectedItem();
             String accRoom = (String) roomComboBox.getSelectedItem();
-            gameLog+=(accSuspect+", ");
-            gameLog+=(accWeapon+", ");
-            gameLog+=(accRoom+"\n");
+            gameLog += (accSuspect + ", ");
+            gameLog += (accWeapon + ", ");
+            gameLog += (accRoom + "\n");
 
             if (game.checkAccusationIsTrue(accSuspect, accWeapon, accRoom)) {
-                log("Oops, that was not correct, "+game.getCurrentPlayer().getName()+" can no longer suggest/accuse\n");
+                log("\nOops, that was not correct, " + game.getCurrentPlayer().getName() + " can no longer suggest/accuse\n");
             } else {
-                log("Congratulations to player "+game.getCurrentPlayer().getName()+", you won!\n");
+                log("Congratulations to player " + game.getCurrentPlayer().getName() + ", you won!\n");
             }
 
             dialog.setVisible(false);
@@ -662,19 +670,19 @@ public class GUI {
             dialog.add(suggestButton);
 
             suggestButton.addActionListener(e -> {
-                gameLog+=("Player "+game.getCurrentPlayer().getName()+" chose to suggest:\n");
+                gameLog += ("\n" + game.getCurrentPlayer().getName() + " chose to suggest:\n");
                 String susSuspect = (String) suspectComboBox.getSelectedItem();
                 String susWeapon = (String) weaponComboBox.getSelectedItem();
                 String susRoom = sugRoom.getName();
 
-                gameLog+=(susSuspect+", ");
-                gameLog+=(susWeapon+", ");
-                gameLog+=(susRoom+"\n");
+                gameLog += (susSuspect + ", ");
+                gameLog += (susWeapon + ", ");
+                gameLog += (susRoom + "\n\n");
 
                 if (game.canRefuteSuggestion(susSuspect, susWeapon, susRoom)) {
-                    log("You may make an accusation before ending your turn.\n");
+                    log("\nYou may make an accusation before ending your turn.\n");
                 } else {
-                    log("The Suggestion was unable to be refuted by the other players.\n");
+                    log("\nThe Suggestion was unable to be refuted by the other players.\n");
                 }
 
                 dialog.setVisible(false);
@@ -684,13 +692,14 @@ public class GUI {
             // otherwise some things aren't visible
             dialog.setVisible(true);
         } else {      // Player is not in a room
-            gameLog+=("You are not in a room!\n");
+            gameLog += ("You are not in a room!\n");
         }
 
     }
 
     /**
      * Adds information to game log
+     *
      * @param string The info to add
      */
     public void log(String string) {
@@ -698,69 +707,92 @@ public class GUI {
     }
 
     public void refute(Player refuter, String suggestedPlayer, String suggestedWeapon, String suggestedRoom, boolean failed) {
-        String[] refutableCards = {suggestedPlayer, suggestedWeapon, suggestedRoom};
         List<Card> refuterCards = refuter.getCards();
+        String name = refuter.getName();
 
         if (!failed) {
-            gameLog += (refuter.getName()+" is able to refute the suggestion.\n");
-        }
-        else {
-            gameLog += (refuter.getName()+" chose a card they did not hold! Please choose again.\n");
+            gameLog += ("\n" + name + " is able to refute the suggestion.\n");
+        } else {
+            gameLog += (name + " chose a card they did not hold! Please choose again.\n");
         }
 
-        JDialog dialog = new JDialog(frame, "Choose Card to refute", true);
-        dialog.setSize(400, 400);
+        JDialog dialog = new JDialog(frame, name + "Choose Card to Refute", true);
+        dialog.setSize(400, 200);
         dialog.setLayout(null);
 
         // text at the top
-        JLabel title = new JLabel("Choose card to refute for "+game.getCurrentPlayer().getName()+"'s suggestion:");
-        title.setBounds(30, 10, 250, 25);
+        JLabel title = new JLabel(name + " is able to refute " + game.getCurrentPlayer().getName() + "'s suggestion");
+        title.setBounds(30, 10, 350, 25);
         dialog.add(title);
 
         // a refute button
         JButton refuteButton = new JButton("Refute");
-        refuteButton.setBounds(30, 260, 100, 25);
-        refuteButton.setEnabled(false);
+        refuteButton.setBounds(30, 110, 100, 25);
+        refuteButton.setEnabled(true);
         dialog.add(refuteButton);
 
-        int y = 10;
-        ButtonGroup buttonGroup = new ButtonGroup();
-        for (String card : refutableCards) {
-            JRadioButton radioButton = new JRadioButton(card);
-            radioButton.addActionListener(e -> refuteButton.setEnabled(true));
-            radioButton.setActionCommand(card);  // it will return this String
-            radioButton.setBounds(30, y += 25, 120, 25);
-            buttonGroup.add(radioButton);
-            dialog.add(radioButton);
-        }
+        JRadioButton characterButton = new JRadioButton(suggestedPlayer);
+        characterButton.setBounds(30, 35, 100, 25);
+        characterButton.setMnemonic(KeyEvent.VK_C);
+        characterButton.setActionCommand(suggestedPlayer);
+        characterButton.setSelected(true);
+        dialog.add(characterButton);
+
+        JRadioButton weaponButton = new JRadioButton(suggestedWeapon);
+        weaponButton.setBounds(30, 60, 100, 25);
+        weaponButton.setMnemonic(KeyEvent.VK_W);
+        weaponButton.setActionCommand(suggestedWeapon);
+        dialog.add(weaponButton);
+
+        JRadioButton roomButton = new JRadioButton(suggestedRoom);
+        roomButton.setBounds(30, 85, 100, 25);
+        roomButton.setMnemonic(KeyEvent.VK_R);
+        roomButton.setActionCommand(suggestedRoom);
+        dialog.add(roomButton);
+
+        ButtonGroup group = new ButtonGroup();
+        group.add(characterButton);
+        group.add(weaponButton);
+        group.add(roomButton);
 
         // Checks to see if Refuter owns the chosen card
         refuteButton.addActionListener(e -> {
-                if (refuteButton.isSelected()) {
-                        String refuteChoice = refuteButton.getActionCommand();
-                        gameLog += (refuter.getName() + " chose to refute: " + refuteChoice + "\n");
-                        // If Refuter owns their refute choice as a Player card.
-                        if (refuterCards.contains(game.getPlayerMap().get(refuteChoice))) {
-                            gameLog += (refuter.getName() + " refuted the suggestion with Player card: " + refuteChoice);
-                            return;
-                        }
-                        // If Refuter owns their refute choice as a Weapon card.
-                        else if (refuterCards.contains(game.getWeaponMap().get(refuteChoice))) {
-                            gameLog += (refuter.getName() + " refuted the suggestion with Weapon card: " + refuteChoice);
-                            return;
-                        }
-                        // If Refuter owns their refute choice as a Player card.
-                        else if (refuterCards.contains(game.getRoomMap().get(refuteChoice))) {
-                            gameLog += (refuter.getName() + " refuted the suggestion with Room card: " + refuteChoice);
+            if (characterButton.isSelected()) {
+                String refuteChoice = characterButton.getActionCommand();
+                // If Refuter owns their refute choice as a Player card.
+                if (refuterCards.contains(game.getPlayerMap().get(refuteChoice))) {
+                    gameLog += ("\n" + name + " refuted the suggestion with Player card: " + refuteChoice + "\n");
+                    dialog.setVisible(false);
+                    dialog.dispose();
+                    return;
+                }
+                refute(refuter, suggestedPlayer, suggestedWeapon, suggestedRoom, true);
+            } else if (weaponButton.isSelected()) {
+                String refuteChoice = weaponButton.getActionCommand();
+                // If Refuter owns their refute choice as a Weapon card.
+                if (refuterCards.contains(game.getWeaponMap().get(refuteChoice))) {
+                    gameLog += ("\n" + name + " refuted the suggestion with Weapon card: " + refuteChoice + "\n");
+                    dialog.setVisible(false);
+                    dialog.dispose();
+                    return;
+                }
+                refute(refuter, suggestedPlayer, suggestedWeapon, suggestedRoom, true);
+            } else if (roomButton.isSelected()) {
+                String refuteChoice = roomButton.getActionCommand();
+                // If Refuter owns their refute choice as a Player card.
+                if (refuterCards.contains(game.getRoomMap().get(refuteChoice))) {
+                    gameLog += ("\n" + name + " refuted the suggestion with Room card: " + refuteChoice + "\n");
+                    dialog.setVisible(false);
+                    dialog.dispose();
+                    return;
+                }
+                // TODO: Delete this dialog.dispose/setvisible code, and add a way to delete this dialog.
+                dialog.setVisible(false);
+                dialog.dispose();
+                refute(refuter, suggestedPlayer, suggestedWeapon, suggestedRoom, true);
+            }
 
-                            return;
-                        }
-                        // Error: Player chose a card they do not hold.
-                        else {
-                            refute(refuter, suggestedPlayer, suggestedWeapon, suggestedRoom, true);
-                        }
-                    }
-            });
+        });
         // NOTE: it seems to work better putting this at the end
         // otherwise some things aren't visible
         dialog.setVisible(true);
@@ -842,21 +874,27 @@ public class GUI {
 
     public boolean[] getDots(int value) {
         switch (value) {
-            case 1: return new boolean[]{false, false, false, false, true, false, false, false, false};
-            case 2: return new boolean[]{false, false, true, false, false, false, true, false, false};
-            case 3: return new boolean[]{false, false, true, false, true, false, true, false, false};
-            case 4: return new boolean[]{true, false, true, false, false, false, true, false, true};
-            case 5: return new boolean[]{true, false, true, false, true, false, true, false, true};
-            case 6: return new boolean[]{true, false, true, true, false, true, true, false, true};
+            case 1:
+                return new boolean[]{false, false, false, false, true, false, false, false, false};
+            case 2:
+                return new boolean[]{false, false, true, false, false, false, true, false, false};
+            case 3:
+                return new boolean[]{false, false, true, false, true, false, true, false, false};
+            case 4:
+                return new boolean[]{true, false, true, false, false, false, true, false, true};
+            case 5:
+                return new boolean[]{true, false, true, false, true, false, true, false, true};
+            case 6:
+                return new boolean[]{true, false, true, true, false, true, true, false, true};
             default:
-                return new boolean[] {true, true, true, true, true, true, true, true, true};
+                return new boolean[]{true, true, true, true, true, true, true, true, true};
         }
     }
 
     public void drawDie(int top, int left, int value, Graphics2D g) {
         int INNER_PADDING = DICE_SIZE / 4;
         int DOT_RADIUS = DICE_SIZE / 12;
-        int step = (DICE_SIZE - 2*INNER_PADDING) / 2;
+        int step = (DICE_SIZE - 2 * INNER_PADDING) / 2;
 
         g.setColor(Color.WHITE);
         g.fillRect(left, top, DICE_SIZE, DICE_SIZE);
@@ -866,8 +904,8 @@ public class GUI {
         boolean[] isDot = getDots(value);
         int x = left + INNER_PADDING;
         int y = top + INNER_PADDING;
-        for (int i=0; i<9; i++) {
-            if (i != 0 && i%3==0) {
+        for (int i = 0; i < 9; i++) {
+            if (i != 0 && i % 3 == 0) {
                 y += step;
                 x = left + INNER_PADDING;
             }
