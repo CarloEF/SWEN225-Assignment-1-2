@@ -113,6 +113,10 @@ public class Game {
     private Queue<Player> playerQueue = new ArrayDeque<Player>();
     private ArrayList<Player> validPlayers = new ArrayList<Player>();
 
+    // the initial values on the dice
+    int die1 = diceRoll();
+    int die2 = diceRoll();
+
     boolean isRunning = true;
 
     //get all input from this scanner
@@ -409,16 +413,16 @@ public class Game {
 
     public void initializeTurn() {
         GUI.log(currentPlayer.getName()+"'s turn: ");
-        int step1 = diceRoll();
-        int step2 = diceRoll();
-        int stepNum = step1 + step2;       // Should be shown in UI dice
+        die1 = diceRoll();
+        die2 = diceRoll();
+        int stepNum = die1 + die2;       // Should be shown in UI dice
         int playerX = currentPlayer.getTile().getX() + 1;
         int playerY = BOARD_HEIGHT - currentPlayer.getTile().getY();
 
         // Gets all valid tiles and rooms the player can go to and puts them into the sets
         getBoard().getValidMoves(stepNum, currentPlayer);
 
-        GUI.log("They rolled a "+step1+" and a "+step2+".\n");
+        GUI.log("They rolled a "+die1+" and a "+die2+".\n");
         // Possibly remove:
         // gameLog+=("Your possible moves have been highlighted as green tiles, or orange tiles for rooms.\n");
         GUI.redraw();
@@ -495,5 +499,9 @@ public class Game {
     }
 
     public Player getCurrentPlayer() {return currentPlayer;}
+
+    public int[] getDice() {
+        return new int[] {die1, die2};
+    }
 
 }

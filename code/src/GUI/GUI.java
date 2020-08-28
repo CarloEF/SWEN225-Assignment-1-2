@@ -18,8 +18,12 @@ public class GUI {
     public static int CURRENT_WINDOW_HEIGHT = 720;
 
     // the top/left position on screen where cards are drawn
-    public static int CARDS_LEFT = 600;
-    public static int CARDS_TOP = 360;
+    public static final int CARDS_LEFT = 600;
+    public static final int CARDS_TOP = 360;
+
+    public static final int DICE_SIZE = 80;
+    public static final int DICE_TOP = 30;
+    public static final int DICE_LEFT = 630;
 
     private String gameLog = "";
 
@@ -92,8 +96,8 @@ public class GUI {
         protected void paintComponent(Graphics g) {
             game.draw((Graphics2D) g);
             game.getBoard().drawValidTiles((Graphics2D) g);
-            // TODO: reinstate this when drawCards displays properly
             // drawCards((Graphics2D) g);
+            drawDice((Graphics2D)g);
         }
     }
 
@@ -632,6 +636,51 @@ public class GUI {
         // Add scrolling pane to dialog box & display box
         rules.add(scroll);
         rules.setVisible(true);
+    }
+
+    public void drawDice(Graphics2D g) {
+        drawDie(DICE_TOP, DICE_LEFT, game.getDice()[0], g);
+        drawDie(DICE_TOP, DICE_LEFT + DICE_SIZE + 20, game.getDice()[1], g);
+    }
+
+    public boolean[] getDots(int value) {
+        switch (value) {
+            case 1: return new boolean[]{false, false, false, false, true, false, false, false, false};
+            case 2: return new boolean[]{false, false, true, false, false, false, true, false, false};
+            case 3: return new boolean[]{false, false, true, false, true, false, true, false, false};
+            case 4: return new boolean[]{true, false, true, false, false, false, true, false, true};
+            case 5: return new boolean[]{true, false, true, false, true, false, true, false, true};
+            case 6: return new boolean[]{true, false, true, true, false, true, true, false, true};
+            default:
+                return new boolean[] {true, true, true, true, true, true, true, true, true};
+        }
+    }
+
+    public void drawDie(int top, int left, int value, Graphics2D g) {
+        int INNER_PADDING = DICE_SIZE / 4;
+        int DOT_RADIUS = DICE_SIZE / 12;
+        int step = (DICE_SIZE - 2*INNER_PADDING) / 2;
+
+        g.setColor(Color.WHITE);
+        g.fillRect(left, top, DICE_SIZE, DICE_SIZE);
+        g.setColor(Color.BLACK);
+        g.drawRect(left, top, DICE_SIZE, DICE_SIZE);
+
+        boolean[] isDot = getDots(value);
+        int x = left + INNER_PADDING;
+        int y = top + INNER_PADDING;
+        for (int i=0; i<9; i++) {
+            if (i != 0 && i%3==0) {
+                y += step;
+                x = left + INNER_PADDING;
+            }
+
+            if (isDot[i]) {
+                g.fillOval(x - DOT_RADIUS, y - DOT_RADIUS, DOT_RADIUS * 2, DOT_RADIUS * 2);
+            }
+
+            x += step;
+        }
     }
 
     public void doMouse() {
