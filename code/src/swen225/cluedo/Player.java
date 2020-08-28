@@ -10,9 +10,9 @@ import java.util.ArrayList;
 public class Player implements CluedoObject {
 	private List<Card> hand;
 	private String name;
-	private String tileValue;
 	private String username;	// the name of the person controlling this player (or null)
 	private Tile tile;
+	private Color colour;
 	
 	private boolean allowedAccuse = true;
 
@@ -23,9 +23,9 @@ public class Player implements CluedoObject {
 	 * @param name
 	 * @param tile
 	 */
-	public Player(String name, String tileValue, String username) {
+	public Player(String name, Color colour, String username) {
 		this.name = name;
-		this.tileValue = tileValue;
+		this.colour = colour;
 		this.username = username;
 		this.hand = new ArrayList<Card>();
 		this.tile = null;
@@ -35,6 +35,17 @@ public class Player implements CluedoObject {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void draw(Graphics2D g) {
+		int tileTop = Board.TOP + tile.getY() * Board.TILE_SIZE;
+		int tileLeft = Board.LEFT + tile.getX() * Board.TILE_SIZE;
+
+		g.setColor(colour);
+		g.fillOval(tileLeft, tileTop, Board.TILE_SIZE, Board.TILE_SIZE);
+
+		g.setColor(Color.BLACK);
+		g.drawOval(tileLeft, tileTop, Board.TILE_SIZE, Board.TILE_SIZE);
 	}
 	
 	/**
@@ -47,10 +58,6 @@ public class Player implements CluedoObject {
 	
 	/**
 	 * Gets the cards a player can use to refute a murder suggestion
-	 * @param murderSugg
-	 * @param weaponSugg
-	 * @param roomSugg
-	 * @return
 	 */
 	public List<Card> getRefutes(Player murdererSugg, Weapon weaponSugg, Room roomSugg) {
 		List<Card> refuteCards = new ArrayList<Card>();
@@ -140,6 +147,6 @@ public class Player implements CluedoObject {
 	 * Returns the tile value
 	 */
 	public String toString() {
-		return tileValue;
+		return name;
 	}
 }

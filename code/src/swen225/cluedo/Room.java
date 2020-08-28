@@ -20,18 +20,15 @@ public class Room implements Card {
 	private Set<Tile> exitTiles;
 	
 	private String name;
-	private String tileValue;
 
 	private static Image icon;
 	
 	/**
 	 * Constructs a room
 	 * @param name
-	 * @param tileValue
 	 */
-	public Room(String name, String tileValue) {
+	public Room(String name) {
 		this.name = name;
-		this.tileValue = tileValue;
 		tiles = new ArrayList<RoomTile>();
 		exitTiles = new HashSet<Tile>();
 
@@ -100,6 +97,6 @@ public class Room implements Card {
 	 * @return tile value
 	 */
 	public String toString() {
-		return tileValue;
+		return name;
 	}
 }

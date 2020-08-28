@@ -151,6 +151,10 @@ public class Game {
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, width, height);
         board.draw(g);
+
+        for (Player player : players.values()) {
+            player.draw(g);
+        }
     }
 
     /**
@@ -158,30 +162,29 @@ public class Game {
      */
     private void initCards() {
 
-        addPlayer(new Player("Miss Scarlett", "S", null));
-        addPlayer(new Player("Col. Mustard", "M", null));
-        addPlayer(new Player("Mrs. White", "W", null));
-        addPlayer(new Player("Mr. Green", "G", null));
-        addPlayer(new Player("Mrs. Peacock", "P", null));
-        addPlayer(new Player("Prof. Plum", "p", null));
+        addPlayer(new Player("Miss Scarlett", new Color(0xFFB71C1C), null));
+        addPlayer(new Player("Col. Mustard", new Color(0xFFFFD600), null));
+        addPlayer(new Player("Mrs. White", Color.WHITE, null));
+        addPlayer(new Player("Mr. Green", new Color(0xFF33691E),null));
+        addPlayer(new Player("Mrs. Peacock", new Color(0xFF0D47A1), null));
+        addPlayer(new Player("Prof. Plum", new Color(0xFF311B92), null));
 
-        addWeapon(new Weapon("Candlestick", "C"));
-        addWeapon(new Weapon("Dagger", "D"));
-        addWeapon(new Weapon("Lead Pipe", "L"));
-        addWeapon(new Weapon("Revolver", "R"));
-        addWeapon(new Weapon("Rope", "r"));
-        addWeapon(new Weapon("Spanner", "s"));
+        addWeapon(new Weapon("Candlestick"));
+        addWeapon(new Weapon("Dagger"));
+        addWeapon(new Weapon("Lead Pipe"));
+        addWeapon(new Weapon("Revolver"));
+        addWeapon(new Weapon("Rope"));
+        addWeapon(new Weapon("Spanner"));
 
-        addRoom(new Room("Kitchen", "K"));
-        addRoom(new Room("Ball Room", "B"));
-        addRoom(new Room("Conservatory", "C"));
-        addRoom(new Room("Billiard Room", "b"));
-        addRoom(new Room("Library", "L"));
-        addRoom(new Room("Study", "S"));
-        addRoom(new Room("Hall", "H"));
-        addRoom(new Room("Lounge", "l"));
-        addRoom(new Room("Dining Room", "D"));
-
+        addRoom(new Room("Kitchen"));
+        addRoom(new Room("Ball Room"));
+        addRoom(new Room("Conservatory"));
+        addRoom(new Room("Billiard Room"));
+        addRoom(new Room("Library"));
+        addRoom(new Room("Study"));
+        addRoom(new Room("Hall"));
+        addRoom(new Room("Lounge"));
+        addRoom(new Room("Dining Room"));
     }
 
     /**
@@ -492,10 +495,6 @@ public class Game {
     }
     public Room getMurderRoom() {
         return murderRoom;
-    }
-
-    public List<Player> getHumanPlayers() {
-        return humanPlayers;
     }
 
     public Player getCurrentPlayer() {return currentPlayer;}

@@ -11,7 +11,6 @@ import java.io.IOException;
  */
 public class Weapon implements CluedoObject {
 	private String name;
-	private String tileValue;
 	//should only ever be a RoomTile
 	private Tile tile;
 
@@ -22,9 +21,8 @@ public class Weapon implements CluedoObject {
 	 * @param name
 	 * @param tile
 	 */
-	public Weapon(String name, String tileValue) {
+	public Weapon(String name) {
 		this.name = name;
-		this.tileValue = tileValue;
 		this.tile = null;
 
 		try {
@@ -68,11 +66,11 @@ public class Weapon implements CluedoObject {
 		newTile.setObject(this);
 		tile = newTile;
 	}
-	
+
 	/**
 	 * This weapon's representation on the board
 	 */
 	public String toString() {
-		return tileValue;
+		return name;
 	}
 }

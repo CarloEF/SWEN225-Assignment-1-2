@@ -46,6 +46,10 @@ public class Board {
         else
             TILE_SIZE = height / 25;
 
+        // fill in behind the board so that cellar looks solid
+        g.setColor(Color.GRAY);
+        g.fillRect(LEFT + 2*TILE_SIZE, TOP + 2*TILE_SIZE, TILE_SIZE * (board.length - 4), TILE_SIZE * (board[0].length - 4));
+
         g.setColor(Color.WHITE);
         for (int row = 0; row < board[0].length; row++) {
             for (int col = 0; col < board.length; col++) {
@@ -57,15 +61,25 @@ public class Board {
                 if (tile instanceof InaccessibleTile)
                     continue;
 
-                if (tile instanceof HallwayTile) {
+                if (validTiles.contains(tile)) {
+                    g.setColor(Color.GREEN);
+                } else if (tile instanceof HallwayTile) {
                     g.setColor(Color.LIGHT_GRAY);
-                    g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                    g.setColor(Color.GRAY);
-                    g.drawRect(x, y, TILE_SIZE, TILE_SIZE);
                 } else if (tile instanceof RoomTile) {
                     g.setColor(Color.GRAY);
-                    g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                    g.setColor(Color.LIGHT_GRAY);
+                }
+
+                for (Room room : validRooms) {
+                    if (room.getTiles().contains(tile)) {
+                        g.setColor(Color.GREEN);
+                    }
+                }
+
+                g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+
+                // do outlines for hallway tiles
+                if (tile instanceof HallwayTile) {
+                    g.setColor(Color.GRAY);
                     g.drawRect(x, y, TILE_SIZE, TILE_SIZE);
                 }
 
@@ -82,83 +96,6 @@ public class Board {
                     g.drawLine(x + TILE_SIZE, y, x + TILE_SIZE, y + TILE_SIZE);
 
                 g.setStroke(new BasicStroke(1)); // set the stroke back to normal
-            }
-        }
-    }
-
-    public void drawValidTiles(Graphics2D g) {
-
-        int width = GUI.CURRENT_WINDOW_WIDTH;
-        int height = GUI.CURRENT_WINDOW_HEIGHT - 25;
-
-        if (width < height)
-            TILE_SIZE = width / 24;
-        else
-            TILE_SIZE = height / 25;
-
-        g.setColor(Color.WHITE);
-        for (int row = 0; row < board[0].length; row++) {
-            for (int col = 0; col < board.length; col++) {
-
-                ArrayList<RoomTile> roomTiles = new ArrayList<RoomTile>();
-                for (Room room : validRooms) {
-                    for (RoomTile tile : room.getTiles()) {
-                        roomTiles.add(tile);
-                    }
-                }
-
-                // Draws valid HallwayTiles
-                if (validTiles.contains(board[col][row])) {
-                    int x = LEFT + col * TILE_SIZE;
-                    int y = TOP + row * TILE_SIZE;
-                    Tile tile = board[col][row];
-
-                    g.setColor(Color.GREEN);
-                    g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                    g.setColor(Color.GRAY);
-                    g.drawRect(x, y, TILE_SIZE, TILE_SIZE);
-
-                    // draw walls as thicker lines
-                    g.setColor(Color.BLACK);
-                    g.setStroke(new BasicStroke(3));
-                    if (tile.hasDownWall())
-                        g.drawLine(x, y + TILE_SIZE, x + TILE_SIZE, y + TILE_SIZE);
-                    if (tile.hasUpWall())
-                        g.drawLine(x, y, x + TILE_SIZE, y);
-                    if (tile.hasLeftWall())
-                        g.drawLine(x, y, x, y + TILE_SIZE);
-                    if (tile.hasRightWall())
-                        g.drawLine(x + TILE_SIZE, y, x + TILE_SIZE, y + TILE_SIZE);
-
-                    g.setStroke(new BasicStroke(1)); // set the stroke back to normal
-                }
-
-                // Draws valid RoomTiles
-                else if (roomTiles.contains(board[col][row])) {
-                    int x = LEFT + col * TILE_SIZE;
-                    int y = TOP + row * TILE_SIZE;
-                    Tile tile = board[col][row];
-
-                    g.setColor(Color.ORANGE);
-                    g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                    g.setColor(Color.GRAY);
-                    g.drawRect(x, y, TILE_SIZE, TILE_SIZE);
-
-                    // draw walls as thicker lines
-                    g.setColor(Color.BLACK);
-                    g.setStroke(new BasicStroke(3));
-                    if (tile.hasDownWall())
-                        g.drawLine(x, y + TILE_SIZE, x + TILE_SIZE, y + TILE_SIZE);
-                    if (tile.hasUpWall())
-                        g.drawLine(x, y, x + TILE_SIZE, y);
-                    if (tile.hasLeftWall())
-                        g.drawLine(x, y, x, y + TILE_SIZE);
-                    if (tile.hasRightWall())
-                        g.drawLine(x + TILE_SIZE, y, x + TILE_SIZE, y + TILE_SIZE);
-
-                    g.setStroke(new BasicStroke(1)); // set the stroke back to normal
-                }
-
             }
         }
     }
@@ -182,8 +119,6 @@ public class Board {
                 return;
             }
         }
-
-        System.out.printf("You clicked on [%d, %d]%n", col, row);
     }
 
     public void clearValidRoomsAndTiles() {

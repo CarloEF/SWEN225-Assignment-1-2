@@ -95,7 +95,7 @@ public class GUI {
         @Override
         protected void paintComponent(Graphics g) {
             game.draw((Graphics2D) g);
-            game.getBoard().drawValidTiles((Graphics2D) g);
+//            game.getBoard().drawValidTiles((Graphics2D) g);
             // drawCards((Graphics2D) g);
             drawDice((Graphics2D)g);
         }
