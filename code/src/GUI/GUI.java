@@ -440,7 +440,7 @@ public class GUI {
         // add the selected player when button is pressed
         accuseButton.addActionListener(e -> {
 
-            gameLog+=("You chose: ");
+            gameLog+=(currentPlayer.getName()+" chose to accuse: ");
             String accSuspect = (String) suspectComboBox.getSelectedItem();
             String accWeapon = (String) weaponComboBox.getSelectedItem();
             String accRoom = (String) roomComboBox.getSelectedItem();
@@ -506,13 +506,13 @@ public class GUI {
             dialog.add(suggestButton);
 
             suggestButton.addActionListener(e -> {
-                gameLog+=("Player "+currentPlayer.getName()+" chose:\n");
+                gameLog+=("Player "+currentPlayer.getName()+" chose to suggest:\n");
                 String susSuspect = (String) suspectComboBox.getSelectedItem();
                 String susWeapon = (String) weaponComboBox.getSelectedItem();
                 String susRoom = sugRoom.getName();
 
-                gameLog+=(susSuspect+"\n");
-                gameLog+=(susWeapon+"\n");
+                gameLog+=(susSuspect+", ");
+                gameLog+=(susWeapon+", ");
                 gameLog+=(susRoom+"\n");
 
                 Player suggestedPlayer = game.getPlayerMap().get(susSuspect);
@@ -537,21 +537,18 @@ public class GUI {
                     List<Card> refuteCards = currentRefuter.getRefutes(suggestedPlayer, suggestedWeapon, suggestedRoom);
 
                     if (refuteCards.size() == 0) {
-                        gameLog+=(currentRefuter.getName()+"cannot refute the murder suggestion.\n");
+                        gameLog+=("\n"+currentRefuter.getName()+" cannot refute the murder suggestion.\n");
                     } else {
-                        refute(currentRefuter, susSuspect, susWeapon, susRoom, parentFrame);
+                        refute(currentRefuter, susSuspect, susWeapon, susRoom, parentFrame, false);
                         refuted = true;
                         break;
                     }
-
                 }
 
                 if (!refuted) {
                     gameLog+=("The Suggestion was unable to be refuted by the other players.\n");
-                    gameLog+=("Would you like to make an accusation?\n");
-                    // TODO: Instead of ending the turn, allow the player to make an accusation.
-
                 }
+                gameLog+=("You may make an accusation before ending your turn.\n");
                 dialog.setVisible(false);
             });
 
@@ -564,9 +561,73 @@ public class GUI {
 
     }
 
-    // TODO: Add a JRadioButton for all 3 cards. If the player selects a card they don't have, ask again.
-    public void refute(Player refuter, String suggestedPlayer, String suggestedWeapon, String suggestedRoom, JFrame parentFrame) {
+    public void refute(Player refuter, String suggestedPlayer, String suggestedWeapon, String suggestedRoom, JFrame parentFrame, boolean failed) {
+        String[] refutableCards = {suggestedPlayer, suggestedWeapon, suggestedRoom};
+        List<Card> refuterCards = refuter.getCards();
 
+        if (failed = false) {
+            gameLog += (refuter.getName()+" is able to refute the suggestion.\n");
+        }
+        else {
+            gameLog += (refuter.getName()+" chose a card they did not hold! Please choose again.\n");
+        }
+
+        JDialog dialog = new JDialog(parentFrame, "Choose Card to refute", true);
+        dialog.setSize(400, 400);
+        dialog.setLayout(null);
+
+        // text at the top
+        JLabel title = new JLabel("Choose card to refute for "+currentPlayer.getName()+"'s suggestion:");
+        title.setBounds(30, 10, 250, 25);
+        dialog.add(title);
+
+        // a refute button
+        JButton refuteButton = new JButton("Refute");
+        refuteButton.setBounds(30, 260, 100, 25);
+        refuteButton.setEnabled(false);
+        dialog.add(refuteButton);
+
+        int y = 10;
+        ButtonGroup buttonGroup = new ButtonGroup();
+        for (String card : refutableCards) {
+            JRadioButton radioButton = new JRadioButton(card);
+            radioButton.addActionListener(e -> refuteButton.setEnabled(true));
+            radioButton.setActionCommand(card);  // it will return this String
+            radioButton.setBounds(30, y += 25, 120, 25);
+            buttonGroup.add(radioButton);
+            dialog.add(radioButton);
+        }
+
+        // Checks to see if Refuter owns the chosen card
+        refuteButton.addActionListener(e -> {
+                if (refuteButton.isSelected()) {
+                        String refuteChoice = refuteButton.getActionCommand();
+                        gameLog += (refuter.getName() + " chose to refute: " + refuteChoice + "\n");
+                        // If Refuter owns their refute choice as a Player card.
+                        if (refuterCards.contains(game.getPlayerMap().get(refuteChoice))) {
+                            gameLog += (refuter.getName() + " refuted the suggestion with Player card: " + refuteChoice);
+                            return;
+                        }
+                        // If Refuter owns their refute choice as a Weapon card.
+                        else if (refuterCards.contains(game.getWeaponMap().get(refuteChoice))) {
+                            gameLog += (refuter.getName() + " refuted the suggestion with Weapon card: " + refuteChoice);
+                            return;
+                        }
+                        // If Refuter owns their refute choice as a Player card.
+                        else if (refuterCards.contains(game.getRoomMap().get(refuteChoice))) {
+                            gameLog += (refuter.getName() + " refuted the suggestion with Room card: " + refuteChoice);
+
+                            return;
+                        }
+                        // Error: Player chose a card they do not hold.
+                        else {
+                            refute(refuter, suggestedPlayer, suggestedWeapon, suggestedRoom, parentFrame, true);
+                        }
+                    }
+            });
+        // NOTE: it seems to work better putting this at the end
+        // otherwise some things aren't visible
+        dialog.setVisible(true);
     }
 
     public void initializeTurn() {

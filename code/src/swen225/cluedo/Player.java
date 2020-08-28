@@ -100,7 +100,7 @@ public class Player implements CluedoObject {
 	 * @return player's name
 	 */
 	public String getName() {
-		return name;
+		return username;
 	}
 
 	/**
