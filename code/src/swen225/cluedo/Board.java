@@ -40,8 +40,8 @@ public class Board {
 
     public void draw(Graphics2D g) {
 
-        int width = (int)(GUI.CURRENT_WINDOW_WIDTH*0.6);
-        int height = GUI.CURRENT_WINDOW_HEIGHT - 25;
+        int width = GUI.getBoardComponentWidth();
+        int height = GUI.getBoardComponentHeight();
 
         if (width < height)
             TILE_SIZE = width / 24;

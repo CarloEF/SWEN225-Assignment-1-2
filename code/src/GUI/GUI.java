@@ -19,16 +19,6 @@ public class GUI {
     public static int CURRENT_WINDOW_WIDTH = 960;
     public static int CURRENT_WINDOW_HEIGHT = 720;
 
-    // the top/left position on screen where cards are drawn
-    public static final int CARDS_LEFT = 600;
-    public static final int CARDS_TOP = 360;
-
-    public static final int DICE_SIZE = 80;
-    public static final int DICE_TOP = 30;
-    public static final int DICE_LEFT = 630;
-
-    private String gameLog = "";
-
     /*
      * The window
      */
@@ -43,6 +33,18 @@ public class GUI {
      * Drawing components
      */
     private static JComponent boardComponent, logComponent, cardsComponent, diceComponent;
+
+    // the top/left position on screen where cards are drawn
+    public static final int CARDS_LEFT = 600;
+    public static final int CARDS_TOP = 360;
+
+    public static int DICE_SIZE;
+    public static int DICE_TOP;
+    public static int DICE_LEFT;
+    public static int DICE_GAP;
+
+    private String gameLog = "";
+
 
     private Game game;
 
@@ -82,6 +84,7 @@ public class GUI {
         diceComponent = new DiceComponent();
         diceComponent.setVisible(true);
         diceComponent.setBackground(Color.black);
+        diceComponent.setBorder(BorderFactory.createLineBorder(Color.black));
         // constraints changed for diceComponent
         gbc.gridx = 1;
         gbc.gridheight = 1;
@@ -157,9 +160,12 @@ public class GUI {
 
         // these methods have to be called at the end, otherwise horrific things happen - Ollie
         redraw();
-        //frame.pack();   // make the frame take on the size of the panel
+        frame.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);   // make the frame take on the size of the panel
         frame.setVisible(true);
     }
+
+    public static int getBoardComponentWidth() { return boardComponent.getWidth(); }
+    public static int getBoardComponentHeight() { return boardComponent.getHeight(); }
 
     class GameBoardComponent extends JComponent {
 
@@ -220,8 +226,13 @@ public class GUI {
 
         @Override
         protected void paintComponent(Graphics g) {
-            g.setColor(Color.RED);
+            g.setColor(new Color(0xe1f5fe));
             g.fillRect(0, 0, CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT);
+            DICE_SIZE = (int) (this.getWidth() > this.getHeight() ? this.getHeight() * 0.8 : this.getWidth() * 0.4);
+            DICE_TOP = (int) (this.getHeight() * 0.1);
+            DICE_LEFT = (int) (this.getWidth() * 0.1);
+            DICE_GAP = (int) (this.getWidth()*0.8 - 2 * DICE_SIZE);
+            drawDice((Graphics2D) g);
         }
     }
     class CardsComponent extends JComponent {
@@ -763,7 +774,7 @@ public class GUI {
 
     public void drawDice(Graphics2D g) {
         drawDie(DICE_TOP, DICE_LEFT, game.getDice()[0], g);
-        drawDie(DICE_TOP, DICE_LEFT + DICE_SIZE + 20, game.getDice()[1], g);
+        drawDie(DICE_TOP, DICE_LEFT + DICE_SIZE + DICE_GAP, game.getDice()[1], g);
     }
 
     public boolean[] getDots(int value) {
