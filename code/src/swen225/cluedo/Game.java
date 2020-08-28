@@ -24,8 +24,8 @@ public class Game {
         ROLLING_DICE(0),
         MOVING(1),
         SUGGESTING(2),
-        ACCUSING(3),
-        ENDING_TURN(4),
+        REFUTING(3),
+        ACCUSING(4),
         GAME_OVER(5);
 
         private int value;
@@ -423,6 +423,7 @@ public class Game {
             Player currentRefuter = refuterQueue.poll();
             List<Card> refuteCards = currentRefuter.getRefutes(suggestedPlayer, suggestedWeapon, suggestedRoom);
 
+            goToState(State.REFUTING);
             if (refuteCards.size() == 0) {
                 GUI.log("" + currentRefuter.getName() + " cannot refute the murder suggestion.\n");
             } else {
@@ -435,53 +436,48 @@ public class Game {
     }
 
     public void initializeTurn() {
-        if (state != State.GAME_OVER) {
-            goToState(State.ROLLING_DICE);
-            GUI.log("\n" + currentPlayer.getName() + "'s turn: ");
-            die1 = diceRoll();
-            die2 = diceRoll();
-            int stepNum = die1 + die2;
-
-            // Gets all valid tiles and rooms the player can go to and puts them into the sets
-            getBoard().getValidMoves(stepNum, currentPlayer);
-
-            GUI.log("They rolled a " + die1 + " and a " + die2 + ".\n");
-            // Possibly remove:
-            // gameLog+=("Your possible moves have been highlighted as green tiles, or orange tiles for rooms.\n");
-            GUI.redraw();
-
-            goToState(State.MOVING);
+        if (state == State.GAME_OVER) {
+            return;
         }
+        goToState(State.ROLLING_DICE);
+        GUI.log("\n" + currentPlayer.getName() + "'s turn: ");
+        die1 = diceRoll();
+        die2 = diceRoll();
+        int stepNum = die1 + die2;
+
+        // Gets all valid tiles and rooms the player can go to and puts them into the sets
+        getBoard().getValidMoves(stepNum, currentPlayer);
+
+        GUI.log("They rolled a " + die1 + " and a " + die2 + ".\n");
+        // Possibly remove:
+        // gameLog+=("Your possible moves have been highlighted as green tiles, or orange tiles for rooms.\n");
+        GUI.redraw();
+        goToState(State.MOVING);
     }
 
     public void endTurn() {
 
-        // TODO: is this what we agreed on? or do you not have to make a suggestion?
-        //if (state.value() <= State.SUGGESTING.value()) {
-        //    GUI.log("Cannot end turn without making a suggestion");
-        //    return;
-        //}
         // Currently, turns can always be ended, any time.
 
         // Only allows turns to end while game is still running.
-        if (state != State.GAME_OVER) {
-            goToState(State.ENDING_TURN);
-            // This if-statement is called most of the time.
-            if (currentPlayer.canAccuse()) {
-                GUI.log(currentPlayer.getName() + " has ended their turn.\n");
-            } else {    // Only called right after when it rolls back around to a player who has lost.
-                GUI.log("\n" + currentPlayer.getName() + " cannot play any more, as they have made a failed accusation.\n");
-            }
+        if (state == State.GAME_OVER) {
+            return;
+        }
+        // This if-statement is called most of the time.
+        if (currentPlayer.canAccuse()) {
+            GUI.log(currentPlayer.getName() + " has ended their turn.\n");
+        } else {    // Only called right after when it rolls back around to a player who has lost.
+            GUI.log("\n" + currentPlayer.getName() + " cannot play any more, as they have made a failed accusation.\n");
+        }
 
-            Player lastPlayer = currentPlayer;
-            currentPlayer = playerQueue.poll();
-            playerQueue.add(lastPlayer);
-            getBoard().clearValidRoomsAndTiles();
-            if (currentPlayer.canAccuse()) {
-                initializeTurn();
-            } else {
-                endTurn();
-            }
+        Player lastPlayer = currentPlayer;
+        currentPlayer = playerQueue.poll();
+        playerQueue.add(lastPlayer);
+        getBoard().clearValidRoomsAndTiles();
+        if (currentPlayer.canAccuse()) {
+            initializeTurn();
+        } else {
+            endTurn();
         }
     }
 
@@ -490,7 +486,10 @@ public class Game {
         currentPlayer.setCanAccuse(false);
         // If endTurn is called, and 1 player is left.
         if (validPlayers.size() == 1) {
-            GUI.log(validPlayers.get(0).getName() + " has won by default, as they are the only player left!\n");
+            GUI.log(
+                    "\n--------------------------------------------------\n" +
+                            validPlayers.get(0).getName() + " has won by default, as they are the only player left!" +
+                            "\n--------------------------------------------------\n");
             getBoard().clearValidRoomsAndTiles();
             GUI.redraw();
             goToState(State.GAME_OVER);

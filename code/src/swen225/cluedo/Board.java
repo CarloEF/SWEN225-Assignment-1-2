@@ -114,7 +114,7 @@ public class Board {
 
             if (validTiles.contains(tile)) {
                 player.moveToTile(tile);
-                game.goToState(Game.State.SUGGESTING);
+                game.goToState(Game.State.ACCUSING);
                 return;
             }
             for (Room room : validRooms) {

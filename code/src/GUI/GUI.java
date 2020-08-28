@@ -96,9 +96,6 @@ public class GUI {
         // add diceComponent with constraints to panel
         panel.add(diceComponent, gbc);
 
-        // TODO: Need to ask someone about whether you can Accuse before Suggesting on your turn, or if you must make a
-        //  suggestion whenever you enter a new room, etc. Then enable/disable buttons according to game state.
-
         // sets up an End Turn Button
         JButton endTurnButton = new JButton("End Turn");
         endTurnButton.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -499,7 +496,7 @@ public class GUI {
                     textField.setText("");
 
                     players.put(button.getActionCommand(), playerName);
-                    gameLog += ("Player " + playerCount.get() + " (" + playerName + ") selected " + button.getActionCommand() + "\n");
+                    log("Player " + playerCount.get() + " (" + playerName + ") selected " + button.getActionCommand() + "\n");
 
                     if (playerCount.getAndSet(playerCount.get() + 1) >= numPlayers) {
                         game.startGame(players);
@@ -564,14 +561,10 @@ public class GUI {
 
     public void getAccusationCircumstances(JFrame parentFrame) {
 
-        // TODO: we said they can accuse without suggesting, right?
-        if (game.state != Game.State.SUGGESTING && game.state != Game.State.ACCUSING) {
-            log("Cannot make an accusation right now");
+        // Only allows accusations if Game is not in GAME_OVER State.
+        if (game.state == Game.State.GAME_OVER) {
             return;
         }
-
-        // Only allows accusations if Game is not in GAME_OVER State.
-        if (game.state != Game.State.GAME_OVER) {
             JDialog dialog = new JDialog(parentFrame, "Make an Accusation", true);
             dialog.setSize(400, 400);
             dialog.setLayout(null);
@@ -613,19 +606,22 @@ public class GUI {
             // add the selected player when button is pressed
             accuseButton.addActionListener(e -> {
 
-                gameLog += ("\n" + game.getCurrentPlayer().getName() + " chose to accuse: ");
+                log("\n" + game.getCurrentPlayer().getName() + " chose to accuse: ");
                 String accSuspect = (String) suspectComboBox.getSelectedItem();
                 String accWeapon = (String) weaponComboBox.getSelectedItem();
                 String accRoom = (String) roomComboBox.getSelectedItem();
-                gameLog += (accSuspect + ", ");
-                gameLog += (accWeapon + ", ");
-                gameLog += (accRoom + "\n");
+                log(accSuspect + ", ");
+                log(accWeapon + ", ");
+                log(accRoom + "\n");
 
                 if (!game.checkAccusationIsTrue(accSuspect, accWeapon, accRoom)) {
                     log("\nOops, that was not correct, " + game.getCurrentPlayer().getName() + " can no longer suggest/accuse\n");
                     game.playerLost();
                 } else {
-                    log("Congratulations to player " + game.getCurrentPlayer().getName() + ", you won!\n");
+                    log("\n--------------------------------------------------\n" +
+                            "Congratulations to " + game.getCurrentPlayer().getName() + ", you won!" +
+                            "\n--------------------------------------------------\n");
+                    game.goToState(Game.State.GAME_OVER);
                 }
 
                 dialog.setVisible(false);
@@ -635,78 +631,77 @@ public class GUI {
             // otherwise some things aren't visible
             dialog.setVisible(true);
         }
-    }
 
     private void doGUISuggestion(JFrame parentFrame) {
 
-        // TODO: grey out buttons so they can't suggest
-        if (game.state != Game.State.SUGGESTING) {
-            log("Players must move before suggesting.");
+        // Only allows suggestions if Game is not in GAME_OVER State.
+        if (game.state == Game.State.GAME_OVER) {
             return;
         }
+            // TODO: grey out buttons so they can't suggest
+            if (game.state != Game.State.SUGGESTING) {
+                if (game.getCurrentPlayer().getTile() instanceof RoomTile) {
+                    log("You are not in a room!\n");
+                } else {
+                    log("Players must move before making a suggestion.\n");
+                }
+                return;
+            }
 
-        // Only allows suggestions if Game is not in GAME_OVER State.
-        if (game.state != Game.State.GAME_OVER) {
             JDialog dialog = new JDialog(parentFrame, "Make a Suggestion", true);
             dialog.setSize(400, 400);
             dialog.setLayout(null);
 
-            if (game.getCurrentPlayer().getTile() instanceof RoomTile) {
-                Room sugRoom = ((RoomTile) game.getCurrentPlayer().getTile()).getRoom();
+            Room sugRoom = ((RoomTile) game.getCurrentPlayer().getTile()).getRoom();
 
-                JLabel title = new JLabel("Make a suggestion within the current room: " + sugRoom.getName());
-                title.setBounds(30, 10, 350, 25);
-                dialog.add(title);
+            JLabel title = new JLabel("Make a suggestion within the current room: " + sugRoom.getName());
+            title.setBounds(30, 10, 350, 25);
+            dialog.add(title);
 
-                // combo box to choose a player
-                JLabel suspectLabel = new JLabel("Suspect:");
-                suspectLabel.setBounds(30, 40, 250, 25);
-                dialog.add(suspectLabel);
-                JComboBox<String> suspectComboBox = new JComboBox<>(Card.PLAYERS);
-                suspectComboBox.setBounds(30, 70, 100, 25);
-                dialog.add(suspectComboBox);
+            // combo box to choose a player
+            JLabel suspectLabel = new JLabel("Suspect:");
+            suspectLabel.setBounds(30, 40, 250, 25);
+            dialog.add(suspectLabel);
+            JComboBox<String> suspectComboBox = new JComboBox<>(Card.PLAYERS);
+            suspectComboBox.setBounds(30, 70, 100, 25);
+            dialog.add(suspectComboBox);
 
-                // combo box to choose a weapon
-                JLabel weaponLabel = new JLabel("Weapon:");
-                weaponLabel.setBounds(30, 100, 250, 25);
-                dialog.add(weaponLabel);
-                JComboBox<String> weaponComboBox = new JComboBox<>(Card.WEAPONS);
-                weaponComboBox.setBounds(30, 130, 100, 25);
-                dialog.add(weaponComboBox);
+            // combo box to choose a weapon
+            JLabel weaponLabel = new JLabel("Weapon:");
+            weaponLabel.setBounds(30, 100, 250, 25);
+            dialog.add(weaponLabel);
+            JComboBox<String> weaponComboBox = new JComboBox<>(Card.WEAPONS);
+            weaponComboBox.setBounds(30, 130, 100, 25);
+            dialog.add(weaponComboBox);
 
-                // a Suggest button
-                JButton suggestButton = new JButton("Suggest");
-                suggestButton.setBounds(30, 250, 100, 25);
-                dialog.add(suggestButton);
+            // a Suggest button
+            JButton suggestButton = new JButton("Suggest");
+            suggestButton.setBounds(30, 250, 100, 25);
+            dialog.add(suggestButton);
 
-                suggestButton.addActionListener(e -> {
-                    gameLog += ("\n" + game.getCurrentPlayer().getName() + " chose to suggest:\n");
-                    String susSuspect = (String) suspectComboBox.getSelectedItem();
-                    String susWeapon = (String) weaponComboBox.getSelectedItem();
-                    String susRoom = sugRoom.getName();
+            suggestButton.addActionListener(e -> {
+                log("\n" + game.getCurrentPlayer().getName() + " chose to suggest:\n");
+                String susSuspect = (String) suspectComboBox.getSelectedItem();
+                String susWeapon = (String) weaponComboBox.getSelectedItem();
+                String susRoom = sugRoom.getName();
 
-                    gameLog += (susSuspect + ", ");
-                    gameLog += (susWeapon + ", ");
-                    gameLog += (susRoom + "\n\n");
+                log(susSuspect + ", ");
+                log(susWeapon + ", ");
+                log(susRoom + "\n\n");
 
-                    if (game.canRefuteSuggestion(susSuspect, susWeapon, susRoom)) {
-                        log("\nYou may make an accusation before ending your turn.\n");
-                    } else {
-                        log("\nThe Suggestion was unable to be refuted by the other players.\n");
-                    }
+                if (game.canRefuteSuggestion(susSuspect, susWeapon, susRoom)) {
+                    log("\nYou may make an accusation before ending your turn.\n");
+                } else {
+                    log("\nThe Suggestion was unable to be refuted by the other players.\n");
+                }
+                game.goToState(Game.State.ACCUSING);
+                dialog.setVisible(false);
+            });
 
-                    dialog.setVisible(false);
-                });
-
-                // NOTE: it seems to work better putting this at the end
-                // otherwise some things aren't visible
-                dialog.setVisible(true);
-            } else {      // Player is not in a room
-                gameLog += ("You are not in a room!\n");
-            }
+            // NOTE: it seems to work better putting this at the end
+            // otherwise some things aren't visible
+            dialog.setVisible(true);
         }
-
-    }
 
     /**
      * Adds information to game log
@@ -722,9 +717,9 @@ public class GUI {
         String name = refuter.getName();
 
         if (!failed) {
-            gameLog += ("\n" + name + " is able to refute the suggestion.\n");
+            log("\n" + name + " is able to refute the suggestion.\n");
         } else {
-            gameLog += (name + " chose a card they did not hold! Please choose again.\n");
+            log(name + " chose a card they did not hold! Please choose again.\n");
         }
 
         JDialog dialog = new JDialog(frame, name + "Choose Card to Refute", true);
@@ -772,7 +767,7 @@ public class GUI {
                 String refuteChoice = characterButton.getActionCommand();
                 // If Refuter owns their refute choice as a Player card.
                 if (refuterCards.contains(game.getPlayerMap().get(refuteChoice))) {
-                    gameLog += ("\n" + name + " refuted the suggestion with Player card: " + refuteChoice + "\n");
+                    log("\n" + name + " refuted the suggestion with Player card: " + refuteChoice + "\n");
                     dialog.setVisible(false);
                     dialog.dispose();
                     return;
@@ -782,7 +777,7 @@ public class GUI {
                 String refuteChoice = weaponButton.getActionCommand();
                 // If Refuter owns their refute choice as a Weapon card.
                 if (refuterCards.contains(game.getWeaponMap().get(refuteChoice))) {
-                    gameLog += ("\n" + name + " refuted the suggestion with Weapon card: " + refuteChoice + "\n");
+                    log("\n" + name + " refuted the suggestion with Weapon card: " + refuteChoice + "\n");
                     dialog.setVisible(false);
                     dialog.dispose();
                     return;
@@ -792,12 +787,11 @@ public class GUI {
                 String refuteChoice = roomButton.getActionCommand();
                 // If Refuter owns their refute choice as a Player card.
                 if (refuterCards.contains(game.getRoomMap().get(refuteChoice))) {
-                    gameLog += ("\n" + name + " refuted the suggestion with Room card: " + refuteChoice + "\n");
+                    log("\n" + name + " refuted the suggestion with Room card: " + refuteChoice + "\n");
                     dialog.setVisible(false);
                     dialog.dispose();
                     return;
                 }
-                // TODO: Delete this dialog.dispose/setvisible code, and add a way to delete this dialog.
                 dialog.setVisible(false);
                 dialog.dispose();
                 refute(refuter, suggestedPlayer, suggestedWeapon, suggestedRoom, true);
