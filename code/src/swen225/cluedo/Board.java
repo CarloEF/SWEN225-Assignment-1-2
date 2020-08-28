@@ -19,6 +19,7 @@ public class Board {
     Tile[][] board;
     int width;
     int height;
+    Game game;
 
     Set<Tile> validTiles = new HashSet<Tile>();
     Set<Room> validRooms = new HashSet<Room>();
@@ -29,7 +30,8 @@ public class Board {
      * @param width  of the board
      * @param height of the board
      */
-    public Board(int width, int height) {
+    public Board(Game game, int width, int height) {
+        this.game = game;
         this.width = width;
         this.height = height;
 
@@ -61,19 +63,19 @@ public class Board {
                 if (tile instanceof InaccessibleTile)
                     continue;
 
-                if (validTiles.contains(tile)) {
-                    g.setColor(Color.GREEN);
-                } else if (tile instanceof HallwayTile) {
+                if (tile instanceof HallwayTile) {
                     g.setColor(Color.LIGHT_GRAY);
                 } else if (tile instanceof RoomTile) {
                     g.setColor(Color.GRAY);
                 }
 
-                for (Room room : validRooms) {
-                    if (room.getTiles().contains(tile)) {
+                if (game.state == Game.State.MOVING)
+                    if (validTiles.contains(tile))
                         g.setColor(Color.GREEN);
-                    }
-                }
+                    else
+                        for (Room room : validRooms)
+                            if (room.getTiles().contains(tile))
+                                g.setColor(Color.GREEN);
 
                 g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
@@ -111,11 +113,13 @@ public class Board {
 
         if (validTiles.contains(tile)) {
             player.moveToTile(tile);
+            game.goToState(Game.State.SUGGESTING);
             return;
         }
         for (Room room : validRooms) {
             if (room.getTiles().contains(tile)) {
                 player.moveToRoom(room);
+                game.goToState(Game.State.SUGGESTING);
                 return;
             }
         }
@@ -125,7 +129,6 @@ public class Board {
         validTiles.clear();
         validRooms.clear();
     }
-
 
     /**
      * Moves a player to a tile, assumes all checks have been done
@@ -240,8 +243,6 @@ public class Board {
             board[x][y] = tile;
         }
         scan.close();
-
-        // System.out.println(this);
     }
 
     /**
@@ -269,9 +270,6 @@ public class Board {
 
         validMove(0, diceRoll, visitedTiles);
     }
-
-    Set<Tile> getValidTiles() {return validTiles;}
-    Set<Room> getValidRooms() {return validRooms;}
 
     /**
      * Recursive method to determine whether move is valid
@@ -378,73 +376,6 @@ public class Board {
             return null;
         }
         return board[x][y];
-    }
-
-    /**
-     * Draws the board
-     */
-    public String toString() {
-        // string that contains the board
-        String text = "";
-        for (int y = 0; y < height; y++) {
-            // adds horizontal wall
-            text += "    ";
-            for (int x = 0; x < width; x++) {
-                if (board[x][y].hasUpWall()) {
-                    text += "-";
-                } else {
-                    text += " ";
-                }
-
-                text += " ";
-            }
-            text += "\n";
-
-            // add y coords on left
-            text += (height - y);
-            if (height - y < 10) {
-                text += " ";
-            }
-            text += " ";
-            // adds walls in between tiles
-            for (int x = 0; x < width; x++) {
-                if (board[x][y].hasLeftWall()) {
-                    text += "|";
-                } else {
-                    text += " ";
-                }
-                text += board[x][y];
-            }
-            // adds the walls on the right if they are there
-            if (board[width - 1][y].hasRightWall()) {
-                text += "|";
-            }
-            text += "\n";
-        }
-
-        // adds the walls on the bottom
-        text += "    ";
-        for (int x = 0; x < width; x++) {
-            if (board[x][height - 1].hasDownWall()) {
-                text += "-";
-            } else {
-                text += " ";
-            }
-            text += " ";
-        }
-
-        text += "\n";
-
-        text += "    ";
-        // add numbers on the bottom
-        for (int i = 0; i < width; i++) {
-            if (i + 1 < 10) {
-                text += (i + 1) + " ";
-            } else {
-                text += i + 1;
-            }
-        }
-        return text;
     }
 
 }

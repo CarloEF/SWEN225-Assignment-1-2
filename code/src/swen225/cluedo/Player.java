@@ -46,6 +46,8 @@ public class Player implements CluedoObject {
 
 		g.setColor(Color.BLACK);
 		g.drawOval(tileLeft, tileTop, Board.TILE_SIZE, Board.TILE_SIZE);
+
+
 	}
 	
 	/**

@@ -95,9 +95,6 @@ public class GUI {
         @Override
         protected void paintComponent(Graphics g) {
             game.draw((Graphics2D) g);
-//            game.getBoard().drawValidTiles((Graphics2D) g);
-            // drawCards((Graphics2D) g);
-            drawDice((Graphics2D)g);
         }
     }
 
@@ -164,7 +161,6 @@ public class GUI {
         frame.repaint();
         panel.revalidate();
         panel.repaint();
-        // TODO: Add board.drawValidTiles();
     }
 
     /**
@@ -367,6 +363,12 @@ public class GUI {
 
     public void getAccusationCircumstances(JFrame parentFrame) {
 
+        // TODO: we said they can accuse without suggesting, right?
+        if (game.state != Game.State.SUGGESTING && game.state != Game.State.ACCUSING) {
+            log("Cannot make an accusation right now");
+            return;
+        }
+
         JDialog dialog = new JDialog(parentFrame, "Make an Accusation", true);
         dialog.setSize(400, 400);
         dialog.setLayout(null);
@@ -431,6 +433,12 @@ public class GUI {
     }
 
     private void doGUISuggestion(JFrame parentFrame) {
+
+        // TODO: grey out buttons so they can't suggest
+        if (game.state != Game.State.SUGGESTING) {
+            log("Not allowed to suggest right now");
+            return;
+        }
 
         JDialog dialog = new JDialog(parentFrame, "Make a Suggestion", true);
         dialog.setSize(400, 400);

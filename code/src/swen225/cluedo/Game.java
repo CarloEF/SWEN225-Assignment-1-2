@@ -20,7 +20,24 @@ public class Game {
     public static final int BOARD_WIDTH = 24;
     public static final int BOARD_HEIGHT = 25;
 
-    public enum State {ROLLING_DICE, MOVING, SUGGESTING, ACCUSING};
+    public enum State {
+        ROLLING_DICE(0),
+        MOVING(1),
+        SUGGESTING(2),
+        ACCUSING(3);
+
+        private int value;
+
+        State(int value) {
+            this.value = value;
+        }
+
+        public int value() {
+            return value;
+        }
+    };
+
+    public State state = State.ROLLING_DICE;
 
     //i = inaccessible
     //h = hallway
@@ -129,7 +146,7 @@ public class Game {
      */
     public Game(GUI GUI) {
         cards = new ArrayList<Card>();
-        board = new Board(BOARD_WIDTH, BOARD_HEIGHT);
+        board = new Board(this, BOARD_WIDTH, BOARD_HEIGHT);
 
         players = new LinkedHashMap<>();
         playerList = new ArrayList<Player>();
@@ -155,6 +172,8 @@ public class Game {
         for (Player player : players.values()) {
             player.draw(g);
         }
+
+        GUI.drawDice(g);
     }
 
     /**
@@ -368,6 +387,20 @@ public class Game {
             GUI.drawACard(i < playersCards.size() ? playersCards.get(i) : null, i, g);
     }
 
+    public void goToState(State newState) {
+        state = newState;
+        if (newState == State.ROLLING_DICE) {
+
+        } else if (newState == State.MOVING) {
+
+        } else if (newState == State.SUGGESTING) {
+            board.clearValidRoomsAndTiles();
+            GUI.redraw();
+        } else if (newState == State.ACCUSING) {
+
+        }
+    }
+
     public boolean checkAccusationIsTrue(String accSuspect, String accWeapon, String accRoom) {
         if (players.get(accSuspect) == murderer &&
                 weapons.get(accWeapon) == murderWeapon &&
@@ -415,12 +448,11 @@ public class Game {
     }
 
     public void initializeTurn() {
+        goToState(State.ROLLING_DICE);
         GUI.log(currentPlayer.getName()+"'s turn: ");
         die1 = diceRoll();
         die2 = diceRoll();
         int stepNum = die1 + die2;       // Should be shown in UI dice
-        int playerX = currentPlayer.getTile().getX() + 1;
-        int playerY = BOARD_HEIGHT - currentPlayer.getTile().getY();
 
         // Gets all valid tiles and rooms the player can go to and puts them into the sets
         getBoard().getValidMoves(stepNum, currentPlayer);
@@ -429,9 +461,18 @@ public class Game {
         // Possibly remove:
         // gameLog+=("Your possible moves have been highlighted as green tiles, or orange tiles for rooms.\n");
         GUI.redraw();
+
+        goToState(State.MOVING);
     }
 
     public void endTurn() {
+
+        // TODO: is this what we agreed on? or do you not have to make a suggestion?
+        if (state.value() <= State.SUGGESTING.value()) {
+            GUI.log("Cannot end turn without making a suggestion");
+            return;
+        }
+
         // If endTurn is called, and 1 player is left.
         if (validPlayers.size() == 1) {
             GUI.log(currentPlayer.toString()+" has won by default, as they are the only player left!\n");
