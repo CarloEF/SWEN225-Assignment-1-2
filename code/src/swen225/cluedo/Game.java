@@ -174,6 +174,7 @@ public class Game {
         }
 
         GUI.drawDice(g);
+        drawCards(g);
     }
 
     /**

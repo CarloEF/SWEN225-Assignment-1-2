@@ -42,9 +42,11 @@ public class GUI {
      */
     private static JComponent component;
 
-    private Game game = new Game(this);
+    private Game game;
 
     public GUI() {
+
+        game = new Game(this);
 
         // setup JComponent 
         component = new GameBoardComponent();
@@ -242,6 +244,8 @@ public class GUI {
     }
 
     public void chooseCharacters(JFrame parentFrame) {
+
+        game = new Game(this);
 
         Map<String, String> players = new HashMap<>();
 
