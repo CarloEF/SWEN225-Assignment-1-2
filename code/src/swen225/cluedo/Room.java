@@ -1,5 +1,9 @@
 package swen225.cluedo;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +21,8 @@ public class Room implements Card {
 	
 	private String name;
 	private String tileValue;
+
+	private static Image icon;
 	
 	/**
 	 * Constructs a room
@@ -28,6 +34,12 @@ public class Room implements Card {
 		this.tileValue = tileValue;
 		tiles = new ArrayList<RoomTile>();
 		exitTiles = new HashSet<Tile>();
+
+		try {
+			icon = ImageIO.read(new File("images/room-icon.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -72,6 +84,11 @@ public class Room implements Card {
 	 */
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public Image getIcon() {
+		return icon;
 	}
 
 	public List<RoomTile> getTiles() {

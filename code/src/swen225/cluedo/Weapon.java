@@ -1,5 +1,10 @@
 package swen225.cluedo;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+
 /**
  * Class representing a weapon
  * 
@@ -9,6 +14,8 @@ public class Weapon implements CluedoObject {
 	private String tileValue;
 	//should only ever be a RoomTile
 	private Tile tile;
+
+	private static Image icon;
 	
 	/**
 	 * Constructs a weapon
@@ -19,6 +26,12 @@ public class Weapon implements CluedoObject {
 		this.name = name;
 		this.tileValue = tileValue;
 		this.tile = null;
+
+		try {
+			icon = ImageIO.read(new File("images/weapon-icon.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -35,7 +48,12 @@ public class Weapon implements CluedoObject {
 	public String getName() {
 		return name;
 	}
-	
+
+	@Override
+	public Image getIcon() {
+		return icon;
+	}
+
 	/**
 	 * Moves this weapon to a room
 	 * @param room - the room to move to

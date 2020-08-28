@@ -1,6 +1,7 @@
 package swen225.cluedo;
 
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.*;
@@ -11,11 +12,16 @@ import GUI.GUI;
  * Class representing the board
  */
 public class Board {
+    public static int TILE_SIZE;
+    public static final int TOP = 0;
+    public static final int LEFT = 0;
+
     Tile[][] board;
     int width;
     int height;
 
-    public static int TILE_SIZE;
+    Set<Tile> validTiles = new HashSet<Tile>();
+    Set<Room> validRooms = new HashSet<Room>();
 
     /**
      * Constructs the board
@@ -43,8 +49,8 @@ public class Board {
         g.setColor(Color.WHITE);
         for (int row = 0; row < board[0].length; row++) {
             for (int col = 0; col < board.length; col++) {
-                int x = (col * TILE_SIZE);
-                int y = row * TILE_SIZE;
+                int x = LEFT + col * TILE_SIZE;
+                int y = TOP + row * TILE_SIZE;
 
                 // draw backgrounds of cells
                 Tile tile = board[col][row];
@@ -80,7 +86,7 @@ public class Board {
         }
     }
 
-    public void drawValidTiles(Graphics2D g, Set<Tile> tiles, Set<Room> rooms) {
+    public void drawValidTiles(Graphics2D g) {
 
         int width = GUI.CURRENT_WINDOW_WIDTH;
         int height = GUI.CURRENT_WINDOW_HEIGHT - 25;
@@ -95,16 +101,16 @@ public class Board {
             for (int col = 0; col < board.length; col++) {
 
                 ArrayList<RoomTile> roomTiles = new ArrayList<RoomTile>();
-                for (Room room : rooms) {
+                for (Room room : validRooms) {
                     for (RoomTile tile : room.getTiles()) {
                         roomTiles.add(tile);
                     }
                 }
 
                 // Draws valid HallwayTiles
-                if (tiles.contains(board[col][row])) {
-                    int x = (col * TILE_SIZE);
-                    int y = row * TILE_SIZE;
+                if (validTiles.contains(board[col][row])) {
+                    int x = LEFT + col * TILE_SIZE;
+                    int y = TOP + row * TILE_SIZE;
                     Tile tile = board[col][row];
 
                     g.setColor(Color.GREEN);
@@ -129,8 +135,8 @@ public class Board {
 
                 // Draws valid RoomTiles
                 else if (roomTiles.contains(board[col][row])) {
-                    int x = (col * TILE_SIZE);
-                    int y = row * TILE_SIZE;
+                    int x = LEFT + col * TILE_SIZE;
+                    int y = TOP + row * TILE_SIZE;
                     Tile tile = board[col][row];
 
                     g.setColor(Color.ORANGE);
@@ -155,6 +161,34 @@ public class Board {
 
             }
         }
+    }
+
+    public void doMouse(Player player, MouseEvent e) {
+        if (e.getX() < LEFT || e.getX() > LEFT + board.length*TILE_SIZE) return;
+        if (e.getY() < TOP || e.getY() > TOP + board[0].length*TILE_SIZE) return;
+
+        int col = (e.getX() - LEFT) / TILE_SIZE;
+        int row = (e.getY() - TOP) / TILE_SIZE;
+
+        Tile tile = board[col][row];
+
+        if (validTiles.contains(tile)) {
+            player.moveToTile(tile);
+            return;
+        }
+        for (Room room : validRooms) {
+            if (room.getTiles().contains(tile)) {
+                player.moveToRoom(room);
+                return;
+            }
+        }
+
+        System.out.printf("You clicked on [%d, %d]%n", col, row);
+    }
+
+    public void clearValidRoomsAndTiles() {
+        validTiles.clear();
+        validRooms.clear();
     }
 
 
@@ -280,11 +314,9 @@ public class Board {
      *
      * @param diceRoll   - the number of moves to use, determined by a dice roll
      * @param player     - the player to move
-     * @param validTiles - the set which all the valid tiles are added to
-     * @param validRooms - the set which all the valid rooms are added to
      * @return
      */
-    public void getValidMoves(int diceRoll, Player player, Set<Tile> validTiles, Set<Room> validRooms) {
+    public void getValidMoves(int diceRoll, Player player) {
 
         Tile playerTile = player.getTile();
 
@@ -300,8 +332,11 @@ public class Board {
             visitedTiles.add(playerTile);
         }
 
-        validMove(0, diceRoll, visitedTiles, validTiles, validRooms);
+        validMove(0, diceRoll, visitedTiles);
     }
+
+    Set<Tile> getValidTiles() {return validTiles;}
+    Set<Room> getValidRooms() {return validRooms;}
 
     /**
      * Recursive method to determine whether move is valid
@@ -313,7 +348,7 @@ public class Board {
      * @param validRooms - the set which all the valid rooms are added to
      * @return
      */
-    private void validMove(int moveNum, int diceRoll, Stack<Tile> visited, Set<Tile> validTiles, Set<Room> validRooms) {
+    private void validMove(int moveNum, int diceRoll, Stack<Tile> visited) {
         Tile lastTile = visited.peek();
 
         // if used up all moves, current tile is a valid tile so add to set and stop
@@ -336,7 +371,7 @@ public class Board {
             if (upperTile.isAccessible() && !visited.contains(upperTile)) {
                 visited.add(upperTile);
 
-                validMove(moveNum + 1, diceRoll, visited, validTiles, validRooms);
+                validMove(moveNum + 1, diceRoll, visited);
                 visited.pop();
             }
         }
@@ -354,7 +389,7 @@ public class Board {
             if (lowerTile.isAccessible() && !visited.contains(lowerTile)) {
                 visited.add(lowerTile);
 
-                validMove(moveNum + 1, diceRoll, visited, validTiles, validRooms);
+                validMove(moveNum + 1, diceRoll, visited);
                 visited.pop();
             }
         }
@@ -372,7 +407,7 @@ public class Board {
             if (leftTile.isAccessible() && !visited.contains(leftTile)) {
                 visited.add(leftTile);
 
-                validMove(moveNum + 1, diceRoll, visited, validTiles, validRooms);
+                validMove(moveNum + 1, diceRoll, visited);
                 visited.pop();
             }
         }
@@ -390,7 +425,7 @@ public class Board {
             if (rightTile.isAccessible() && !visited.contains(rightTile)) {
                 visited.add(rightTile);
 
-                validMove(moveNum + 1, diceRoll, visited, validTiles, validRooms);
+                validMove(moveNum + 1, diceRoll, visited);
                 visited.pop();
             }
         }

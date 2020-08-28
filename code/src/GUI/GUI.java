@@ -2,18 +2,10 @@ package GUI;
 
 import swen225.cluedo.*;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.IOException;
+import java.awt.event.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -25,23 +17,11 @@ public class GUI {
     public static int CURRENT_WINDOW_WIDTH = 960;
     public static int CURRENT_WINDOW_HEIGHT = 720;
 
-    public static String[] PLAYERS = {"Miss Scarlett", "Col. Mustard", "Mrs. White", "Mr. Green", "Mrs. Peacock", "Prof. Plum"};
-    public static String[] WEAPONS = {"Candlestick", "Dagger", "Lead Pipe", "Revolver", "Rope", "Spanner"};
-    public static String[] ROOMS = {"Kitchen", "Ball Room", "Conservatory", "Billiard Room", "Library", "Study", "Hall", "Lounge", "Dining Room"};
-
-    Set<Tile> validTiles = new HashSet<Tile>();
-    Set<Room> validRooms = new HashSet<Room>();
-
-    private Player currentPlayer;
-    private Queue<Player> playerQueue = new ArrayDeque<Player>();
-    private ArrayList<Player> validPlayers = new ArrayList<Player>();
+    // the top/left position on screen where cards are drawn
+    public static int CARDS_LEFT = 600;
+    public static int CARDS_TOP = 360;
 
     private String gameLog = "";
-    private int turn = 1;
-
-    public static Image WEAPON_IMG;
-    public static Image PLAYER_IMG;
-    public static Image ROOM_IMG;
 
     /*
      * The window
@@ -58,22 +38,14 @@ public class GUI {
      */
     private static JComponent component;
 
-    private Game game = new Game();
+    private Game game = new Game(this);
 
     public GUI() {
-
-        // load images for cards, there's a better way of doing this but I forgot what it is - Ollie
-        try {
-            PLAYER_IMG = ImageIO.read(new File("images/player-icon.png"));
-            WEAPON_IMG = ImageIO.read(new File("images/weapon-icon.png"));
-            ROOM_IMG = ImageIO.read(new File("images/room-icon.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         // setup JComponent 
         component = new GameBoardComponent();
         component.setVisible(true);
+        component.addMouseListener(new GameBoardMouseListener());
 
         component.addMouseListener(new MouseAdapter() {
             public void mouseReleased(MouseEvent mouseEvent) {    //redraw after mouseRelease
@@ -104,17 +76,6 @@ public class GUI {
             }
         });
 
-        // Initializes Queue of players for turns
-        for (Player player : game.getHumanPlayers()) {
-            playerQueue.add(player);
-            validPlayers.add(player);
-        }
-
-        // Sets up the first player's turn.
-        // Something similar to this will be called only whenever a turn is ended.
-        currentPlayer = playerQueue.poll();
-        initializeTurn();
-
         // these methods have to be called at the end, otherwise horrific things happen - Ollie
         redraw();
         frame.pack();   // make the frame take on the size of the panel
@@ -130,68 +91,70 @@ public class GUI {
         @Override
         protected void paintComponent(Graphics g) {
             game.draw((Graphics2D) g);
-            game.getBoard().drawValidTiles((Graphics2D) g, validTiles, validRooms);
+            game.getBoard().drawValidTiles((Graphics2D) g);
             // TODO: reinstate this when drawCards displays properly
             // drawCards((Graphics2D) g);
         }
     }
 
-    // TODO: should probably move this stuff to GUI class (is it not already in the GUI class?)
-    //  also get this to scale properly with the display, so it doesn't overlap with the board
-//    public void drawCards(Graphics2D g) {
-//
-//        List<Card> playersCards = currentPlayer.getCards();
-//
-//        for (int i=0; i<6; i++)
-//            drawACard(i < playersCards.size() ? playersCards.get(i) : null, i, g);
-//    }
-//
-//    public void drawACard(Card card, int index, Graphics2D g) {
-//
-//        int CARDS_LEFT = 600;
-//        int CARDS_TOP = 360;
-//        int CARD_WIDTH = 110;
-//        int CARD_HEIGHT = 160;
-//        int CARD_PADDING = 10;
-//        int INNER_PADDING = 10;
-//
-//        int x = CARDS_LEFT + (index % 3) * (CARD_WIDTH + CARD_PADDING);
-//        int y = CARDS_TOP + (index < 3 ? 0 : 1) * (CARD_HEIGHT + CARD_PADDING);
-//        Rectangle iconArea = new Rectangle(x + INNER_PADDING, y + INNER_PADDING, CARD_WIDTH - 2 * INNER_PADDING, CARD_HEIGHT - 4*INNER_PADDING);
-//
-//        // if there's no card to be drawn here, draw outline and return
-//        if (card == null) {
-//            g.setColor(Color.LIGHT_GRAY);
-//            g.drawRoundRect(x, y, CARD_WIDTH, CARD_HEIGHT, 10, 10);
-//            return;
-//        }
-//
-//        g.setColor(new Color(0xFF01579B));
-//        g.fillRoundRect(x, y, CARD_WIDTH, CARD_HEIGHT, 10, 10);
-//
-//        g.setColor(Color.WHITE);
-//        g.fillRect(iconArea.x, iconArea.y, iconArea.width, iconArea.height);
-//
-//        Image icon = card instanceof Weapon ? WEAPON_IMG : card instanceof Player ? PLAYER_IMG : ROOM_IMG;
-//        int iconXOffset = (CARD_WIDTH - icon.getWidth(null)) / 2;
-//        int iconYOffset = INNER_PADDING + (iconArea.height - icon.getHeight(null)) / 2;
-//        g.drawImage(icon, x + iconXOffset, y + iconYOffset,null);
-//
-//        String cardName = card.getName();
-//        Font font = new Font("SansSerif", Font.BOLD, 13);
-//        FontMetrics fontMetrics = g.getFontMetrics(font);
-//        int textXOffset = (CARD_WIDTH - fontMetrics.stringWidth(cardName)) / 2;
-//        g.setFont(font);
-//        g.drawString(cardName, x + textXOffset, y + CARD_HEIGHT-CARD_PADDING);
-//    }
+    class GameBoardMouseListener implements MouseListener {
 
-    /*
-     * return dimension of component
-     */
-    public static Dimension getComponentDimension() {
-        return component.getSize();
+        @Override
+        public void mouseClicked(MouseEvent e) {}
+
+        @Override
+        public void mousePressed(MouseEvent e) {}
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            game.getBoard().doMouse(game.getCurrentPlayer(), e);
+
+            redraw();
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+
+        }
     }
 
+    //  TODO: also get this to scale properly with the display, so it doesn't overlap with the board
+    public void drawACard(Card card, int index, Graphics2D g) {
+
+        int x = CARDS_LEFT + (index % 3) * (Card.WIDTH + Card.OUTER_PADDING);
+        int y = CARDS_TOP + (index < 3 ? 0 : 1) * (Card.HEIGHT + Card.OUTER_PADDING);
+        Rectangle iconArea = new Rectangle(x + Card.INNER_PADDING, y + Card.INNER_PADDING, Card.WIDTH - 2 * Card.INNER_PADDING, Card.HEIGHT - 4*Card.INNER_PADDING);
+
+        // if there's no card to be drawn here, draw outline and return
+        if (card == null) {
+            g.setColor(Color.LIGHT_GRAY);
+            g.drawRoundRect(x, y, Card.WIDTH, Card.HEIGHT, 10, 10);
+            return;
+        }
+
+        g.setColor(new Color(0xFF01579B));
+        g.fillRoundRect(x, y, Card.WIDTH, Card.HEIGHT, 10, 10);
+
+        g.setColor(Color.WHITE);
+        g.fillRect(iconArea.x, iconArea.y, iconArea.width, iconArea.height);
+
+        Image icon = card.getIcon();
+        int iconXOffset = (Card.WIDTH - icon.getWidth(null)) / 2;
+        int iconYOffset = Card.INNER_PADDING + (iconArea.height - icon.getHeight(null)) / 2;
+        g.drawImage(icon, x + iconXOffset, y + iconYOffset,null);
+
+        String cardName = card.getName();
+        Font font = new Font("SansSerif", Font.BOLD, 13);
+        FontMetrics fontMetrics = g.getFontMetrics(font);
+        int textXOffset = (Card.WIDTH - fontMetrics.stringWidth(cardName)) / 2;
+        g.setFont(font);
+        g.drawString(cardName, x + textXOffset, y + Card.HEIGHT-Card.OUTER_PADDING);
+    }
 
     public void redraw() {
         frame.repaint();
@@ -267,7 +230,7 @@ public class GUI {
         // For redrawing
         redrawButton.addActionListener(e -> redraw());
         // For ending turn
-        endTurn.addActionListener(e -> endTurn());
+        endTurn.addActionListener(e -> game.endTurn());
         // For showing rules
         rulesButton.addActionListener(e -> displayRules(parentFrame));
         // For showing readme
@@ -282,7 +245,7 @@ public class GUI {
 
         Map<String, String> players = new HashMap<>();
 
-        int numPlayers = getIntegerInput(parentFrame);
+        int numPlayers = getNumPlayers(parentFrame);
         if (numPlayers == -1) return; //User closed dialog
 
         // set up the frame (basically the window?)
@@ -314,7 +277,7 @@ public class GUI {
         // create the radio buttons, based on player name Strings
         int y = 10;
         ButtonGroup buttonGroup = new ButtonGroup();
-        for (String name : PLAYERS) {
+        for (String name : Card.PLAYERS) {
             JRadioButton radioButton = new JRadioButton(name);
             radioButton.addActionListener(e -> continueButton.setEnabled(true));
             radioButton.setActionCommand(name);  // it will return this String
@@ -355,7 +318,7 @@ public class GUI {
     /*
      * Construct a dialog to ask for the number of players.
      */
-    public int getIntegerInput(Component parentComponent) {
+    public int getNumPlayers(Component parentComponent) {
         String title = "Welcome to Cludeo!";
         String question = "How many players do you have?";
         Object[] fixed_option = {"3", "4", "5", "6"};
@@ -369,6 +332,7 @@ public class GUI {
 
         return Integer.parseInt(input);
     }
+
     private void viewLog(JFrame parentFrame) {
         displayTextDialog(gameLog, "Game Log", parentFrame);
     }
@@ -412,7 +376,7 @@ public class GUI {
         JLabel suspectLabel = new JLabel("Suspect:");
         suspectLabel.setBounds(30, 40, 250, 25);
         dialog.add(suspectLabel);
-        JComboBox<String> suspectComboBox = new JComboBox<>(PLAYERS);
+        JComboBox<String> suspectComboBox = new JComboBox<>(Card.PLAYERS);
         suspectComboBox.setBounds(30, 70, 100, 25);
         dialog.add(suspectComboBox);
 
@@ -420,7 +384,7 @@ public class GUI {
         JLabel weaponLabel = new JLabel("Weapon:");
         weaponLabel.setBounds(30, 100, 250, 25);
         dialog.add(weaponLabel);
-        JComboBox<String> weaponComboBox = new JComboBox<>(WEAPONS);
+        JComboBox<String> weaponComboBox = new JComboBox<>(Card.WEAPONS);
         weaponComboBox.setBounds(30, 130, 100, 25);
         dialog.add(weaponComboBox);
 
@@ -428,7 +392,7 @@ public class GUI {
         JLabel roomLabel = new JLabel("Crime scene:");
         roomLabel.setBounds(30, 160, 250, 25);
         dialog.add(roomLabel);
-        JComboBox<String> roomComboBox = new JComboBox<>(ROOMS);
+        JComboBox<String> roomComboBox = new JComboBox<>(Card.ROOMS);
         roomComboBox.setBounds(30, 190, 100, 25);
         dialog.add(roomComboBox);
 
@@ -440,7 +404,7 @@ public class GUI {
         // add the selected player when button is pressed
         accuseButton.addActionListener(e -> {
 
-            gameLog+=(currentPlayer.getName()+" chose to accuse: ");
+            gameLog+=(game.getCurrentPlayer().getName()+" chose to accuse: ");
             String accSuspect = (String) suspectComboBox.getSelectedItem();
             String accWeapon = (String) weaponComboBox.getSelectedItem();
             String accRoom = (String) roomComboBox.getSelectedItem();
@@ -448,18 +412,10 @@ public class GUI {
             gameLog+=(accWeapon+", ");
             gameLog+=(accRoom+"\n");
 
-            if (game.getPlayerMap().get(accSuspect) == game.getMurderer() &&
-                    game.getWeaponMap().get(accWeapon) == game.getMurderWeapon() &&
-                    game.getRoomMap().get(accRoom) == game.getMurderRoom()) {
-                gameLog+=("Congratulations to player "+currentPlayer.getName()+", you won!\n");
-                game.setEnd();
-                return;
+            if (game.checkAccusationIsTrue(accSuspect, accWeapon, accRoom)) {
+                log("Oops, that was not correct, "+game.getCurrentPlayer().getName()+" can no longer suggest/accuse\n");
             } else {
-                gameLog+=("Oops, that was not correct, "+currentPlayer.getName()+" can no longer suggest/accuse\n");
-                turn++;
-                validPlayers.remove(currentPlayer);
-                currentPlayer.setCanAccuse(false);
-                endTurn();
+                log("Congratulations to player "+game.getCurrentPlayer().getName()+", you won!\n");
             }
 
             dialog.setVisible(false);
@@ -476,9 +432,8 @@ public class GUI {
         dialog.setSize(400, 400);
         dialog.setLayout(null);
 
-        if (currentPlayer.getTile() instanceof RoomTile) {
-            Room sugRoom = ((RoomTile) currentPlayer.getTile()).getRoom();
-
+        if (game.getCurrentPlayer().getTile() instanceof RoomTile) {
+            Room sugRoom = ((RoomTile) game.getCurrentPlayer().getTile()).getRoom();
 
             JLabel title = new JLabel("Make a suggestion within the current room: " + sugRoom.getName());
             title.setBounds(30, 10, 350, 25);
@@ -488,7 +443,7 @@ public class GUI {
             JLabel suspectLabel = new JLabel("Suspect:");
             suspectLabel.setBounds(30, 40, 250, 25);
             dialog.add(suspectLabel);
-            JComboBox<String> suspectComboBox = new JComboBox<>(PLAYERS);
+            JComboBox<String> suspectComboBox = new JComboBox<>(Card.PLAYERS);
             suspectComboBox.setBounds(30, 70, 100, 25);
             dialog.add(suspectComboBox);
 
@@ -496,7 +451,7 @@ public class GUI {
             JLabel weaponLabel = new JLabel("Weapon:");
             weaponLabel.setBounds(30, 100, 250, 25);
             dialog.add(weaponLabel);
-            JComboBox<String> weaponComboBox = new JComboBox<>(WEAPONS);
+            JComboBox<String> weaponComboBox = new JComboBox<>(Card.WEAPONS);
             weaponComboBox.setBounds(30, 130, 100, 25);
             dialog.add(weaponComboBox);
 
@@ -506,7 +461,7 @@ public class GUI {
             dialog.add(suggestButton);
 
             suggestButton.addActionListener(e -> {
-                gameLog+=("Player "+currentPlayer.getName()+" chose to suggest:\n");
+                gameLog+=("Player "+game.getCurrentPlayer().getName()+" chose to suggest:\n");
                 String susSuspect = (String) suspectComboBox.getSelectedItem();
                 String susWeapon = (String) weaponComboBox.getSelectedItem();
                 String susRoom = sugRoom.getName();
@@ -515,40 +470,12 @@ public class GUI {
                 gameLog+=(susWeapon+", ");
                 gameLog+=(susRoom+"\n");
 
-                Player suggestedPlayer = game.getPlayerMap().get(susSuspect);
-                Weapon suggestedWeapon = game.getWeaponMap().get(susWeapon);
-                Room suggestedRoom = game.getRoomMap().get(susRoom);
-
-                game.getBoard().movePlayer(suggestedPlayer, sugRoom);
-                game.getBoard().moveWeapon(suggestedWeapon, sugRoom);
-                redraw();
-
-                boolean refuted = false;
-                Queue<Player> refuterQueue = new ArrayDeque<>();
-                Queue<Player> tempQueue = new ArrayDeque<>(playerQueue);
-
-                // For loop to only include players that are not the currentPlayer
-                for (int i = 0; i < game.getHumanPlayers().size() - 1; i++) {
-                    refuterQueue.add(tempQueue.poll());
+                if (game.canRefuteSuggestion(susSuspect, susWeapon, susRoom)) {
+                    log("You may make an accusation before ending your turn.\n");
+                } else {
+                    log("The Suggestion was unable to be refuted by the other players.\n");
                 }
 
-                for (int i = 0; i < refuterQueue.size(); i++) {
-                    Player currentRefuter = refuterQueue.poll();
-                    List<Card> refuteCards = currentRefuter.getRefutes(suggestedPlayer, suggestedWeapon, suggestedRoom);
-
-                    if (refuteCards.size() == 0) {
-                        gameLog+=("\n"+currentRefuter.getName()+" cannot refute the murder suggestion.\n");
-                    } else {
-                        refute(currentRefuter, susSuspect, susWeapon, susRoom, parentFrame, false);
-                        refuted = true;
-                        break;
-                    }
-                }
-
-                if (!refuted) {
-                    gameLog+=("The Suggestion was unable to be refuted by the other players.\n");
-                }
-                gameLog+=("You may make an accusation before ending your turn.\n");
                 dialog.setVisible(false);
             });
 
@@ -561,23 +488,31 @@ public class GUI {
 
     }
 
-    public void refute(Player refuter, String suggestedPlayer, String suggestedWeapon, String suggestedRoom, JFrame parentFrame, boolean failed) {
+    /**
+     * Adds information to game log
+     * @param string The info to add
+     */
+    public void log(String string) {
+        gameLog += string;
+    }
+
+    public void refute(Player refuter, String suggestedPlayer, String suggestedWeapon, String suggestedRoom, boolean failed) {
         String[] refutableCards = {suggestedPlayer, suggestedWeapon, suggestedRoom};
         List<Card> refuterCards = refuter.getCards();
 
-        if (failed = false) {
+        if (!failed) {
             gameLog += (refuter.getName()+" is able to refute the suggestion.\n");
         }
         else {
             gameLog += (refuter.getName()+" chose a card they did not hold! Please choose again.\n");
         }
 
-        JDialog dialog = new JDialog(parentFrame, "Choose Card to refute", true);
+        JDialog dialog = new JDialog(frame, "Choose Card to refute", true);
         dialog.setSize(400, 400);
         dialog.setLayout(null);
 
         // text at the top
-        JLabel title = new JLabel("Choose card to refute for "+currentPlayer.getName()+"'s suggestion:");
+        JLabel title = new JLabel("Choose card to refute for "+game.getCurrentPlayer().getName()+"'s suggestion:");
         title.setBounds(30, 10, 250, 25);
         dialog.add(title);
 
@@ -621,63 +556,13 @@ public class GUI {
                         }
                         // Error: Player chose a card they do not hold.
                         else {
-                            refute(refuter, suggestedPlayer, suggestedWeapon, suggestedRoom, parentFrame, true);
+                            refute(refuter, suggestedPlayer, suggestedWeapon, suggestedRoom, true);
                         }
                     }
             });
         // NOTE: it seems to work better putting this at the end
         // otherwise some things aren't visible
         dialog.setVisible(true);
-    }
-
-    public void initializeTurn() {
-        gameLog+=("\nTurn: "+turn+"\n");
-        gameLog+=(currentPlayer.getName()+"'s turn: ");
-        int step1 = game.diceRoll();
-        int step2 = game.diceRoll();
-        int stepNum = step1 + step2;       // Should be shown in UI dice
-        int playerX = currentPlayer.getTile().getX() + 1;
-        int playerY = game.BOARD_HEIGHT - currentPlayer.getTile().getY();
-
-        // Gets all valid tiles and rooms the player can go to and puts them into the sets
-        game.getBoard().getValidMoves(stepNum, currentPlayer, validTiles, validRooms);
-
-        gameLog+=("They rolled a "+step1+" and a "+step2+".\n");
-        // Possibly remove:
-        // gameLog+=("Your possible moves have been highlighted as green tiles, or orange tiles for rooms.\n");
-        redraw();
-
-    }
-
-    private void endTurn() {
-        // If endTurn is called, and 1 player is left.
-        if (validPlayers.size() == 1) {
-            gameLog+=(currentPlayer.toString()+" has won by default, as they are the only player left!\n");
-            validRooms.clear();
-            validRooms.clear();
-            redraw();
-            game.setEnd();
-            return;
-
-        }
-        // This if-statement is called most of the time.
-        if (currentPlayer.canAccuse()) {
-            gameLog+=(currentPlayer.getName()+" has ended their turn.\n");
-            turn++;
-        } else {    // Only called right after when it rolls back around to a player who has lost.
-            gameLog+=("\n"+currentPlayer.getName()+" cannot play any more, as they have made a failed accusation.\n");
-        }
-
-        Player lastPlayer = currentPlayer;
-        currentPlayer = playerQueue.poll();
-        playerQueue.add(lastPlayer);
-        validTiles.clear();
-        validRooms.clear();
-        if (currentPlayer.canAccuse()) {
-            initializeTurn();
-        } else {
-            endTurn();
-        }
     }
 
     public void displayRules(JFrame parentFrame) {

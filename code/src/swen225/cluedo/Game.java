@@ -20,8 +20,7 @@ public class Game {
     public static final int BOARD_WIDTH = 24;
     public static final int BOARD_HEIGHT = 25;
 
-    //player order clockwise around the board
-    public static final String[] PLAYER_ORDER = {"Miss Scarlett", "Col. Mustard", "Mrs. White", "Mr. Green", "Mrs. Peacock", "Prof. Plum"};
+    public enum State {ROLLING_DICE, MOVING, SUGGESTING, ACCUSING};
 
     //i = inaccessible
     //h = hallway
@@ -109,15 +108,22 @@ public class Game {
     // Ordered List of all Players
     List<Player> humanPlayers;
 
+    // even more player data structures
+    private Player currentPlayer;
+    private Queue<Player> playerQueue = new ArrayDeque<Player>();
+    private ArrayList<Player> validPlayers = new ArrayList<Player>();
+
     boolean isRunning = true;
 
     //get all input from this scanner
     Scanner input;
 
+    GUI GUI;
+
     /**
      * Constructs the game, sets up stuff
      */
-    public Game() {
+    public Game(GUI GUI) {
         cards = new ArrayList<Card>();
         board = new Board(BOARD_WIDTH, BOARD_HEIGHT);
 
@@ -129,6 +135,8 @@ public class Game {
         roomList = new ArrayList<Room>();
 
         input = new Scanner(System.in);
+
+        this.GUI = GUI;
     }
 
     public void draw(Graphics2D g) {
@@ -139,22 +147,6 @@ public class Game {
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, width, height);
         board.draw(g);
-    }
-
-
-//	/**
-//	 * Main method, initiates the game and starts it
-//	 */
-//	public static void main(String[] args) {
-//		Game game = new Game();
-//		game.startGame();
-//	}
-
-    /**
-     * Initiates the board
-     */
-    private void initBoard() {
-
     }
 
     /**
@@ -297,6 +289,17 @@ public class Game {
         initHumanPlayers(playerNames);
         dealCards();
 
+        // Initializes Queue of players for turns
+        for (Player player : humanPlayers) {
+            playerQueue.add(player);
+            validPlayers.add(player);
+        }
+
+        // Sets up the first player's turn.
+        // Something similar to this will be called only whenever a turn is ended.
+        currentPlayer = playerQueue.poll();
+        initializeTurn();
+
         //todo: I commented out the game loop because waiting for user input stops the GUI from drawing
 //		while(isRunning)
 //			for (Player currentPlayer : humanPlayers)
@@ -350,315 +353,102 @@ public class Game {
         }
     }
 
-    /**
-     * Starts a player's turn, taking input
-     *
-     * @param player
-     */
-    public void startPlayerTurn(Player player) {
+    public void drawCards(Graphics2D g) {
 
-        System.out.println("Board:");
+        List<Card> playersCards = currentPlayer.getCards();
 
-        System.out.println(board + "\n");
-
-        System.out.printf("%s's turn:\n", player.getName());
-
-        int step1 = diceRoll();
-        int step2 = diceRoll();
-
-        int stepNum = step1 + step2;
-
-        System.out.printf("You rolled a %d and a %d.\n", step1, step2);
-        //player MUST make a move
-
-        doMove(player, stepNum);
-
-        // Allows the player to make a suggestion
-        Tile tile = player.getTile();
-        if (tile instanceof RoomTile && player.canAccuse()) {
-            //can do suggestion
-            doSuggestion(player);
-        }
-        // Allows the player to make an accusation
-        System.out.println("Do you want to make an accusation?");
-        System.out.println("Warning: if your accusation is wrong, you will lose and be unable to accuse");
-        if (getBooleanInput()) {
-            doAccusation(player);
-        }
+        for (int i=0; i<6; i++)
+            GUI.drawACard(i < playersCards.size() ? playersCards.get(i) : null, i, g);
     }
 
-    /**
-     * Gets input and does the move
-     * Need to add more outputs
-     */
-    private void doMove(Player player, int diceRoll) {
-        //converts player coords from array indices to board coords
-        int playerX = player.getTile().getX() + 1;
-        int playerY = BOARD_HEIGHT - player.getTile().getY();
-
-        Set<Tile> validTiles = new HashSet<Tile>();
-        Set<Room> validRooms = new HashSet<Room>();
-
-        //gets all valid tiles and rooms the player can go to and puts them into the sets
-        board.getValidMoves(diceRoll, player, validTiles, validRooms);
-
-        if (validTiles.size() == 0 && validRooms.size() == 0) {
-            System.out.println("You are blocked and cannot move!");
-            return;
+    public boolean checkAccusationIsTrue(String accSuspect, String accWeapon, String accRoom) {
+        if (players.get(accSuspect) == murderer &&
+                weapons.get(accWeapon) == murderWeapon &&
+                rooms.get(accRoom) == murderRoom) {
+            isRunning = false;
+            return true;
         }
 
-        try {
-
-            System.out.printf("You are at (%d %d) and have %d moves to use.\n", playerX, playerY, diceRoll);
-            System.out.println("Where do you want to move (give in pairs of coords or room name):");
-
-            String textInput;
-
-            //catch and ignore nothing lines
-            do {
-                textInput = input.nextLine();
-            } while (textInput.equals(""));
-
-            String[] inputs = textInput.split(" ");
-
-            if (inputs.length == 0) {
-                System.out.println("Invalid input, please try again");
-                doMove(player, diceRoll);
-                //regex to check whether input is a number
-            } else if (inputs.length == 2 && inputs[0].matches("\\d+")) {
-                //coords
-                int newX = Integer.parseInt(inputs[0]);
-                int newY = Integer.parseInt(inputs[1]);
-
-                //convert to board array indices
-                newX--;
-                newY = BOARD_HEIGHT - newY;
-
-                Tile newTile = board.getTile(newX, newY);
-
-                //check if tile is invalid
-                if (newTile == null) {
-                    System.out.println("Invalid coordinates, please try again.");
-                    doMove(player, diceRoll);
-                    //check if they want to move to a room
-                } else if (newTile instanceof RoomTile) {
-                    Room newRoom = ((RoomTile) newTile).getRoom();
-
-                    if (validRooms.contains(newRoom)) {
-                        board.movePlayer(player, newRoom);
-                    } else {
-                        System.out.println("Can't get to that room, please try again.");
-                        doMove(player, diceRoll);
-                    }
-                    //coords are at a valid hallway tile
-                } else {
-                    if (validTiles.contains(newTile)) {
-                        board.movePlayer(player, newX, newY);
-                    } else {
-                        System.out.println("Can't get to that tile, please try again");
-                        doMove(player, diceRoll);
-                    }
-                }
-            } else {        // Must be a room
-
-                //join all of line together, rooms are only 2 words max so this is sufficient
-                if (inputs.length == 2) {
-                    textInput = String.join(" ", inputs[0], inputs[1]);
-                } else {
-                    textInput = inputs[0];
-                }
-                boolean roomFound = false;
-
-                for (Room room : rooms.values()) {
-                    if (textInput.equalsIgnoreCase(room.getName()) || textInput.equals(room.toString())) {
-
-                        if (validRooms.contains(room)) {
-                            board.movePlayer(player, room);
-                        } else {
-                            System.out.println("Can't get to that room, please try again");
-                            doMove(player, diceRoll);
-                        }
-                        roomFound = true;
-                        break;
-                    }
-                }
-
-                if (!roomFound) {
-                    System.out.println("Invalid room, please try again");
-                    doMove(player, diceRoll);
-                }
-            }
-        } catch (InputMismatchException e) {
-            System.out.println("Invalid input, please try again");
-            doMove(player, diceRoll);
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid input, please try again");
-            doMove(player, diceRoll);
-        }
+        validPlayers.remove(currentPlayer);
+        currentPlayer.setCanAccuse(false);
+        endTurn();
+        return false;
     }
 
-    /**
-     * @param player
-     * @return - whether the suggestion was refuted
-     */
-    private void doSuggestion(Player player) {
-        //assumes player is in a roomtile
-        Room room = ((RoomTile) player.getTile()).getRoom();
+    public boolean canRefuteSuggestion(String sugSuspect, String sugWeapon, String sugRoom) {
+        Player suggestedPlayer = players.get(sugSuspect);
+        Weapon suggestedWeapon = weapons.get(sugWeapon);
+        Room suggestedRoom = rooms.get(sugRoom);
 
-        System.out.printf("You(%s) are in room %s.\n", player.getName(), room.getName());
+        board.movePlayer(suggestedPlayer, suggestedRoom);
+        board.moveWeapon(suggestedWeapon, suggestedRoom);
+        GUI.redraw();
 
-        List<Card> playerCards = player.getCards();
-        String cardString = "";
-        for (int i = 0; i < playerCards.size(); i++) {
-            cardString += playerCards.get(i).getName();
-            if (i != playerCards.size() - 1) {
-                cardString += ", ";
-            }
-        }
-        System.out.printf("You have cards %s.\n", cardString);
+        Queue<Player> refuterQueue = new ArrayDeque<>();
+        Queue<Player> tempQueue = new ArrayDeque<>(playerQueue);
 
-        System.out.println("You can make a suggestion about the murder circumstances.");
-        // Ask which Character to suggest, print out possible Character options.
-        System.out.println("Which Player would you like to suggest?");
-        System.out.println(getPlayerList());
-        Player murdererSugg = playerList.get(getNum(0, playerList.size() - 1));
-
-        // Ask which weapon to suggest, print out possible Weapon options.
-        System.out.println("Which Weapon would you like to suggest?");
-        System.out.println(getWeaponList());
-        Weapon weaponSugg = weaponList.get(getNum(0, weaponList.size() - 1));
-
-        // Move objects to the room
-        board.movePlayer(murdererSugg, room);
-        board.moveWeapon(weaponSugg, room);
-
-        Iterator<Player> playerIterator = humanPlayers.iterator();
-        while (playerIterator.next() != player) {
-        }     // start iterator at currentPlayer
-
-        // for each player clockwise of currentPlayer, check if they can refute the suggestion
+        // For loop to only include players that are not the currentPlayer
         for (int i = 0; i < humanPlayers.size() - 1; i++) {
-            if (!playerIterator.hasNext())
-                playerIterator = humanPlayers.iterator();
+            refuterQueue.add(tempQueue.poll());
+        }
 
-            Player currPlayer = playerIterator.next();
-            List<Card> refuteCards = currPlayer.getRefutes(murdererSugg, weaponSugg, room);
+        for (int i = 0; i < refuterQueue.size(); i++) {
+            Player currentRefuter = refuterQueue.poll();
+            List<Card> refuteCards = currentRefuter.getRefutes(suggestedPlayer, suggestedWeapon, suggestedRoom);
 
             if (refuteCards.size() == 0) {
-                System.out.printf("%s cannot refute the murder suggestion.\n", currPlayer.getName());
-            } else if (refuteCards.size() == 1) {
-                System.out.printf("%s refuted the murder suggestion with %s.\n", currPlayer.getName(), refuteCards.get(0).getName());
-                break;
+                GUI.log("\n"+currentRefuter.getName()+" cannot refute the murder suggestion.\n");
             } else {
-                System.out.printf("%s needs to choose a card to refute.\n", currPlayer.getName());
-                System.out.println("Choose a card to use:");
-                for (int j = 0; j < refuteCards.size(); j++) {
-                    System.out.printf("%d: %s\n", j, refuteCards.get(j).getName());
-                }
-
-                Card inputCard = refuteCards.get(getNum(0, refuteCards.size() - 1));
-
-                System.out.printf("%s refuted the murder suggestion with %s.\n", currPlayer.getName(), inputCard.getName());
-                break;
+                GUI.refute(currentRefuter, sugSuspect, sugWeapon, sugRoom, false);
+                return true;
             }
         }
+
+        return false;
     }
 
-    private void doAccusation(Player player) {
+    public void initializeTurn() {
+        GUI.log(currentPlayer.getName()+"'s turn: ");
+        int step1 = diceRoll();
+        int step2 = diceRoll();
+        int stepNum = step1 + step2;       // Should be shown in UI dice
+        int playerX = currentPlayer.getTile().getX() + 1;
+        int playerY = BOARD_HEIGHT - currentPlayer.getTile().getY();
 
-        // Ask which Player to accuse, print out possible Player options.
-        System.out.println("Which Player would you like to accuse?");
-        System.out.println(getPlayerList());
-        Player murdererAcc = playerList.get(getNum(0, playerList.size() - 1));
-        // Ask which Weapon to suggest, print out possible Weapon options.
-        System.out.println("Which Weapon would you like to accuse?");
-        System.out.println(getWeaponList());
-        Weapon weaponAcc = weaponList.get(getNum(0, weaponList.size() - 1));
-        // Ask which Room to suggest, print out possible Room options.
-        System.out.println("Which Room would you like to accuse?");
-        System.out.println(getRoomList());
-        Room roomAcc = roomList.get(getNum(0, roomList.size() - 1));
+        // Gets all valid tiles and rooms the player can go to and puts them into the sets
+        getBoard().getValidMoves(stepNum, currentPlayer);
 
-        if (murdererAcc == murderer && weaponAcc == murderWeapon && roomAcc == murderRoom) {
-            System.out.println("Congratulations, you won!");
-            input.close();
+        GUI.log("They rolled a "+step1+" and a "+step2+".\n");
+        // Possibly remove:
+        // gameLog+=("Your possible moves have been highlighted as green tiles, or orange tiles for rooms.\n");
+        GUI.redraw();
+    }
+
+    public void endTurn() {
+        // If endTurn is called, and 1 player is left.
+        if (validPlayers.size() == 1) {
+            GUI.log(currentPlayer.toString()+" has won by default, as they are the only player left!\n");
+            getBoard().clearValidRoomsAndTiles();
+            GUI.redraw();
             isRunning = false;
+            return;
+
+        }
+        // This if-statement is called most of the time.
+        if (currentPlayer.canAccuse()) {
+            GUI.log(currentPlayer.getName()+" has ended their turn.\n");
+        } else {    // Only called right after when it rolls back around to a player who has lost.
+            GUI.log("\n"+currentPlayer.getName()+" cannot play any more, as they have made a failed accusation.\n");
+        }
+
+        Player lastPlayer = currentPlayer;
+        currentPlayer = playerQueue.poll();
+        playerQueue.add(lastPlayer);
+        getBoard().clearValidRoomsAndTiles();
+        if (currentPlayer.canAccuse()) {
+            initializeTurn();
         } else {
-            System.out.println("Oops, that was not correct, you can no longer suggest/accuse");
-            player.setCanAccuse(false);
-        }
-
-        // Code to check if
-        int playersLeft = 0;
-        Player last = null;
-
-        for (Player p : humanPlayers) {
-            if (p.canAccuse()) {
-                playersLeft++;
-                last = p;
-            }
-        }
-
-        if (playersLeft == 1) {
-            //everyone else accused wrongly, so the last player wins
-            System.out.printf("Everyone else accused incorrectly, so %s wins!\n", last.getName());
-            System.out.printf("The murderer was %s with the %s in the room %s", murderer.getName(), murderWeapon.getName(), murderRoom.getName());
-            input.close();
-            isRunning = false;
-        }
-    }
-
-    /**
-     * Gets a number between min and max
-     *
-     * @param min
-     * @param max
-     * @return
-     */
-    private int getNum(int min, int max) {
-        int num = 0;
-        int temp;
-        boolean validNum = false;
-
-        do {
-            if (input.hasNextInt()) {
-                temp = input.nextInt();
-                if (temp < min || temp > max) {
-                    System.out.printf("Number must be between %d and %d:\n", min, max);
-                } else {
-                    num = temp;
-                    validNum = true;
-                }
-            } else {
-                System.out.println("Number must be an integer:");
-                input.next();
-            }
-        } while (!validNum);
-
-        return num;
-    }
-
-    /**
-     * @return
-     */
-    private boolean getBooleanInput() {
-        String[] yesInputs = {"y", "yes", "true", "t"};
-        String[] noInputs = {"n", "no", "false", "f"};
-
-
-        while (true) {
-            String text = input.next();
-
-            for (String y : yesInputs) {
-                if (text.equalsIgnoreCase(y)) {
-                    return true;
-                }
-            }
-            for (String n : noInputs) {
-                if (text.equalsIgnoreCase(n)) {
-                    return false;
-                }
-            }
+            endTurn();
         }
     }
 
@@ -669,65 +459,6 @@ public class Game {
      */
     public int diceRoll() {
         return (int) Math.floor(Math.random() * 6 + 1);
-    }
-
-    public String getPlayerList() {
-        String temp = "Players: \n";
-        for (int i = 0; i < this.playerList.size(); i++) {
-            String lineTemp = i + ": " + this.playerList.get(i).getName() + "\n";
-            temp += lineTemp;
-        }
-        return temp;
-    }
-
-
-    public String getWeaponList() {
-        String temp = "Weapons: " + "\n";
-        for (int i = 0; i < this.weaponList.size(); i++) {
-            String lineTemp = i + ": " + this.weaponList.get(i).getName() + "\n";
-            temp += lineTemp;
-        }
-        return temp;
-    }
-
-    public String getRoomList() {
-        String temp = "Rooms: " + "\n";
-        for (int i = 0; i < this.roomList.size(); i++) {
-            String lineTemp = i + ": " + this.roomList.get(i).getName() + "\n";
-            temp += lineTemp;
-        }
-        return temp;
-    }
-
-    public void startGUITurn(Player player) {
-        // TODO: Change these System.outs to draw on JPanel under Board.
-        System.out.printf("%s's turn:\n", player.getName());
-        int step1 = diceRoll();
-        int step2 = diceRoll();
-        int stepNum = step1 + step2;
-        int playerX = player.getTile().getX() + 1;
-        int playerY = BOARD_HEIGHT - player.getTile().getY();
-
-        Set<Tile> validTiles = new HashSet<Tile>();
-        Set<Room> validRooms = new HashSet<Room>();
-
-        // Gets all valid tiles and rooms the player can go to and puts them into the sets
-        board.getValidMoves(stepNum, player, validTiles, validRooms);
-
-        if (validTiles.size() == 0 && validRooms.size() == 0) {
-            System.out.println("You are blocked and cannot move!"); // Should not be reachable.
-            return;
-        }
-
-        System.out.printf("You rolled a %d and a %d.\n", step1, step2);
-        System.out.printf("Your possible moves have been highlighted as green tiles, or orange tiles for rooms.");
-
-        // Allows the player to make a suggestion
-        Tile tile = player.getTile();
-        if (tile instanceof RoomTile && player.canAccuse()) {
-            System.out.printf("You may make a suggestion, ending your turn.");
-            // doGUISuggestion(player);
-        }
     }
 
     public Board getBoard() {
@@ -763,14 +494,6 @@ public class Game {
         return humanPlayers;
     }
 
-    public boolean getIsRunning() {
-        return isRunning;
-    }
-    public void setEnd() {
-        isRunning = false;
-    }
-
-
-
+    public Player getCurrentPlayer() {return currentPlayer;}
 
 }

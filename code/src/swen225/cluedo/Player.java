@@ -1,5 +1,9 @@
 package swen225.cluedo;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -11,6 +15,8 @@ public class Player implements CluedoObject {
 	private Tile tile;
 	
 	private boolean allowedAccuse = true;
+
+	private static Image icon;
 	
 	/**
 	 * Constructs the player
@@ -23,6 +29,12 @@ public class Player implements CluedoObject {
 		this.username = username;
 		this.hand = new ArrayList<Card>();
 		this.tile = null;
+
+		try {
+			icon = ImageIO.read(new File("images/player-icon.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -100,7 +112,12 @@ public class Player implements CluedoObject {
 	 * @return player's name
 	 */
 	public String getName() {
-		return username;
+		return name;
+	}
+
+	@Override
+	public Image getIcon() {
+		return icon;
 	}
 
 	/**
