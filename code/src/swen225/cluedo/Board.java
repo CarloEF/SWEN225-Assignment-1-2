@@ -50,7 +50,7 @@ public class Board {
 
         // fill in behind the board so that cellar looks solid
         g.setColor(Color.GRAY);
-        g.fillRect(LEFT + 2*TILE_SIZE, TOP + 2*TILE_SIZE, TILE_SIZE * (board.length - 4), TILE_SIZE * (board[0].length - 4));
+        g.fillRect(LEFT + 2 * TILE_SIZE, TOP + 2 * TILE_SIZE, TILE_SIZE * (board.length - 4), TILE_SIZE * (board[0].length - 4));
 
         for (int row = 0; row < board[0].length; row++) {
             for (int col = 0; col < board.length; col++) {
@@ -74,7 +74,7 @@ public class Board {
                     else
                         for (Room room : validRooms)
                             if (room.getTiles().contains(tile))
-                                g.setColor(Color.GREEN);
+                                g.setColor(Color.ORANGE);
 
                 g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
@@ -102,24 +102,27 @@ public class Board {
     }
 
     public void doMouse(Player player, MouseEvent e) {
-        if (e.getX() < LEFT || e.getX() > LEFT + board.length*TILE_SIZE) return;
-        if (e.getY() < TOP || e.getY() > TOP + board[0].length*TILE_SIZE) return;
+        // Only allows movement if Game is not in GAME_OVER State.
+        if (game.state != Game.State.GAME_OVER) {
+            if (e.getX() < LEFT || e.getX() > LEFT + board.length * TILE_SIZE) return;
+            if (e.getY() < TOP || e.getY() > TOP + board[0].length * TILE_SIZE) return;
 
-        int col = (e.getX() - LEFT) / TILE_SIZE;
-        int row = (e.getY() - TOP) / TILE_SIZE;
+            int col = (e.getX() - LEFT) / TILE_SIZE;
+            int row = (e.getY() - TOP) / TILE_SIZE;
 
-        Tile tile = board[col][row];
+            Tile tile = board[col][row];
 
-        if (validTiles.contains(tile)) {
-            player.moveToTile(tile);
-            game.goToState(Game.State.SUGGESTING);
-            return;
-        }
-        for (Room room : validRooms) {
-            if (room.getTiles().contains(tile)) {
-                player.moveToRoom(room);
+            if (validTiles.contains(tile)) {
+                player.moveToTile(tile);
                 game.goToState(Game.State.SUGGESTING);
                 return;
+            }
+            for (Room room : validRooms) {
+                if (room.getTiles().contains(tile)) {
+                    player.moveToRoom(room);
+                    game.goToState(Game.State.SUGGESTING);
+                    return;
+                }
             }
         }
     }
@@ -127,19 +130,6 @@ public class Board {
     public void clearValidRoomsAndTiles() {
         validTiles.clear();
         validRooms.clear();
-    }
-
-    /**
-     * Moves a player to a tile, assumes all checks have been done
-     *
-     * @param player
-     * @param newX
-     * @param newY
-     */
-    public void movePlayer(Player player, int newX, int newY) {
-        Tile newTile = getTile(newX, newY);
-
-        player.moveToTile(newTile);
     }
 
     /**
@@ -247,8 +237,8 @@ public class Board {
     /**
      * Gets all valid moves and adds them to sets
      *
-     * @param diceRoll   - the number of moves to use, determined by a dice roll
-     * @param player     - the player to move
+     * @param diceRoll - the number of moves to use, determined by a dice roll
+     * @param player   - the player to move
      * @return
      */
     public void getValidMoves(int diceRoll, Player player) {

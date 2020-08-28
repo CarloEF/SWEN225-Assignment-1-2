@@ -24,7 +24,9 @@ public class Game {
         ROLLING_DICE(0),
         MOVING(1),
         SUGGESTING(2),
-        ACCUSING(3);
+        ACCUSING(3),
+        ENDING_TURN(4),
+        GAME_OVER(5);
 
         private int value;
 
@@ -135,8 +137,6 @@ public class Game {
     // the initial values on the dice
     int die1 = diceRoll();
     int die2 = diceRoll();
-
-    boolean isRunning = true;
 
     //get all input from this scanner
     Scanner input;
@@ -393,6 +393,8 @@ public class Game {
             GUI.redraw();
         } else if (newState == State.ACCUSING) {
 
+        } else if (newState == State.GAME_OVER) {
+
         }
     }
 
@@ -400,7 +402,7 @@ public class Game {
         if (players.get(accSuspect) == murderer &&
                 weapons.get(accWeapon) == murderWeapon &&
                 rooms.get(accRoom) == murderRoom) {
-            isRunning = false;
+            goToState(State.GAME_OVER);
             return true;
         }
         return false;
@@ -433,23 +435,23 @@ public class Game {
     }
 
     public void initializeTurn() {
-        goToState(State.ROLLING_DICE);
-        GUI.log("\n" + currentPlayer.getName() + "'s turn: ");
-        die1 = diceRoll();
-        die2 = diceRoll();
-        // Kept at 12 for debugging, for easy room traversal.
-        // int stepNum = 6 + 6;
-        int stepNum = die1 + die2;
+        if (state != State.GAME_OVER) {
+            goToState(State.ROLLING_DICE);
+            GUI.log("\n" + currentPlayer.getName() + "'s turn: ");
+            die1 = diceRoll();
+            die2 = diceRoll();
+            int stepNum = die1 + die2;
 
-        // Gets all valid tiles and rooms the player can go to and puts them into the sets
-        getBoard().getValidMoves(stepNum, currentPlayer);
+            // Gets all valid tiles and rooms the player can go to and puts them into the sets
+            getBoard().getValidMoves(stepNum, currentPlayer);
 
-        GUI.log("They rolled a " + die1 + " and a " + die2 + ".\n");
-        // Possibly remove:
-        // gameLog+=("Your possible moves have been highlighted as green tiles, or orange tiles for rooms.\n");
-        GUI.redraw();
+            GUI.log("They rolled a " + die1 + " and a " + die2 + ".\n");
+            // Possibly remove:
+            // gameLog+=("Your possible moves have been highlighted as green tiles, or orange tiles for rooms.\n");
+            GUI.redraw();
 
-        goToState(State.MOVING);
+            goToState(State.MOVING);
+        }
     }
 
     public void endTurn() {
@@ -459,10 +461,11 @@ public class Game {
         //    GUI.log("Cannot end turn without making a suggestion");
         //    return;
         //}
+        // Currently, turns can always be ended, any time.
 
         // Only allows turns to end while game is still running.
-        if (isRunning) {
-
+        if (state != State.GAME_OVER) {
+            goToState(State.ENDING_TURN);
             // This if-statement is called most of the time.
             if (currentPlayer.canAccuse()) {
                 GUI.log(currentPlayer.getName() + " has ended their turn.\n");
@@ -490,7 +493,7 @@ public class Game {
             GUI.log(validPlayers.get(0).getName() + " has won by default, as they are the only player left!\n");
             getBoard().clearValidRoomsAndTiles();
             GUI.redraw();
-            isRunning = false;
+            goToState(State.GAME_OVER);
             return;
         }
         endTurn();
@@ -544,10 +547,5 @@ public class Game {
     public int[] getDice() {
         return new int[]{die1, die2};
     }
-
-    public boolean getIsRunning() {
-        return isRunning;
-    }
-
 
 }

@@ -570,8 +570,8 @@ public class GUI {
             return;
         }
 
-        // Only allow accusations if the game is still running.
-        if (game.getIsRunning()) {
+        // Only allows accusations if Game is not in GAME_OVER State.
+        if (game.state != Game.State.GAME_OVER) {
             JDialog dialog = new JDialog(parentFrame, "Make an Accusation", true);
             dialog.setSize(400, 400);
             dialog.setLayout(null);
@@ -641,12 +641,12 @@ public class GUI {
 
         // TODO: grey out buttons so they can't suggest
         if (game.state != Game.State.SUGGESTING) {
-            log("Not allowed to suggest right now");
+            log("Players must move before suggesting.");
             return;
         }
 
-        // Only allow suggestions while the game is still running.
-        if (game.getIsRunning()) {
+        // Only allows suggestions if Game is not in GAME_OVER State.
+        if (game.state != Game.State.GAME_OVER) {
             JDialog dialog = new JDialog(parentFrame, "Make a Suggestion", true);
             dialog.setSize(400, 400);
             dialog.setLayout(null);
