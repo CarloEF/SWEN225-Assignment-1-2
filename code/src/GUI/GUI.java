@@ -364,13 +364,14 @@ public class GUI {
         g.setColor(Color.WHITE);
         g.fillRect(iconArea.x, iconArea.y, iconArea.width, iconArea.height);
 
-        Image icon = card.getIcon();
+        Image icon = card.getIcon().getScaledInstance(iconArea.width, iconArea.height, Image.SCALE_SMOOTH);
         int iconXOffset = (CARD_WIDTH - icon.getWidth(null)) / 2;
         int iconYOffset = CARD_PADDING + (iconArea.height - icon.getHeight(null)) / 2;
         g.drawImage(icon, x + iconXOffset, y + iconYOffset, null);
+        System.out.println(icon.getHeight(null));
 
         String cardName = card.getName();
-        Font font = new Font("SansSerif", Font.BOLD, 13);
+        Font font = new Font("SansSerif", Font.BOLD, (int)(1.5*CARD_PADDING));
         FontMetrics fontMetrics = g.getFontMetrics(font);
         int textXOffset = (CARD_WIDTH - fontMetrics.stringWidth(cardName)) / 2;
         g.setFont(font);
