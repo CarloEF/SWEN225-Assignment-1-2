@@ -388,17 +388,23 @@ public class Game {
 
     public void goToState(State newState) {
         state = newState;
+
         if (newState == State.ROLLING_DICE) {
 
         } else if (newState == State.MOVING) {
-
+            // Available: Green Tiles + Accuse, End Turn
+            GUI.redraw();
         } else if (newState == State.SUGGESTING) {
+            // Available: Suggest, Accuse, End Turn
             board.clearValidRoomsAndTiles();
             GUI.redraw();
         } else if (newState == State.ACCUSING) {
-
+            // Available: Accuse, End Turn
+            GUI.redraw();
         } else if (newState == State.GAME_OVER) {
-
+            // Available: None
+            board.clearValidRoomsAndTiles();
+            GUI.redraw();
         }
     }
 
