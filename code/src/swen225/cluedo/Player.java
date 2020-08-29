@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class Player implements CluedoObject {
     private List<Card> hand;
     private String name;
-    private String username;    // the name of the person controlling this player (or null)
+    private String username;    // the name of the person controlling this player
     private Tile tile;
     private Color colour;
 
@@ -42,13 +42,27 @@ public class Player implements CluedoObject {
         int tileTop = Board.TOP + tile.getY() * Board.TILE_SIZE;
         int tileLeft = Board.LEFT + tile.getX() * Board.TILE_SIZE;
 
+        int innerPadding = Board.TILE_SIZE / 10;
+        int diameter = Board.TILE_SIZE - 2*innerPadding;
+        int circleTop = tileTop + innerPadding;
+        int circleLeft = tileLeft + innerPadding;
+
         g.setColor(colour);
-        g.fillOval(tileLeft, tileTop, Board.TILE_SIZE, Board.TILE_SIZE);
+        g.fillOval(circleLeft, circleTop, diameter, diameter);
 
         g.setColor(Color.BLACK);
-        g.drawOval(tileLeft, tileTop, Board.TILE_SIZE, Board.TILE_SIZE);
+        g.drawOval(circleLeft, circleTop, diameter, diameter);
 
+        Font font = new Font("SansSerif", Font.PLAIN, 10);
+        FontMetrics fontMetrics = g.getFontMetrics(font);
+        int textWidth = fontMetrics.stringWidth(username);
+        int textHeight = fontMetrics.getHeight();
+        int textLeft = tileLeft + (Board.TILE_SIZE / 2) - (textWidth / 2);
+        int textTop = tileTop + Board.TILE_SIZE;
+        g.setFont(font);
 
+        g.setColor(Color.BLACK);
+        g.drawString(username, textLeft, textTop + textHeight - 5);
     }
 
     /**

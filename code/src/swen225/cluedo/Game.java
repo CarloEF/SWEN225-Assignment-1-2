@@ -175,6 +175,10 @@ public class Game {
             player.draw(g);
         }
 
+        for (Weapon weapon : weapons.values()) {
+            weapon.draw(g);
+        }
+
     }
 
     /**
@@ -182,12 +186,12 @@ public class Game {
      */
     private void initCards() {
 
-        addPlayer(new Player("Miss Scarlett", new Color(0xFFB71C1C), null));
-        addPlayer(new Player("Col. Mustard", new Color(0xFFFFD600), null));
-        addPlayer(new Player("Mrs. White", Color.WHITE, null));
-        addPlayer(new Player("Mr. Green", new Color(0xFF33691E), null));
-        addPlayer(new Player("Mrs. Peacock", new Color(0xFF0D47A1), null));
-        addPlayer(new Player("Prof. Plum", new Color(0xFF311B92), null));
+        addPlayer(new Player("Miss Scarlett", new Color(0xFFB71C1C), ""));
+        addPlayer(new Player("Col. Mustard", new Color(0xFFFFD600), ""));
+        addPlayer(new Player("Mrs. White", Color.WHITE, ""));
+        addPlayer(new Player("Mr. Green", new Color(0xFF33691E), ""));
+        addPlayer(new Player("Mrs. Peacock", new Color(0xFF0D47A1), ""));
+        addPlayer(new Player("Prof. Plum", new Color(0xFF311B92), ""));
 
         addWeapon(new Weapon("Candlestick"));
         addWeapon(new Weapon("Dagger"));

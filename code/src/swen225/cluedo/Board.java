@@ -85,8 +85,9 @@ public class Board {
                 }
 
                 // draw walls as thicker lines
-                g.setColor(Color.BLACK);
-                g.setStroke(new BasicStroke(3));
+                Stroke initialStroke = g.getStroke();
+                g.setColor(Color.DARK_GRAY);
+                g.setStroke(new BasicStroke(3, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
                 if (tile.hasDownWall())
                     g.drawLine(x, y + TILE_SIZE, x + TILE_SIZE, y + TILE_SIZE);
                 if (tile.hasUpWall())
@@ -96,7 +97,7 @@ public class Board {
                 if (tile.hasRightWall())
                     g.drawLine(x + TILE_SIZE, y, x + TILE_SIZE, y + TILE_SIZE);
 
-                g.setStroke(new BasicStroke(1)); // set the stroke back to normal
+                g.setStroke(initialStroke); // set the stroke back to normal
             }
         }
     }
