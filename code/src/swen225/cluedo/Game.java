@@ -39,8 +39,6 @@ public class Game {
         }
     }
 
-    ;
-
     public State state = State.ROLLING_DICE;
 
     //i = inaccessible
@@ -418,7 +416,7 @@ public class Game {
         return false;
     }
 
-    public boolean canRefuteSuggestion(String sugSuspect, String sugWeapon, String sugRoom) {
+    public boolean refuteSuggestion(String sugSuspect, String sugWeapon, String sugRoom) {
         Player suggestedPlayer = players.get(sugSuspect);
         Weapon suggestedWeapon = weapons.get(sugWeapon);
         Room suggestedRoom = rooms.get(sugRoom);
@@ -427,17 +425,21 @@ public class Game {
         board.moveWeapon(suggestedWeapon, suggestedRoom);
         GUI.redraw();
 
-        Queue<Player> refuterQueue = new ArrayDeque<>(playerQueue);
-        int refuters = refuterQueue.size();
-        for (int i = 0; i < refuters; i++) {
-            Player currentRefuter = refuterQueue.poll();
-            List<Card> refuteCards = currentRefuter.getRefutes(suggestedPlayer, suggestedWeapon, suggestedRoom);
+        Iterator<Player> playerIterator = humanPlayers.iterator();
+        // start iterator at currentPlayer
+        while (playerIterator.next() != currentPlayer){}
 
-            goToState(State.REFUTING);
-            if (refuteCards.size() == 0) {
-                GUI.log("" + currentRefuter.getName() + " cannot refute the murder suggestion.\n");
-            } else {
-                GUI.refute(currentRefuter, sugSuspect, sugWeapon, sugRoom, false);
+        // for each player clockwise of currentPlayer, check if they can refute the suggestion
+        for (int i = 0; i < humanPlayers.size() - 1; i++) {
+            if (!playerIterator.hasNext())
+                playerIterator = humanPlayers.iterator();
+
+            Player player = playerIterator.next();
+
+            List<Card> refutes = player.getRefutes(suggestedPlayer, suggestedWeapon, suggestedRoom);
+
+            if (!refutes.isEmpty()) {
+                GUI.chooseRefutingCard(player, refutes);
                 return true;
             }
         }

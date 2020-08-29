@@ -740,7 +740,7 @@ public class GUI {
                 dialog.add(suggestButton);
 
                 suggestButton.addActionListener(e -> {
-                    gameLog += ("\n" + game.getCurrentPlayer().getName() + " chose to suggest:\n");
+                    gameLog += ("\n" + game.getCurrentPlayer().getName() + " suggests:\n");
                     String susSuspect = (String) suspectComboBox.getSelectedItem();
                     String susWeapon = (String) weaponComboBox.getSelectedItem();
                     String susRoom = sugRoom.getName();
@@ -749,11 +749,10 @@ public class GUI {
                     gameLog += (susWeapon + ", ");
                     gameLog += (susRoom + "\n\n");
 
-                    if (game.canRefuteSuggestion(susSuspect, susWeapon, susRoom)) {
-                        log("\nYou may make an accusation before ending your turn.\n");
-                    } else {
-                        log("\nThe Suggestion was unable to be refuted by the other players.\n");
+                    if (!game.refuteSuggestion(susSuspect, susWeapon, susRoom)) {
+                        log("No one could refute your suggestion!\n");
                     }
+                    
                     game.goToState(Game.State.ACCUSING);
                     dialog.setVisible(false);
                 });
@@ -765,7 +764,57 @@ public class GUI {
                 log("You are not in a room!\n");
             }
         }
+    }
 
+    public void chooseRefutingCard(Player refutee, List<Card> cards) {
+
+        if (cards.size() == 1) {
+            String message = String.format("%s showed %s the %s card", refutee.getName(), game.getCurrentPlayer().getName(), cards.get(0).getName());
+            log(message);
+            JOptionPane.showMessageDialog(frame, message);
+            return;
+        }
+
+        // if there are multiple cards to choose from...
+        JDialog dialog = new JDialog(frame, "Choose Card to Refute", true);
+        dialog.setSize(400, 200);
+        dialog.setLayout(null);
+
+        // text at the top
+        JLabel title = new JLabel(refutee.getName() + ", please choose which card to show " + game.getCurrentPlayer().getName());
+        title.setBounds(30, 10, 350, 25);
+        dialog.add(title);
+
+        // a confirm button
+        JButton confirmButton = new JButton("Confirm");
+        confirmButton.setBounds(30, 110, 100, 25);
+        confirmButton.setEnabled(true);
+        dialog.add(confirmButton);
+
+        ButtonGroup group = new ButtonGroup();
+
+        for (int i=0; i<cards.size(); i++) {
+            Card card = cards.get(i);
+            JRadioButton radioButton = new JRadioButton(card.getName());
+            radioButton.setBounds(30, 35 + i*30, 200, 25);
+            radioButton.setMnemonic(KeyEvent.VK_1 + i);
+            radioButton.setActionCommand(card.getName());
+            radioButton.setSelected(i==0);
+            dialog.add(radioButton);
+            group.add(radioButton);
+        }
+
+        // tells the user which was selected
+        confirmButton.addActionListener(e -> {
+            String message = String.format("%s showed %s the %s card", refutee.getName(), game.getCurrentPlayer().getName(), group.getSelection().getActionCommand());
+            log(message);
+            JOptionPane.showMessageDialog(frame, message);
+            dialog.setVisible(false);
+            dialog.dispose();
+            return;
+        });
+
+       dialog.setVisible(true);
     }
 
     /**
@@ -776,100 +825,6 @@ public class GUI {
     public void log(String string) {
         gameLog += string;
         textOutputPane.setText(gameLog);
-    }
-
-    public void refute(Player refuter, String suggestedPlayer, String suggestedWeapon, String suggestedRoom,
-                       boolean failed) {
-        List<Card> refuterCards = refuter.getCards();
-        String name = refuter.getName();
-
-        if (!failed) {
-            gameLog += ("\n" + name + " is able to refute the suggestion.\n");
-        } else {
-            gameLog += (name + " chose a card they did not hold! Please choose again.\n");
-        }
-
-        JDialog dialog = new JDialog(frame, name + "Choose Card to Refute", true);
-        dialog.setSize(400, 200);
-        dialog.setLayout(null);
-
-        // text at the top
-        JLabel title = new JLabel(name + " is able to refute " + game.getCurrentPlayer().getName() + "'s suggestion");
-        title.setBounds(30, 10, 350, 25);
-        dialog.add(title);
-
-        // a refute button
-        JButton refuteButton = new JButton("Refute");
-        refuteButton.setBounds(30, 110, 100, 25);
-        refuteButton.setEnabled(true);
-        dialog.add(refuteButton);
-
-        JRadioButton characterButton = new JRadioButton(suggestedPlayer);
-        characterButton.setBounds(30, 35, 200, 25);
-        characterButton.setMnemonic(KeyEvent.VK_C);
-        characterButton.setActionCommand(suggestedPlayer);
-        characterButton.setSelected(true);
-        dialog.add(characterButton);
-
-        JRadioButton weaponButton = new JRadioButton(suggestedWeapon);
-        weaponButton.setBounds(30, 60, 200, 25);
-        weaponButton.setMnemonic(KeyEvent.VK_W);
-        weaponButton.setActionCommand(suggestedWeapon);
-        dialog.add(weaponButton);
-
-        JRadioButton roomButton = new JRadioButton(suggestedRoom);
-        roomButton.setBounds(30, 85, 200, 25);
-        roomButton.setMnemonic(KeyEvent.VK_R);
-        roomButton.setActionCommand(suggestedRoom);
-        dialog.add(roomButton);
-
-        ButtonGroup group = new ButtonGroup();
-        group.add(characterButton);
-        group.add(weaponButton);
-        group.add(roomButton);
-
-        // Checks to see if Refuter owns the chosen card
-        refuteButton.addActionListener(e -> {
-            if (characterButton.isSelected()) {
-                String refuteChoice = characterButton.getActionCommand();
-                // If Refuter owns their refute choice as a Player card.
-                if (refuterCards.contains(game.getPlayerMap().get(refuteChoice))) {
-                    gameLog += ("\n" + name + " refuted the suggestion with Player card: " + refuteChoice + "\n");
-                    dialog.setVisible(false);
-                    dialog.dispose();
-                    return;
-                }
-                refute(refuter, suggestedPlayer, suggestedWeapon, suggestedRoom, true);
-            } else if (weaponButton.isSelected()) {
-                String refuteChoice = weaponButton.getActionCommand();
-                // If Refuter owns their refute choice as a Weapon card.
-                if (refuterCards.contains(game.getWeaponMap().get(refuteChoice))) {
-                    gameLog += ("\n" + name + " refuted the suggestion with Weapon card: " + refuteChoice + "\n");
-                    dialog.setVisible(false);
-                    dialog.dispose();
-                    return;
-                }
-                refute(refuter, suggestedPlayer, suggestedWeapon, suggestedRoom, true);
-            } else if (roomButton.isSelected()) {
-                String refuteChoice = roomButton.getActionCommand();
-                // If Refuter owns their refute choice as a Player card.
-                if (refuterCards.contains(game.getRoomMap().get(refuteChoice))) {
-                    gameLog += ("\n" + name + " refuted the suggestion with Room card: " + refuteChoice + "\n");
-                    dialog.setVisible(false);
-                    dialog.dispose();
-                    return;
-                }
-                // TODO: Delete this dialog.dispose/setvisible code, and add a way to delete
-                // this dialog.
-                dialog.setVisible(false);
-                dialog.dispose();
-                refute(refuter, suggestedPlayer, suggestedWeapon, suggestedRoom, true);
-            }
-
-        });
-        // NOTE: it seems to work better putting this at the end
-        // otherwise some things aren't visible
-        dialog.setVisible(true);
     }
 
     public void displayRules(JFrame parentFrame) {
