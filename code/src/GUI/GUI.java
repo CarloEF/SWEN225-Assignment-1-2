@@ -49,8 +49,7 @@ public class GUI {
     public static int CARDS_TOP = 0;
     public static int CARD_WIDTH;
     public static int CARD_HEIGHT;
-    public static int CARD_INNER_PADDING;
-    public static int CARD_OUTER_PADDING;
+    public static int CARD_PADDING;
 
     public static int DICE_SIZE;
     public static int DICE_TOP;
@@ -300,17 +299,16 @@ public class GUI {
             g.setColor(new Color(0xe1f5fe));
             g.fillRect(0, 0, CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT);
 
-            int verticalSpace = (int) (this.getWidth() / 2 - 0.05 * this.getWidth());
-            int horizontalSpace = (int) (this.getWidth() / 3 - 0.03 * this.getWidth());
+            int verticalSpace = (int) (this.getHeight()/34);     // maximum vertical space a card can take
+            int horizontalSpace = (int) (this.getWidth()/36);    //maximum horizontal space a card can take
 
-            // System.out.println(verticalSpace + " " + horizontalSpace);
+            System.out.println(verticalSpace + " " + horizontalSpace);
 
             // TODO: Fix this. Cards have 16:11:1 ratio - Height:Width:Padding
 
-            CARD_HEIGHT = verticalSpace > horizontalSpace ? 16 * (horizontalSpace / 11) : verticalSpace;
-            CARD_WIDTH = verticalSpace > horizontalSpace ? horizontalSpace : 11 * (verticalSpace / 16);
-            CARD_INNER_PADDING = verticalSpace > horizontalSpace ? horizontalSpace / 11 : verticalSpace / 16;
-            CARD_OUTER_PADDING = verticalSpace > horizontalSpace ? horizontalSpace / 11 : verticalSpace / 16;
+            CARD_HEIGHT = verticalSpace > horizontalSpace ? 16*horizontalSpace : 16*verticalSpace;
+            CARD_WIDTH = verticalSpace > horizontalSpace ? 11*horizontalSpace : 11*verticalSpace;
+            CARD_PADDING = verticalSpace > horizontalSpace ? horizontalSpace : verticalSpace;
 
             game.drawCards((Graphics2D) g);
         }
@@ -348,10 +346,10 @@ public class GUI {
     // with the board
     public void drawACard(Card card, int index, Graphics2D g) {
 
-        int x = CARDS_LEFT + (index % 3) * (CARD_WIDTH + CARD_OUTER_PADDING);
-        int y = CARDS_TOP + (index < 3 ? 0 : 1) * (CARD_HEIGHT + CARD_OUTER_PADDING);
-        Rectangle iconArea = new Rectangle(x + CARD_INNER_PADDING, y + CARD_INNER_PADDING,
-                CARD_WIDTH - 2 * CARD_INNER_PADDING, CARD_HEIGHT - 4 * CARD_INNER_PADDING);
+        int x = CARDS_LEFT + (index % 3) * (CARD_WIDTH + CARD_PADDING);
+        int y = CARDS_TOP + (index < 3 ? 0 : 1) * (CARD_HEIGHT + CARD_PADDING);
+        Rectangle iconArea = new Rectangle(x + CARD_PADDING, y + CARD_PADDING,
+                CARD_WIDTH - 2 * CARD_PADDING, CARD_HEIGHT - 4 * CARD_PADDING);
 
         // if there's no card to be drawn here, draw outline and return
         if (card == null) {
@@ -368,7 +366,7 @@ public class GUI {
 
         Image icon = card.getIcon();
         int iconXOffset = (CARD_WIDTH - icon.getWidth(null)) / 2;
-        int iconYOffset = CARD_INNER_PADDING + (iconArea.height - icon.getHeight(null)) / 2;
+        int iconYOffset = CARD_PADDING + (iconArea.height - icon.getHeight(null)) / 2;
         g.drawImage(icon, x + iconXOffset, y + iconYOffset, null);
 
         String cardName = card.getName();
@@ -376,7 +374,7 @@ public class GUI {
         FontMetrics fontMetrics = g.getFontMetrics(font);
         int textXOffset = (CARD_WIDTH - fontMetrics.stringWidth(cardName)) / 2;
         g.setFont(font);
-        g.drawString(cardName, x + textXOffset, y + CARD_HEIGHT - CARD_OUTER_PADDING);
+        g.drawString(cardName, x + textXOffset, y + CARD_HEIGHT - CARD_PADDING);
     }
 
     public void redraw() {
