@@ -45,8 +45,6 @@ public class GUI {
     private static JComponent boardComponent, cardsComponent, diceComponent;
 
     // the top/left position on screen where cards are drawn
-    public static int CARDS_LEFT = 0;
-    public static int CARDS_TOP = 0;
     public static int CARD_WIDTH;
     public static int CARD_HEIGHT;
     public static int CARD_PADDING;
@@ -114,7 +112,8 @@ public class GUI {
         endTurnButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                endTurnButton.setBorder(BorderFactory.createLineBorder(Color.blue));
+                if (endTurnButton.isEnabled())
+                    endTurnButton.setBorder(BorderFactory.createLineBorder(Color.blue));
             }
 
             @Override
@@ -138,7 +137,8 @@ public class GUI {
         suggestionButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                suggestionButton.setBorder(BorderFactory.createLineBorder(Color.blue));
+                if (suggestionButton.isEnabled())
+                    suggestionButton.setBorder(BorderFactory.createLineBorder(Color.blue));
             }
 
             @Override
@@ -162,7 +162,8 @@ public class GUI {
         accusationButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                accusationButton.setBorder(BorderFactory.createLineBorder(Color.blue));
+                if (accusationButton.isEnabled())
+                    accusationButton.setBorder(BorderFactory.createLineBorder(Color.blue));
             }
 
             @Override
@@ -216,9 +217,6 @@ public class GUI {
                 Component c = (Component) e.getSource();
                 CURRENT_WINDOW_WIDTH = c.getWidth();
                 CURRENT_WINDOW_HEIGHT = c.getHeight();
-
-                // TODO: This resizes the pane for the board. Breaks sometimes? Look at it. -
-                // Elias
             }
         });
 
@@ -248,25 +246,12 @@ public class GUI {
     class GameBoardComponent extends JComponent {
 
         GameBoardComponent() {
-            setPreferredSize(new Dimension(100000000, 10000000));
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            game.draw((Graphics2D) g);
-        }
-    }
-
-    class LogComponent extends JComponent {
-
-        LogComponent() {
             setPreferredSize(new Dimension(CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT));
         }
 
         @Override
         protected void paintComponent(Graphics g) {
-            g.setColor(Color.BLACK);
-            g.fillRect(0, 0, CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT);
+            game.draw((Graphics2D) g);
         }
     }
 
@@ -299,13 +284,10 @@ public class GUI {
             g.setColor(new Color(0xe1f5fe));
             g.fillRect(0, 0, CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT);
 
-            int verticalSpace = (int) (this.getHeight()/34);     // maximum vertical space a card can take
-            int horizontalSpace = (int) (this.getWidth()/36);    //maximum horizontal space a card can take
+            int verticalSpace = (int) (this.getHeight()/34);     // single unit of vertical space for cards
+            int horizontalSpace = (int) (this.getWidth()/36);    // single unit of horizontal space for cards
 
-            System.out.println(verticalSpace + " " + horizontalSpace);
-
-            // TODO: Fix this. Cards have 16:11:1 ratio - Height:Width:Padding
-
+            // based on 16:11:1 Height:Width:Padding ratio given in original cards
             CARD_HEIGHT = verticalSpace > horizontalSpace ? 16*horizontalSpace : 16*verticalSpace;
             CARD_WIDTH = verticalSpace > horizontalSpace ? 11*horizontalSpace : 11*verticalSpace;
             CARD_PADDING = verticalSpace > horizontalSpace ? horizontalSpace : verticalSpace;
@@ -342,12 +324,10 @@ public class GUI {
         }
     }
 
-    // TODO: also get this to scale properly with the display, so it doesn't overlap
-    // with the board
     public void drawACard(Card card, int index, Graphics2D g) {
 
-        int x = CARDS_LEFT + (index % 3) * (CARD_WIDTH + CARD_PADDING);
-        int y = CARDS_TOP + (index < 3 ? 0 : 1) * (CARD_HEIGHT + CARD_PADDING);
+        int x = CARD_PADDING + (index % 3) * (CARD_WIDTH + CARD_PADDING);
+        int y = CARD_PADDING + (index < 3 ? 0 : 1) * (CARD_HEIGHT + CARD_PADDING);
         Rectangle iconArea = new Rectangle(x + CARD_PADDING, y + CARD_PADDING,
                 CARD_WIDTH - 2 * CARD_PADDING, CARD_HEIGHT - 4 * CARD_PADDING);
 
@@ -368,7 +348,6 @@ public class GUI {
         int iconXOffset = (CARD_WIDTH - icon.getWidth(null)) / 2;
         int iconYOffset = CARD_PADDING + (iconArea.height - icon.getHeight(null)) / 2;
         g.drawImage(icon, x + iconXOffset, y + iconYOffset, null);
-        System.out.println(icon.getHeight(null));
 
         String cardName = card.getName();
         Font font = new Font("SansSerif", Font.BOLD, (int)(1.5*CARD_PADDING));
