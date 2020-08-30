@@ -11,7 +11,6 @@ import java.util.Set;
 
 /**
  * Class representing a Room
- *
  */
 public class Room implements Card {
 	//list of all the tiles that make up this room

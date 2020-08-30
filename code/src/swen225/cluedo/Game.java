@@ -1,13 +1,10 @@
 package swen225.cluedo;
 
 import java.awt.*;
-import java.awt.font.GraphicAttribute;
 import java.util.*;
 import java.util.List;
 
 import GUI.GUI;
-
-// Hello, World!
 
 /**
  * Game class that handles all input/output and the game logic
