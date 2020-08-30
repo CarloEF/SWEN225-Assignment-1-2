@@ -20,25 +20,10 @@ public class Game {
     public static final int BOARD_WIDTH = 24;
     public static final int BOARD_HEIGHT = 25;
 
-    public enum State {
-        ROLLING_DICE(0),
-        MOVING(1),
-        SUGGESTING(2),
-        REFUTING(3),
-        ACCUSING(4),
-        GAME_OVER(5);
-
-        private int value;
-
-        State(int value) {
-            this.value = value;
-        }
-
-        public int value() {
-            return value;
-        }
-    }
-
+    /**
+     * Enumerator that represents the current state of a player's turn
+     */
+    public enum State { ROLLING_DICE, MOVING, SUGGESTING,  REFUTING, ACCUSING, GAME_OVER};
     public State state = State.ROLLING_DICE;
 
     //i = inaccessible
@@ -136,9 +121,6 @@ public class Game {
     int die1 = diceRoll();
     int die2 = diceRoll();
 
-    //get all input from this scanner
-    Scanner input;
-
     GUI GUI;
 
     /**
@@ -155,11 +137,40 @@ public class Game {
         rooms = new HashMap<String, Room>();
         roomList = new ArrayList<Room>();
 
-        input = new Scanner(System.in);
-
         this.GUI = GUI;
     }
 
+    /**
+     * Handles all the logic at the start of the game
+     */
+    public void startGame(Map<String, String> playerNames) {
+        initCards();
+        board.setBoard(ROOM_BOARD, WALL_BOARD, rooms);
+        addRoomExits();
+        setPlayerTiles();
+        setWeaponTiles();
+
+        GUI.log("Hello, welcome to Cluedo!\n");
+
+        initHumanPlayers(playerNames);
+        dealCards();
+
+        // Initializes Queue of players for turns
+        for (Player player : humanPlayers) {
+            playerQueue.add(player);
+            validPlayers.add(player);
+        }
+
+        // Sets up the first player's turn.
+        // Something similar to this will be called only whenever a turn is ended.
+        currentPlayer = playerQueue.poll();
+        initializeTurn();
+    }
+
+    /**
+     * Draw method for the whole Game. Draws the board and everything on it
+     * @param g The graphics object to draw to
+     */
     public void draw(Graphics2D g) {
 
         int width = GUI.CURRENT_WINDOW_WIDTH;
@@ -207,39 +218,6 @@ public class Game {
         addRoom(new Room("Hall"));
         addRoom(new Room("Lounge"));
         addRoom(new Room("Dining Room"));
-    }
-
-    /**
-     * Adds a player to collections
-     *
-     * @param player
-     */
-    private void addPlayer(Player player) {
-        cards.add(player);
-        players.put(player.getName(), player);
-        playerList.add(player);
-    }
-
-    /**
-     * Adds a weapon to collections
-     *
-     * @param weapon
-     */
-    private void addWeapon(Weapon weapon) {
-        cards.add(weapon);
-        weapons.put(weapon.getName(), weapon);
-        weaponList.add(weapon);
-    }
-
-    /**
-     * Adds a room to collections
-     *
-     * @param room
-     */
-    private void addRoom(Room room) {
-        cards.add(room);
-        rooms.put(room.getName(), room);
-        roomList.add(room);
     }
 
     /**
@@ -304,34 +282,6 @@ public class Game {
     }
 
     /**
-     * Handles all the logic at the start of the game
-     */
-    public void startGame(Map<String, String> playerNames) {
-        initCards();
-        board.setBoard(ROOM_BOARD, WALL_BOARD, rooms);
-        addRoomExits();
-        setPlayerTiles();
-        setWeaponTiles();
-
-        GUI.log("Hello, welcome to Cluedo!\n");
-
-        initHumanPlayers(playerNames);
-        dealCards();
-
-        // Initializes Queue of players for turns
-        for (Player player : humanPlayers) {
-            playerQueue.add(player);
-            validPlayers.add(player);
-        }
-
-        // Sets up the first player's turn.
-        // Something similar to this will be called only whenever a turn is ended.
-        currentPlayer = playerQueue.poll();
-        initializeTurn();
-
-    }
-
-    /**
      * Puts the human player list in the correct order
      */
     private void initHumanPlayers(Map<String, String> usernames) {
@@ -376,6 +326,10 @@ public class Game {
         }
     }
 
+    /**
+     * Calls method in GUI to draw the current player's card to screen
+     * @param g Graphics object to draw to
+     */
     public void drawCards(Graphics2D g) {
 
         List<Card> playersCards = currentPlayer.getCards();
@@ -384,6 +338,10 @@ public class Game {
             GUI.drawACard(i < playersCards.size() ? playersCards.get(i) : null, i, g);
     }
 
+    /**
+     * Change game state, calls state-entry code
+     * @param newState The state to move to
+     */
     public void goToState(State newState) {
         state = newState;
 
@@ -406,6 +364,36 @@ public class Game {
         }
     }
 
+    /**
+     * The start of a player's turn
+     * Roll the dice and determine where they can move
+     */
+    public void initializeTurn() {
+        if (state == State.GAME_OVER) {
+            return;
+        }
+        goToState(State.ROLLING_DICE);
+        GUI.log("\n" + currentPlayer.getName() + "'s turn: ");
+        die1 = diceRoll();
+        die2 = diceRoll();
+        int stepNum = die1 + die2;
+
+        // Gets all valid tiles and rooms the player can go to and puts them into the sets
+        getBoard().getValidMoves(stepNum, currentPlayer);
+
+        GUI.log("They rolled a " + die1 + " and a " + die2 + ".\n");
+        GUI.redraw();
+        goToState(State.MOVING);
+    }
+
+    /**
+     * Determine whether an accusation is correct
+     * Move to GAME_OVER state if it is correct
+     * @param accSuspect The accused player's name
+     * @param accWeapon The accused weapon's name
+     * @param accRoom The accused room's name
+     * @return True if accusation is correct
+     */
     public boolean checkAccusationIsTrue(String accSuspect, String accWeapon, String accRoom) {
         if (players.get(accSuspect) == murderer &&
                 weapons.get(accWeapon) == murderWeapon &&
@@ -416,6 +404,13 @@ public class Game {
         return false;
     }
 
+    /**
+     * Check other players' cards to determine if suggested murder circumstances are correct
+     * @param sugSuspect The suggested player's name
+     * @param sugWeapon The suggested weapon's name
+     * @param sugRoom The suggested room's name
+     * @return True if suggestion can be refuted
+     */
     public boolean refuteSuggestion(String sugSuspect, String sugWeapon, String sugRoom) {
         Player suggestedPlayer = players.get(sugSuspect);
         Weapon suggestedWeapon = weapons.get(sugWeapon);
@@ -447,29 +442,11 @@ public class Game {
         return false;
     }
 
-    public void initializeTurn() {
-        if (state == State.GAME_OVER) {
-            return;
-        }
-        goToState(State.ROLLING_DICE);
-        GUI.log("\n" + currentPlayer.getName() + "'s turn: ");
-        die1 = diceRoll();
-        die2 = diceRoll();
-        int stepNum = die1 + die2;
-
-        // Gets all valid tiles and rooms the player can go to and puts them into the sets
-        getBoard().getValidMoves(stepNum, currentPlayer);
-
-        GUI.log("They rolled a " + die1 + " and a " + die2 + ".\n");
-        // Possibly remove:
-        // gameLog+=("Your possible moves have been highlighted as green tiles, or orange tiles for rooms.\n");
-        GUI.redraw();
-        goToState(State.MOVING);
-    }
-
+    /**
+     * End of a player's turn
+     * Begins the next player's turn
+     */
     public void endTurn() {
-
-        // Currently, turns can always be ended, any time.
 
         // Only allows turns to end while game is still running.
         if (state == State.GAME_OVER) {
@@ -493,6 +470,11 @@ public class Game {
         }
     }
 
+    /**
+     * Method called when a player makes an incorrect accusation
+     * They can no longer move or make suggestions
+     * If all other players have lost, the remaining player automatically wins
+     */
     public void playerLost() {
         validPlayers.remove(currentPlayer);
         currentPlayer.setCanAccuse(false);
@@ -519,6 +501,64 @@ public class Game {
         return (int) Math.floor(Math.random() * 6 + 1);
     }
 
+    /**
+     * Helper method for drawing dice
+     * Converts an integer into 9 booleans, representing a 3x3 grid of dots
+     * @param value The integer to convert (should be 1-6)
+     * @return True where there should be a dot, false where there shouldn't
+     */
+    public boolean[] getDots(int value) {
+        switch (value) {
+            case 1:
+                return new boolean[]{false, false, false, false, true, false, false, false, false};
+            case 2:
+                return new boolean[]{false, false, true, false, false, false, true, false, false};
+            case 3:
+                return new boolean[]{false, false, true, false, true, false, true, false, false};
+            case 4:
+                return new boolean[]{true, false, true, false, false, false, true, false, true};
+            case 5:
+                return new boolean[]{true, false, true, false, true, false, true, false, true};
+            case 6:
+                return new boolean[]{true, false, true, true, false, true, true, false, true};
+            default:
+                return new boolean[]{true, true, true, true, true, true, true, true, true};
+        }
+    }
+
+    /**
+     * Adds a player to collections
+     * @param player The player to add
+     */
+    private void addPlayer(Player player) {
+        cards.add(player);
+        players.put(player.getName(), player);
+        playerList.add(player);
+    }
+
+    /**
+     * Adds a weapon to collections
+     * @param weapon The weapon to add
+     */
+    private void addWeapon(Weapon weapon) {
+        cards.add(weapon);
+        weapons.put(weapon.getName(), weapon);
+        weaponList.add(weapon);
+    }
+
+    /**
+     * Adds a room to collections
+     * @param room The room to add
+     */
+    private void addRoom(Room room) {
+        cards.add(room);
+        rooms.put(room.getName(), room);
+        roomList.add(room);
+    }
+
+    /**
+     * Getters
+     */
     public Board getBoard() {
         return board;
     }
@@ -558,5 +598,4 @@ public class Game {
     public int[] getDice() {
         return new int[]{die1, die2};
     }
-
 }

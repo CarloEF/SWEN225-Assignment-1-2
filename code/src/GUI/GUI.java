@@ -883,25 +883,6 @@ public class GUI {
         drawDie(DICE_TOP, DICE_LEFT + DICE_SIZE + DICE_GAP, game.getDice()[1], g);
     }
 
-    public boolean[] getDots(int value) {
-        switch (value) {
-            case 1:
-                return new boolean[]{false, false, false, false, true, false, false, false, false};
-            case 2:
-                return new boolean[]{false, false, true, false, false, false, true, false, false};
-            case 3:
-                return new boolean[]{false, false, true, false, true, false, true, false, false};
-            case 4:
-                return new boolean[]{true, false, true, false, false, false, true, false, true};
-            case 5:
-                return new boolean[]{true, false, true, false, true, false, true, false, true};
-            case 6:
-                return new boolean[]{true, false, true, true, false, true, true, false, true};
-            default:
-                return new boolean[]{true, true, true, true, true, true, true, true, true};
-        }
-    }
-
     public void drawDie(int top, int left, int value, Graphics2D g) {
         int INNER_PADDING = DICE_SIZE / 4;
         int DOT_RADIUS = DICE_SIZE / 12;
@@ -912,7 +893,7 @@ public class GUI {
         g.setColor(Color.BLACK);
         g.drawRect(left, top, DICE_SIZE, DICE_SIZE);
 
-        boolean[] isDot = getDots(value);
+        boolean[] isDot = game.getDots(value);
         int x = left + INNER_PADDING;
         int y = top + INNER_PADDING;
         for (int i = 0; i < 9; i++) {

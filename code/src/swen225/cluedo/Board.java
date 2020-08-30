@@ -12,6 +12,7 @@ import GUI.GUI;
  * Class representing the board
  */
 public class Board {
+    // constants representing the position the board is drawn to
     public static int TILE_SIZE;
     public static final int TOP = 0;
     public static final int LEFT = 0;
@@ -21,6 +22,7 @@ public class Board {
     int height;
     Game game;
 
+    // tiles and rooms that the current player can move to
     Set<Tile> validTiles = new HashSet<Tile>();
     Set<Room> validRooms = new HashSet<Room>();
 
@@ -38,6 +40,10 @@ public class Board {
         this.board = new Tile[width][height];
     }
 
+    /**
+     * Draw the board
+     * @param g The graphics object to draw on
+     */
     public void draw(Graphics2D g) {
 
         int width = GUI.getBoardComponentWidth();
@@ -102,6 +108,11 @@ public class Board {
         }
     }
 
+    /**
+     * Called when board is clicked on
+     * @param player The current player moving
+     * @param e The mouse event
+     */
     public void doMouse(Player player, MouseEvent e) {
         // Only allows movement if Game is not in GAME_OVER State.
         if (game.state != Game.State.GAME_OVER) {
@@ -128,6 +139,9 @@ public class Board {
         }
     }
 
+    /**
+     * Clear valid rooms and tiles once player has moved
+     */
     public void clearValidRoomsAndTiles() {
         validTiles.clear();
         validRooms.clear();
@@ -136,8 +150,8 @@ public class Board {
     /**
      * Moves a player to a room
      *
-     * @param player
-     * @param newRoom
+     * @param player The player to move
+     * @param newRoom The room to move to
      */
     public void movePlayer(Player player, Room newRoom) {
         player.moveToRoom(newRoom);
@@ -146,8 +160,8 @@ public class Board {
     /**
      * Moves a weapon to a room
      *
-     * @param weapon
-     * @param newRoom
+     * @param weapon The weapon to move
+     * @param newRoom The room to move to
      */
     public void moveWeapon(Weapon weapon, Room newRoom) {
         weapon.moveToRoom(newRoom);
@@ -240,7 +254,6 @@ public class Board {
      *
      * @param diceRoll - the number of moves to use, determined by a dice roll
      * @param player   - the player to move
-     * @return
      */
     public void getValidMoves(int diceRoll, Player player) {
 
@@ -269,7 +282,6 @@ public class Board {
      * @param visited    - a stack of tiles already visited
      * @param validTiles - the set which all the valid tiles are added to
      * @param validRooms - the set which all the valid rooms are added to
-     * @return
      */
     private void validMove(int moveNum, int diceRoll, Stack<Tile> visited) {
         Tile lastTile = visited.peek();
@@ -357,9 +369,9 @@ public class Board {
     /**
      * Returns the tile at a point (x, y) returns null if invalid x or y
      *
-     * @param x
-     * @param y
-     * @return
+     * @param x The x position of the Tile to get
+     * @param y The y position of the Tile to get
+     * @return The Tile at that position, or null if there isn't one
      */
     public Tile getTile(int x, int y) {
         if (x < 0 || x >= width || y < 0 || y >= height) {
