@@ -344,10 +344,13 @@ public class GUI {
         g.setColor(Color.WHITE);
         g.fillRect(iconArea.x, iconArea.y, iconArea.width, iconArea.height);
 
-        Image icon = card.getIcon().getScaledInstance(iconArea.width, iconArea.height, Image.SCALE_SMOOTH);
-        int iconXOffset = (CARD_WIDTH - icon.getWidth(null)) / 2;
-        int iconYOffset = CARD_PADDING + (iconArea.height - icon.getHeight(null)) / 2;
-        g.drawImage(icon, x + iconXOffset, y + iconYOffset, null);
+        Image icon = card.getIcon();
+        int iconScaledWidth = (int)(iconArea.width * 0.7);
+        int iconScaledHeight = (int)(((float)icon.getHeight(null) / icon.getWidth(null)) * iconScaledWidth);
+        Image iconScaled = icon.getScaledInstance(iconScaledWidth, iconScaledHeight, Image.SCALE_SMOOTH);
+        int iconXOffset = (CARD_WIDTH - iconScaled.getWidth(null)) / 2;
+        int iconYOffset = CARD_PADDING + (iconArea.height - iconScaled.getHeight(null)) / 2;
+        g.drawImage(iconScaled, x + iconXOffset, y + iconYOffset, null);
 
         String cardName = card.getName();
         Font font = new Font("SansSerif", Font.BOLD, (int)(1.5*CARD_PADDING));
