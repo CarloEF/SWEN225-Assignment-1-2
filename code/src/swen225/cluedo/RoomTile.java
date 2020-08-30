@@ -2,20 +2,21 @@ package swen225.cluedo;
 
 /**
  * Class representing a room tile
- *
  */
 public class RoomTile extends Tile {
 	
 	//the room this belongs to
 	private Room room;
-	
+
 	/**
-	 * Constructs a roomtile
-	 * @param up
-	 * @param down
-	 * @param left
-	 * @param right
-	 * @param room
+	 * Constructs a room tile
+	 * @param up True if this Tile has an upper wall
+	 * @param down True if this Tile has an bottom wall
+	 * @param left True if this Tile has an left wall
+	 * @param right True if this Tile has an right wall
+	 * @param x The column of this Tile
+	 * @param y The row of the Tile
+	 * @param room The Room that this tile is a part of
 	 */
 	public RoomTile(boolean up, boolean down, boolean left, boolean right, int x, int y, Room room) {
 		super(up, down, left, right, x, y);
@@ -26,7 +27,7 @@ public class RoomTile extends Tile {
 	
 	/**
 	 * Gets the room this belongs to
-	 * @return
+	 * @return The Room this tile is in
 	 */
 	public Room getRoom() {
 		return room;
@@ -34,6 +35,7 @@ public class RoomTile extends Tile {
 	
 	/**
 	 * Can't travel through rooms, so a room is always inaccessible
+	 * @return false
 	 */
 	public boolean isAccessible() {
 		return false;

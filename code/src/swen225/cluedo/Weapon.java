@@ -7,7 +7,6 @@ import java.io.IOException;
 
 /**
  * Class representing a weapon
- * 
  */
 public class Weapon implements CluedoObject {
 	private String name;
@@ -18,13 +17,13 @@ public class Weapon implements CluedoObject {
 	
 	/**
 	 * Constructs a weapon
-	 * @param name
-	 * @param tile
+	 * @param name The name of this weapon (e.g. Candlestick)
 	 */
 	public Weapon(String name) {
 		this.name = name;
 		this.tile = null;
 
+		// try to load the icon image, drawn on cards
 		try {
 			icon = ImageIO.read(new File("images/weapon-icon.png"));
 		} catch (IOException e) {
@@ -32,6 +31,10 @@ public class Weapon implements CluedoObject {
 		}
 	}
 
+	/**
+	 * Draw this Weapon on the Board
+	 * @param g The graphics object to draw on
+	 */
 	public void draw(Graphics2D g) {
 		int tileTop = Board.TOP + tile.getY() * Board.TILE_SIZE;
 		int tileLeft = Board.LEFT + tile.getX() * Board.TILE_SIZE;
@@ -76,6 +79,10 @@ public class Weapon implements CluedoObject {
 		return name;
 	}
 
+	/**
+	 * Return the icon to draw on a Weapon card
+	 * @return The icon as an Image
+	 */
 	@Override
 	public Image getIcon() {
 		return icon;

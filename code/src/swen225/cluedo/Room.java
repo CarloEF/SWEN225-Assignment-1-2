@@ -24,7 +24,7 @@ public class Room implements Card {
 	
 	/**
 	 * Constructs a room
-	 * @param name
+	 * @param name The name of the Room as a String
 	 */
 	public Room(String name) {
 		this.name = name;
@@ -40,7 +40,8 @@ public class Room implements Card {
 	
 	/**
 	 * Gets a tile from this room that is free
-	 * @return
+	 * With the current room sizes and CludeoObjects, there should always be a space free
+	 * @return The first randomly located Tile
 	 */
 	public Tile getFreeTile() {
 		int index = 0;
@@ -52,7 +53,7 @@ public class Room implements Card {
 	
 	/**
 	 * Adds an exit tile to the room
-	 * @param tile
+	 * @param tile The Tile to add
 	 */
 	public void addExitTile(Tile tile) {
 		exitTiles.add(tile);
@@ -60,7 +61,7 @@ public class Room implements Card {
 	
 	/**
 	 * Gets the exit tiles for this room
-	 * @return
+	 * @return A Set of the exit tiles
 	 */
 	public Set<Tile> getExitTiles() {
 		return exitTiles;
@@ -68,7 +69,7 @@ public class Room implements Card {
 	
 	/**
 	 * Adds a tile to the room
-	 * @param tile
+	 * @param tile The RoomTile to add
 	 */
 	public void addTile(RoomTile tile) {
 		tiles.add(tile);
@@ -82,6 +83,10 @@ public class Room implements Card {
 		return name;
 	}
 
+	/**
+	 * Get the icon for room cards
+	 * @return The icon as an Image object
+	 */
 	@Override
 	public Image getIcon() {
 		return icon;
