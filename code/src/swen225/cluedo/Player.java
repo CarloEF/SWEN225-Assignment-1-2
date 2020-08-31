@@ -47,32 +47,7 @@ public class Player implements CluedoObject {
      * @param g The graphics object to draw to
      */
     public void draw(Graphics2D g) {
-        int tileTop = Board.TOP + tile.getY() * Board.TILE_SIZE;
-        int tileLeft = Board.LEFT + tile.getX() * Board.TILE_SIZE;
-
-        // make the player a circle slightly smaller than the tile it's in
-        int innerPadding = Board.TILE_SIZE / 10;
-        int diameter = Board.TILE_SIZE - 2*innerPadding;
-        int circleTop = tileTop + innerPadding;
-        int circleLeft = tileLeft + innerPadding;
-
-        // draw the player as a circle
-        g.setColor(colour);
-        g.fillOval(circleLeft, circleTop, diameter, diameter);
-        g.setColor(Color.BLACK);
-        g.drawOval(circleLeft, circleTop, diameter, diameter);
-
-        // draw the player's username underneath (centred horizontally)
-        Font font = new Font("SansSerif", Font.PLAIN, 10);
-        FontMetrics fontMetrics = g.getFontMetrics(font);
-        int textWidth = fontMetrics.stringWidth(username);
-        int textHeight = fontMetrics.getHeight();
-        int textLeft = tileLeft + (Board.TILE_SIZE / 2) - (textWidth / 2);
-        int textTop = tileTop + Board.TILE_SIZE;
-        g.setFont(font);
-
-        g.setColor(Color.BLACK);
-        g.drawString(username, textLeft, textTop + textHeight - 5);
+        GUI.GUI.drawPlayer(this, g);
     }
 
     /**
@@ -180,5 +155,19 @@ public class Player implements CluedoObject {
      */
     public String toString() {
         return name;
+    }
+
+    /**
+     * Returns the username of the player controlling this character
+     * @return The username as a String
+     */
+    public String getUsername() {return username;}
+
+    /**
+     * Returns the colour that this player is drawn as
+     * @return A Color object
+     */
+    public Color getColour() {
+        return colour;
     }
 }

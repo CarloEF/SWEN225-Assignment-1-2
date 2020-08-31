@@ -36,32 +36,7 @@ public class Weapon implements CluedoObject {
 	 * @param g The graphics object to draw on
 	 */
 	public void draw(Graphics2D g) {
-		int tileTop = Board.TOP + tile.getY() * Board.TILE_SIZE;
-		int tileLeft = Board.LEFT + tile.getX() * Board.TILE_SIZE;
-		int halfTile = Board.TILE_SIZE / 2;
-
-		int innerPadding = Board.TILE_SIZE / 10;
-		int diamondSize = Board.TILE_SIZE - 2*innerPadding;
-		int halfDiamond = diamondSize / 2;
-		int diamondTop = tileTop + innerPadding;
-		int diamondLeft = tileLeft + innerPadding;
-
-		int[] xPoints = new int[] {diamondLeft + halfDiamond, diamondLeft + diamondSize, diamondLeft + halfDiamond, diamondLeft};
-		int[] yPoints = new int[] {diamondTop, diamondTop + halfDiamond, diamondTop + diamondSize, diamondTop + halfDiamond};
-
-		g.setColor(Color.BLACK);
-		g.fillPolygon(xPoints, yPoints, 4);
-
-		Font font = new Font("SansSerif", Font.PLAIN, 10);
-		FontMetrics fontMetrics = g.getFontMetrics(font);
-		int textWidth = fontMetrics.stringWidth(name);
-		int textHeight = fontMetrics.getHeight();
-		int textLeft = tileLeft + halfTile - (textWidth / 2);
-		int textTop = tileTop + Board.TILE_SIZE;
-		g.setFont(font);
-
-		g.setColor(Color.BLACK);
-		g.drawString(name, textLeft, textTop + textHeight - 5);
+		GUI.GUI.drawWeapon(this, g);
 	}
 	
 	/**

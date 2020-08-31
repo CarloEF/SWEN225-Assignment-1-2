@@ -12,10 +12,6 @@ import GUI.GUI;
  * Class representing the board
  */
 public class Board {
-    // constants representing the position the board is drawn to
-    public static int TILE_SIZE;
-    public static final int TOP = 0;
-    public static final int LEFT = 0;
 
     Tile[][] board;
     int width;
@@ -38,105 +34,6 @@ public class Board {
         this.height = height;
 
         this.board = new Tile[width][height];
-    }
-
-    /**
-     * Draw the board
-     * @param g The graphics object to draw on
-     */
-    public void draw(Graphics2D g) {
-
-        int width = GUI.getBoardComponentWidth();
-        int height = GUI.getBoardComponentHeight();
-
-        if (width < height)
-            TILE_SIZE = width / 24;
-        else
-            TILE_SIZE = height / 25;
-
-        // fill in behind the board so that cellar looks solid
-        g.setColor(Color.GRAY);
-        g.fillRect(LEFT + 2 * TILE_SIZE, TOP + 2 * TILE_SIZE, TILE_SIZE * (board.length - 4), TILE_SIZE * (board[0].length - 4));
-
-        for (int row = 0; row < board[0].length; row++) {
-            for (int col = 0; col < board.length; col++) {
-                int x = LEFT + col * TILE_SIZE;
-                int y = TOP + row * TILE_SIZE;
-
-                // draw backgrounds of cells
-                Tile tile = board[col][row];
-                if (tile instanceof InaccessibleTile)
-                    continue;
-
-                if (tile instanceof HallwayTile) {
-                    g.setColor(Color.LIGHT_GRAY);
-                } else if (tile instanceof RoomTile) {
-                    g.setColor(Color.GRAY);
-                }
-
-                if (game.state == Game.State.MOVING)
-                    if (validTiles.contains(tile))
-                        g.setColor(Color.GREEN);
-                    else
-                        for (Room room : validRooms)
-                            if (room.getTiles().contains(tile))
-                                g.setColor(Color.ORANGE);
-
-                g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-
-                // do outlines for hallway tiles
-                if (tile instanceof HallwayTile) {
-                    g.setColor(Color.GRAY);
-                    g.drawRect(x, y, TILE_SIZE, TILE_SIZE);
-                }
-
-                // draw walls as thicker lines
-                Stroke initialStroke = g.getStroke();
-                g.setColor(Color.DARK_GRAY);
-                g.setStroke(new BasicStroke(3, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
-                if (tile.hasDownWall())
-                    g.drawLine(x, y + TILE_SIZE, x + TILE_SIZE, y + TILE_SIZE);
-                if (tile.hasUpWall())
-                    g.drawLine(x, y, x + TILE_SIZE, y);
-                if (tile.hasLeftWall())
-                    g.drawLine(x, y, x, y + TILE_SIZE);
-                if (tile.hasRightWall())
-                    g.drawLine(x + TILE_SIZE, y, x + TILE_SIZE, y + TILE_SIZE);
-
-                g.setStroke(initialStroke); // set the stroke back to normal
-            }
-        }
-    }
-
-    /**
-     * Called when board is clicked on
-     * @param player The current player moving
-     * @param e The mouse event
-     */
-    public void doMouse(Player player, MouseEvent e) {
-        // Only allows movement if Game is not in GAME_OVER State.
-        if (game.state != Game.State.GAME_OVER) {
-            if (e.getX() < LEFT || e.getX() > LEFT + board.length * TILE_SIZE) return;
-            if (e.getY() < TOP || e.getY() > TOP + board[0].length * TILE_SIZE) return;
-
-            int col = (e.getX() - LEFT) / TILE_SIZE;
-            int row = (e.getY() - TOP) / TILE_SIZE;
-
-            Tile tile = board[col][row];
-
-            if (validTiles.contains(tile)) {
-                player.moveToTile(tile);
-                game.goToState(Game.State.ACCUSING);
-                return;
-            }
-            for (Room room : validRooms) {
-                if (room.getTiles().contains(tile)) {
-                    player.moveToRoom(room);
-                    game.goToState(Game.State.SUGGESTING);
-                    return;
-                }
-            }
-        }
     }
 
     /**
@@ -380,4 +277,7 @@ public class Board {
         return board[x][y];
     }
 
+
+    public Set<Tile> getValidTiles() { return validTiles;}
+    public Set<Room> getValidRooms() { return validRooms;}
 }

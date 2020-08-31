@@ -3,7 +3,6 @@ package GUI;
 import swen225.cluedo.*;
 
 import javax.swing.*;
-import javax.swing.text.DefaultCaret;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -53,6 +52,11 @@ public class GUI {
     public static int DICE_TOP;
     public static int DICE_LEFT;
     public static int DICE_GAP;
+
+    // constants representing the position the board is drawn to
+    public static int TILE_SIZE;
+    public static final int BOARD_TOP = 0;
+    public static final int BOARD_LEFT = 0;
 
     private String gameLog = "";
 
@@ -250,8 +254,80 @@ public class GUI {
         }
 
         @Override
-        protected void paintComponent(Graphics g) {
-            game.draw((Graphics2D) g);
+        protected void paintComponent(Graphics graphics) {
+            Graphics2D g = (Graphics2D)graphics;
+            
+            g.setColor(Color.WHITE);
+            g.fillRect(0, 0, CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT);
+
+            int width = GUI.getBoardComponentWidth();
+            int height = GUI.getBoardComponentHeight();
+
+            if (width < height)
+                TILE_SIZE = width / 24;
+            else
+                TILE_SIZE = height / 25;
+
+            // fill in behind the board so that cellar looks solid
+            g.setColor(Color.GRAY);
+            g.fillRect(BOARD_LEFT + 2 * TILE_SIZE, BOARD_TOP + 2 * TILE_SIZE, TILE_SIZE * (Game.BOARD_COLS - 4), TILE_SIZE * (Game.BOARD_ROWS - 4));
+
+            for (int row = 0; row < Game.BOARD_ROWS; row++) {
+                for (int col = 0; col < Game.BOARD_COLS; col++) {
+                    int x = BOARD_LEFT + col * TILE_SIZE;
+                    int y = BOARD_TOP + row * TILE_SIZE;
+
+                    // draw backgrounds of cells
+                    Tile tile = game.getBoard().getTile(col, row);
+                    if (tile instanceof InaccessibleTile)
+                        continue;
+
+                    if (tile instanceof HallwayTile) {
+                        g.setColor(Color.LIGHT_GRAY);
+                    } else if (tile instanceof RoomTile) {
+                        g.setColor(Color.GRAY);
+                    }
+
+                    if (game.state == Game.State.MOVING)
+                        if (game.getBoard().getValidTiles().contains(tile))
+                            g.setColor(Color.GREEN);
+                        else
+                            for (Room room : game.getBoard().getValidRooms())
+                                if (room.getTiles().contains(tile))
+                                    g.setColor(Color.ORANGE);
+
+                    g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+
+                    // do outlines for hallway tiles
+                    if (tile instanceof HallwayTile) {
+                        g.setColor(Color.GRAY);
+                        g.drawRect(x, y, TILE_SIZE, TILE_SIZE);
+                    }
+
+                    // draw walls as thicker lines
+                    Stroke initialStroke = g.getStroke();
+                    g.setColor(Color.DARK_GRAY);
+                    g.setStroke(new BasicStroke(3, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
+                    if (tile.hasDownWall())
+                        g.drawLine(x, y + TILE_SIZE, x + TILE_SIZE, y + TILE_SIZE);
+                    if (tile.hasUpWall())
+                        g.drawLine(x, y, x + TILE_SIZE, y);
+                    if (tile.hasLeftWall())
+                        g.drawLine(x, y, x, y + TILE_SIZE);
+                    if (tile.hasRightWall())
+                        g.drawLine(x + TILE_SIZE, y, x + TILE_SIZE, y + TILE_SIZE);
+
+                    g.setStroke(initialStroke); // set the stroke back to normal
+                }
+            }
+
+            for (Player player : game.getPlayerMap().values()) {
+                player.draw(g);
+            }
+
+            for (Weapon weapon : game.getWeaponMap().values()) {
+                weapon.draw(g);
+            }
         }
     }
 
@@ -290,10 +366,68 @@ public class GUI {
             // based on 16:11:1 Height:Width:Padding ratio given in original cards
             CARD_HEIGHT = verticalSpace > horizontalSpace ? 16*horizontalSpace : 16*verticalSpace;
             CARD_WIDTH = verticalSpace > horizontalSpace ? 11*horizontalSpace : 11*verticalSpace;
-            CARD_PADDING = verticalSpace > horizontalSpace ? horizontalSpace : verticalSpace;
+            CARD_PADDING = Math.min(verticalSpace, horizontalSpace);
 
             game.drawCards((Graphics2D) g);
         }
+    }
+
+    public static void drawPlayer(Player player, Graphics2D g) {
+        int tileTop = BOARD_TOP + player.getTile().getY() * TILE_SIZE;
+        int tileLeft = BOARD_LEFT + player.getTile().getX() * TILE_SIZE;
+
+        // make the player a circle slightly smaller than the tile it's in
+        int innerPadding = TILE_SIZE / 10;
+        int diameter = TILE_SIZE - 2*innerPadding;
+        int circleTop = tileTop + innerPadding;
+        int circleLeft = tileLeft + innerPadding;
+
+        // draw the player as a circle
+        g.setColor(player.getColour());
+        g.fillOval(circleLeft, circleTop, diameter, diameter);
+        g.setColor(Color.BLACK);
+        g.drawOval(circleLeft, circleTop, diameter, diameter);
+
+        // draw the player's username underneath (centred horizontally)
+        Font font = new Font("SansSerif", Font.PLAIN, 10);
+        FontMetrics fontMetrics = g.getFontMetrics(font);
+        int textWidth = fontMetrics.stringWidth(player.getUsername());
+        int textHeight = fontMetrics.getHeight();
+        int textLeft = tileLeft + (TILE_SIZE / 2) - (textWidth / 2);
+        int textTop = tileTop + TILE_SIZE;
+        g.setFont(font);
+
+        g.setColor(Color.BLACK);
+        g.drawString(player.getUsername(), textLeft, textTop + textHeight - 5);
+    }
+
+    public static void drawWeapon(Weapon weapon, Graphics2D g) {
+        int tileTop = BOARD_TOP + weapon.getTile().getY() * TILE_SIZE;
+        int tileLeft = BOARD_LEFT + weapon.getTile().getX() * TILE_SIZE;
+        int halfTile = TILE_SIZE / 2;
+
+        int innerPadding = TILE_SIZE / 10;
+        int diamondSize = TILE_SIZE - 2*innerPadding;
+        int halfDiamond = diamondSize / 2;
+        int diamondTop = tileTop + innerPadding;
+        int diamondLeft = tileLeft + innerPadding;
+
+        int[] xPoints = new int[] {diamondLeft + halfDiamond, diamondLeft + diamondSize, diamondLeft + halfDiamond, diamondLeft};
+        int[] yPoints = new int[] {diamondTop, diamondTop + halfDiamond, diamondTop + diamondSize, diamondTop + halfDiamond};
+
+        g.setColor(Color.BLACK);
+        g.fillPolygon(xPoints, yPoints, 4);
+
+        Font font = new Font("SansSerif", Font.PLAIN, 10);
+        FontMetrics fontMetrics = g.getFontMetrics(font);
+        int textWidth = fontMetrics.stringWidth(weapon.getName());
+        int textHeight = fontMetrics.getHeight();
+        int textLeft = tileLeft + halfTile - (textWidth / 2);
+        int textTop = tileTop + TILE_SIZE;
+        g.setFont(font);
+
+        g.setColor(Color.BLACK);
+        g.drawString(weapon.getName(), textLeft, textTop + textHeight - 5);
     }
 
     class GameBoardMouseListener implements MouseListener {
@@ -308,7 +442,30 @@ public class GUI {
 
         @Override
         public void mouseReleased(MouseEvent e) {
-            game.getBoard().doMouse(game.getCurrentPlayer(), e);
+
+            // Only allows movement if Game is not in GAME_OVER State.
+            if (game.state != Game.State.GAME_OVER) {
+                if (e.getX() < BOARD_LEFT || e.getX() > BOARD_LEFT + Game.BOARD_COLS * TILE_SIZE) return;
+                if (e.getY() < BOARD_TOP || e.getY() > BOARD_TOP + Game.BOARD_ROWS * TILE_SIZE) return;
+
+                int col = (e.getX() - BOARD_LEFT) / TILE_SIZE;
+                int row = (e.getY() - BOARD_TOP) / TILE_SIZE;
+
+                Tile tile = game.getBoard().getTile(col, row);
+
+                if (game.getBoard().getValidTiles().contains(tile)) {
+                    game.getCurrentPlayer().moveToTile(tile);
+                    game.goToState(Game.State.ACCUSING);
+                    return;
+                }
+                for (Room room : game.getBoard().getValidRooms()) {
+                    if (room.getTiles().contains(tile)) {
+                        game.getCurrentPlayer().moveToRoom(room);
+                        game.goToState(Game.State.SUGGESTING);
+                        return;
+                    }
+                }
+            }
 
             redraw();
         }

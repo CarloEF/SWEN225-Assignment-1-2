@@ -14,8 +14,8 @@ public class Game {
     /*************
      * CONSTANTS *
      *************/
-    public static final int BOARD_WIDTH = 24;
-    public static final int BOARD_HEIGHT = 25;
+    public static final int BOARD_COLS = 24;
+    public static final int BOARD_ROWS = 25;
 
     /**
      * Enumerator that represents the current state of a player's turn
@@ -125,7 +125,7 @@ public class Game {
      */
     public Game(GUI GUI) {
         cards = new ArrayList<Card>();
-        board = new Board(this, BOARD_WIDTH, BOARD_HEIGHT);
+        board = new Board(this, BOARD_COLS, BOARD_ROWS);
 
         players = new LinkedHashMap<>();
         playerList = new ArrayList<Player>();
@@ -162,29 +162,6 @@ public class Game {
         // Something similar to this will be called only whenever a turn is ended.
         currentPlayer = playerQueue.poll();
         initializeTurn();
-    }
-
-    /**
-     * Draw method for the whole Game. Draws the board and everything on it
-     * @param g The graphics object to draw to
-     */
-    public void draw(Graphics2D g) {
-
-        int width = GUI.CURRENT_WINDOW_WIDTH;
-        int height = GUI.CURRENT_WINDOW_HEIGHT;
-
-        g.setColor(Color.WHITE);
-        g.fillRect(0, 0, width, height);
-        board.draw(g);
-
-        for (Player player : players.values()) {
-            player.draw(g);
-        }
-
-        for (Weapon weapon : weapons.values()) {
-            weapon.draw(g);
-        }
-
     }
 
     /**
