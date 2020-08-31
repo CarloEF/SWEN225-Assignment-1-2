@@ -20,7 +20,9 @@ public class Game {
     /**
      * Enumerator that represents the current state of a player's turn
      */
-    public enum State { ROLLING_DICE, MOVING, SUGGESTING,  REFUTING, ACCUSING, GAME_OVER};
+    public enum State {ROLLING_DICE, MOVING, SUGGESTING, REFUTING, ACCUSING, GAME_OVER}
+
+    ;
     public State state = State.ROLLING_DICE;
 
     //i = inaccessible
@@ -302,6 +304,7 @@ public class Game {
 
     /**
      * Calls method in GUI to draw the current player's card to screen
+     *
      * @param g Graphics object to draw to
      */
     public void drawCards(Graphics2D g) {
@@ -314,6 +317,7 @@ public class Game {
 
     /**
      * Change game state, calls state-entry code
+     *
      * @param newState The state to move to
      */
     public void goToState(State newState) {
@@ -363,9 +367,10 @@ public class Game {
     /**
      * Determine whether an accusation is correct
      * Move to GAME_OVER state if it is correct
+     *
      * @param accSuspect The accused player's name
-     * @param accWeapon The accused weapon's name
-     * @param accRoom The accused room's name
+     * @param accWeapon  The accused weapon's name
+     * @param accRoom    The accused room's name
      * @return True if accusation is correct
      */
     public boolean checkAccusationIsTrue(String accSuspect, String accWeapon, String accRoom) {
@@ -380,9 +385,10 @@ public class Game {
 
     /**
      * Check other players' cards to determine if suggested murder circumstances are correct
+     *
      * @param sugSuspect The suggested player's name
-     * @param sugWeapon The suggested weapon's name
-     * @param sugRoom The suggested room's name
+     * @param sugWeapon  The suggested weapon's name
+     * @param sugRoom    The suggested room's name
      * @return True if suggestion can be refuted
      */
     public boolean refuteSuggestion(String sugSuspect, String sugWeapon, String sugRoom) {
@@ -396,7 +402,8 @@ public class Game {
 
         Iterator<Player> playerIterator = humanPlayers.iterator();
         // start iterator at currentPlayer
-        while (playerIterator.next() != currentPlayer){}
+        while (playerIterator.next() != currentPlayer) {
+        }
 
         // for each player clockwise of currentPlayer, check if they can refute the suggestion
         for (int i = 0; i < humanPlayers.size() - 1; i++) {
@@ -478,6 +485,7 @@ public class Game {
     /**
      * Helper method for drawing dice
      * Converts an integer into 9 booleans, representing a 3x3 grid of dots
+     *
      * @param value The integer to convert (should be 1-6)
      * @return True where there should be a dot, false where there shouldn't
      */
@@ -502,6 +510,7 @@ public class Game {
 
     /**
      * Adds a player to collections
+     *
      * @param player The player to add
      */
     private void addPlayer(Player player) {
@@ -512,6 +521,7 @@ public class Game {
 
     /**
      * Adds a weapon to collections
+     *
      * @param weapon The weapon to add
      */
     private void addWeapon(Weapon weapon) {
@@ -522,6 +532,7 @@ public class Game {
 
     /**
      * Adds a room to collections
+     *
      * @param room The room to add
      */
     private void addRoom(Room room) {

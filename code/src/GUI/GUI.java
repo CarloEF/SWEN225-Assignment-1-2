@@ -231,14 +231,6 @@ public class GUI {
         frame.setVisible(true);
     }
 
-    public static int getBoardComponentWidth() {
-        return boardComponent.getWidth();
-    }
-
-    public static int getBoardComponentHeight() {
-        return boardComponent.getHeight();
-    }
-
     class textOutputPane extends JTextPane {
         textOutputPane() {
             setPreferredSize(new Dimension(CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT));
@@ -255,8 +247,8 @@ public class GUI {
 
         @Override
         protected void paintComponent(Graphics graphics) {
-            Graphics2D g = (Graphics2D)graphics;
-            
+            Graphics2D g = (Graphics2D) graphics;
+
             g.setColor(Color.WHITE);
             g.fillRect(0, 0, CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT);
 
@@ -360,74 +352,16 @@ public class GUI {
             g.setColor(new Color(0xe1f5fe));
             g.fillRect(0, 0, CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT);
 
-            int verticalSpace = (int) (this.getHeight()/34);     // single unit of vertical space for cards
-            int horizontalSpace = (int) (this.getWidth()/36);    // single unit of horizontal space for cards
+            int verticalSpace = (int) (this.getHeight() / 34);     // single unit of vertical space for cards
+            int horizontalSpace = (int) (this.getWidth() / 36);    // single unit of horizontal space for cards
 
             // based on 16:11:1 Height:Width:Padding ratio given in original cards
-            CARD_HEIGHT = verticalSpace > horizontalSpace ? 16*horizontalSpace : 16*verticalSpace;
-            CARD_WIDTH = verticalSpace > horizontalSpace ? 11*horizontalSpace : 11*verticalSpace;
+            CARD_HEIGHT = verticalSpace > horizontalSpace ? 16 * horizontalSpace : 16 * verticalSpace;
+            CARD_WIDTH = verticalSpace > horizontalSpace ? 11 * horizontalSpace : 11 * verticalSpace;
             CARD_PADDING = Math.min(verticalSpace, horizontalSpace);
 
             game.drawCards((Graphics2D) g);
         }
-    }
-
-    public static void drawPlayer(Player player, Graphics2D g) {
-        int tileTop = BOARD_TOP + player.getTile().getY() * TILE_SIZE;
-        int tileLeft = BOARD_LEFT + player.getTile().getX() * TILE_SIZE;
-
-        // make the player a circle slightly smaller than the tile it's in
-        int innerPadding = TILE_SIZE / 10;
-        int diameter = TILE_SIZE - 2*innerPadding;
-        int circleTop = tileTop + innerPadding;
-        int circleLeft = tileLeft + innerPadding;
-
-        // draw the player as a circle
-        g.setColor(player.getColour());
-        g.fillOval(circleLeft, circleTop, diameter, diameter);
-        g.setColor(Color.BLACK);
-        g.drawOval(circleLeft, circleTop, diameter, diameter);
-
-        // draw the player's username underneath (centred horizontally)
-        Font font = new Font("SansSerif", Font.PLAIN, 10);
-        FontMetrics fontMetrics = g.getFontMetrics(font);
-        int textWidth = fontMetrics.stringWidth(player.getUsername());
-        int textHeight = fontMetrics.getHeight();
-        int textLeft = tileLeft + (TILE_SIZE / 2) - (textWidth / 2);
-        int textTop = tileTop + TILE_SIZE;
-        g.setFont(font);
-
-        g.setColor(Color.BLACK);
-        g.drawString(player.getUsername(), textLeft, textTop + textHeight - 5);
-    }
-
-    public static void drawWeapon(Weapon weapon, Graphics2D g) {
-        int tileTop = BOARD_TOP + weapon.getTile().getY() * TILE_SIZE;
-        int tileLeft = BOARD_LEFT + weapon.getTile().getX() * TILE_SIZE;
-        int halfTile = TILE_SIZE / 2;
-
-        int innerPadding = TILE_SIZE / 10;
-        int diamondSize = TILE_SIZE - 2*innerPadding;
-        int halfDiamond = diamondSize / 2;
-        int diamondTop = tileTop + innerPadding;
-        int diamondLeft = tileLeft + innerPadding;
-
-        int[] xPoints = new int[] {diamondLeft + halfDiamond, diamondLeft + diamondSize, diamondLeft + halfDiamond, diamondLeft};
-        int[] yPoints = new int[] {diamondTop, diamondTop + halfDiamond, diamondTop + diamondSize, diamondTop + halfDiamond};
-
-        g.setColor(Color.BLACK);
-        g.fillPolygon(xPoints, yPoints, 4);
-
-        Font font = new Font("SansSerif", Font.PLAIN, 10);
-        FontMetrics fontMetrics = g.getFontMetrics(font);
-        int textWidth = fontMetrics.stringWidth(weapon.getName());
-        int textHeight = fontMetrics.getHeight();
-        int textLeft = tileLeft + halfTile - (textWidth / 2);
-        int textTop = tileTop + TILE_SIZE;
-        g.setFont(font);
-
-        g.setColor(Color.BLACK);
-        g.drawString(weapon.getName(), textLeft, textTop + textHeight - 5);
     }
 
     class GameBoardMouseListener implements MouseListener {
@@ -481,6 +415,83 @@ public class GUI {
         }
     }
 
+    /**
+     * Draws an individual player icon onto the board.
+     *
+     * @param player The player to draw
+     * @param g      2dGraphics Object used to draw
+     */
+    public static void drawPlayer(Player player, Graphics2D g) {
+        int tileTop = BOARD_TOP + player.getTile().getY() * TILE_SIZE;
+        int tileLeft = BOARD_LEFT + player.getTile().getX() * TILE_SIZE;
+
+        // make the player a circle slightly smaller than the tile it's in
+        int innerPadding = TILE_SIZE / 10;
+        int diameter = TILE_SIZE - 2 * innerPadding;
+        int circleTop = tileTop + innerPadding;
+        int circleLeft = tileLeft + innerPadding;
+
+        // draw the player as a circle
+        g.setColor(player.getColour());
+        g.fillOval(circleLeft, circleTop, diameter, diameter);
+        g.setColor(Color.BLACK);
+        g.drawOval(circleLeft, circleTop, diameter, diameter);
+
+        // draw the player's username underneath (centred horizontally)
+        Font font = new Font("SansSerif", Font.PLAIN, 10);
+        FontMetrics fontMetrics = g.getFontMetrics(font);
+        int textWidth = fontMetrics.stringWidth(player.getUsername());
+        int textHeight = fontMetrics.getHeight();
+        int textLeft = tileLeft + (TILE_SIZE / 2) - (textWidth / 2);
+        int textTop = tileTop + TILE_SIZE;
+        g.setFont(font);
+
+        g.setColor(Color.BLACK);
+        g.drawString(player.getUsername(), textLeft, textTop + textHeight - 5);
+    }
+
+    /**
+     * Draws an individual weapon icon onto the board.
+     *
+     * @param weapon The weapon to draw
+     * @param g      2dGraphics Object used to draw
+     */
+    public static void drawWeapon(Weapon weapon, Graphics2D g) {
+        int tileTop = BOARD_TOP + weapon.getTile().getY() * TILE_SIZE;
+        int tileLeft = BOARD_LEFT + weapon.getTile().getX() * TILE_SIZE;
+        int halfTile = TILE_SIZE / 2;
+
+        int innerPadding = TILE_SIZE / 10;
+        int diamondSize = TILE_SIZE - 2 * innerPadding;
+        int halfDiamond = diamondSize / 2;
+        int diamondTop = tileTop + innerPadding;
+        int diamondLeft = tileLeft + innerPadding;
+
+        int[] xPoints = new int[]{diamondLeft + halfDiamond, diamondLeft + diamondSize, diamondLeft + halfDiamond, diamondLeft};
+        int[] yPoints = new int[]{diamondTop, diamondTop + halfDiamond, diamondTop + diamondSize, diamondTop + halfDiamond};
+
+        g.setColor(Color.BLACK);
+        g.fillPolygon(xPoints, yPoints, 4);
+
+        Font font = new Font("SansSerif", Font.PLAIN, 10);
+        FontMetrics fontMetrics = g.getFontMetrics(font);
+        int textWidth = fontMetrics.stringWidth(weapon.getName());
+        int textHeight = fontMetrics.getHeight();
+        int textLeft = tileLeft + halfTile - (textWidth / 2);
+        int textTop = tileTop + TILE_SIZE;
+        g.setFont(font);
+
+        g.setColor(Color.BLACK);
+        g.drawString(weapon.getName(), textLeft, textTop + textHeight - 5);
+    }
+
+    /**
+     * Draws a card onto the player UI
+     *
+     * @param card  The card to draw
+     * @param index The index of the specified card to draw
+     * @param g     2dGraphics Object used to draw
+     */
     public void drawACard(Card card, int index, Graphics2D g) {
 
         int x = CARD_PADDING + (index % 3) * (CARD_WIDTH + CARD_PADDING);
@@ -502,21 +513,24 @@ public class GUI {
         g.fillRect(iconArea.x, iconArea.y, iconArea.width, iconArea.height);
 
         Image icon = card.getIcon();
-        int iconScaledWidth = (int)(iconArea.width * 0.7);
-        int iconScaledHeight = (int)(((float)icon.getHeight(null) / icon.getWidth(null)) * iconScaledWidth);
+        int iconScaledWidth = (int) (iconArea.width * 0.7);
+        int iconScaledHeight = (int) (((float) icon.getHeight(null) / icon.getWidth(null)) * iconScaledWidth);
         Image iconScaled = icon.getScaledInstance(iconScaledWidth, iconScaledHeight, Image.SCALE_SMOOTH);
         int iconXOffset = (CARD_WIDTH - iconScaled.getWidth(null)) / 2;
         int iconYOffset = CARD_PADDING + (iconArea.height - iconScaled.getHeight(null)) / 2;
         g.drawImage(iconScaled, x + iconXOffset, y + iconYOffset, null);
 
         String cardName = card.getName();
-        Font font = new Font("SansSerif", Font.BOLD, (int)(1.5*CARD_PADDING));
+        Font font = new Font("SansSerif", Font.BOLD, (int) (1.5 * CARD_PADDING));
         FontMetrics fontMetrics = g.getFontMetrics(font);
         int textXOffset = (CARD_WIDTH - fontMetrics.stringWidth(cardName)) / 2;
         g.setFont(font);
         g.drawString(cardName, x + textXOffset, y + CARD_HEIGHT - CARD_PADDING);
     }
 
+    /**
+     * Redraws the board and UI, depending on game state.
+     */
     public void redraw() {
         frame.repaint();
 
@@ -634,6 +648,11 @@ public class GUI {
 
     }
 
+    /**
+     * Starts a new game, popups a JDialog and JRadioButtonGroup to choose characters.
+     *
+     * @param parentFrame - The frame we'll put the creator popup in
+     */
     public void chooseCharacters(JFrame parentFrame) {
 
         game = new Game(this);
@@ -707,13 +726,13 @@ public class GUI {
             }
         });
 
-        // NOTE: it seems to work better putting this at the end
-        // otherwise some things aren't visible
         dialog.setVisible(true);
     }
 
-    /*
-     * Construct a dialog to ask for the number of players.
+    /**
+     * Starts a new game, popups a JDialog and JRadioButtonGroup to choose characters.
+     *
+     * @param parentComponent - The frame we'll put the creator popup in
      */
     public int getNumPlayers(Component parentComponent) {
         String title = "Welcome to Cludeo!";
@@ -730,6 +749,11 @@ public class GUI {
         return Integer.parseInt(input);
     }
 
+    /**
+     * Displays a JTextField with the game log.
+     *
+     * @param parentFrame - The frame we'll put the log popup in
+     */
     private void viewLog(JFrame parentFrame) {
         displayTextDialog(gameLog, "Game Log", parentFrame);
     }
@@ -826,12 +850,15 @@ public class GUI {
             dialog.setVisible(false);
         });
 
-        // NOTE: it seems to work better putting this at the end
-        // otherwise some things aren't visible
         dialog.setVisible(true);
 
     }
 
+    /**
+     * Displays a popup, asking for the currentPlayer's suggestion.
+     *
+     * @param parentFrame - The frame we'll put the suggestion popup in
+     */
     private void doGUISuggestion(JFrame parentFrame) {
 
         if (game.state != Game.State.SUGGESTING) {
@@ -890,13 +917,11 @@ public class GUI {
                     if (!game.refuteSuggestion(susSuspect, susWeapon, susRoom)) {
                         log("No one could refute your suggestion!\n");
                     }
-                    
+
                     game.goToState(Game.State.ACCUSING);
                     dialog.setVisible(false);
                 });
 
-                // NOTE: it seems to work better putting this at the end
-                // otherwise some things aren't visible
                 dialog.setVisible(true);
             } else { // Player is not in a room
                 log("You are not in a room!\n");
@@ -904,10 +929,16 @@ public class GUI {
         }
     }
 
-    public void chooseRefutingCard(Player refutee, List<Card> cards) {
+    /**
+     * Displays a popup, asking for the currentPlayer's suggestion.
+     *
+     * @param refuter - The current player refuting the suggestion
+     * @param cards   - The list of cards to be refuted.
+     */
+    public void chooseRefutingCard(Player refuter, List<Card> cards) {
 
         if (cards.size() == 1) {
-            String message = String.format("%s showed %s the %s card", refutee.getName(), game.getCurrentPlayer().getName(), cards.get(0).getName());
+            String message = String.format("%s showed %s the %s card", refuter.getName(), game.getCurrentPlayer().getName(), cards.get(0).getName());
             log(message);
             JOptionPane.showMessageDialog(frame, message);
             return;
@@ -919,7 +950,7 @@ public class GUI {
         dialog.setLayout(null);
 
         // text at the top
-        JLabel title = new JLabel(refutee.getName() + ", please choose which card to show " + game.getCurrentPlayer().getName());
+        JLabel title = new JLabel(refuter.getName() + ", please choose which card to show " + game.getCurrentPlayer().getName());
         title.setBounds(30, 10, 350, 25);
         dialog.add(title);
 
@@ -931,20 +962,20 @@ public class GUI {
 
         ButtonGroup group = new ButtonGroup();
 
-        for (int i=0; i<cards.size(); i++) {
+        for (int i = 0; i < cards.size(); i++) {
             Card card = cards.get(i);
             JRadioButton radioButton = new JRadioButton(card.getName());
-            radioButton.setBounds(30, 35 + i*30, 200, 25);
+            radioButton.setBounds(30, 35 + i * 30, 200, 25);
             radioButton.setMnemonic(KeyEvent.VK_1 + i);
             radioButton.setActionCommand(card.getName());
-            radioButton.setSelected(i==0);
+            radioButton.setSelected(i == 0);
             dialog.add(radioButton);
             group.add(radioButton);
         }
 
         // tells the user which was selected
         confirmButton.addActionListener(e -> {
-            String message = String.format("%s showed %s the %s card", refutee.getName(), game.getCurrentPlayer().getName(), group.getSelection().getActionCommand());
+            String message = String.format("%s showed %s the %s card", refuter.getName(), game.getCurrentPlayer().getName(), group.getSelection().getActionCommand());
             log(message);
             JOptionPane.showMessageDialog(frame, message);
             dialog.setVisible(false);
@@ -952,7 +983,7 @@ public class GUI {
             return;
         });
 
-       dialog.setVisible(true);
+        dialog.setVisible(true);
     }
 
     /**
@@ -965,9 +996,12 @@ public class GUI {
         textOutputPane.setText(gameLog);
     }
 
+    /**
+     * Displays a JTextDialog of the rules of Cluedo.
+     *
+     * @param parentFrame - The frame we'll put the JTextDialog popup in
+     */
     public void displayRules(JFrame parentFrame) {
-        // TODO: Bother writing HTML to make this nicer formatted, or otherwise cleaning
-        // it up, adapt to use JEditorPane?
         String text = "Object:\nWelcome to Tudor Mansion. Your host, Mr. John Boddy, has met and untimely end - he's "
                 + "the victim of foul play. To win this game, you must determine the answer to these three questions: "
                 + "Who done it? Where? And with what Weapon?\n\nGameplay:\nYour turn consists of up to three actions: "
@@ -1000,9 +1034,18 @@ public class GUI {
         displayTextDialog(text, "Rules", parentFrame);
     }
 
+    /**
+     * Displays ReadMe of project
+     *
+     * @param parentFrame The info to draw the ReadMe into.
+     */
     public void displayReadme(JFrame parentFrame) {
-        // TODO: Add text to readme
-        String text = "Readme:";
+        String text = "Readme:\n" +
+                "Assignment 2 Implementation by:\n" +
+                "Carlo Flores, 300439425\n" +
+                "Elias Z, \n" +
+                "Francis Nguyen-Ly, \n" +
+                "Ollie Franklin, 300497201\n";
 
         displayTextDialog(text, "Rules", parentFrame);
     }
@@ -1035,11 +1078,24 @@ public class GUI {
         rules.setVisible(true);
     }
 
+    /**
+     * Displays current player's dice rolls.
+     *
+     * @param g - 2dGraphics Object used to draw
+     */
     public void drawDice(Graphics2D g) {
         drawDie(DICE_TOP, DICE_LEFT, game.getDice()[0], g);
         drawDie(DICE_TOP, DICE_LEFT + DICE_SIZE + DICE_GAP, game.getDice()[1], g);
     }
 
+    /**
+     * Displays a die onto the UI.
+     *
+     * @param top   - Starting TOP position of die draw.
+     * @param left  - Starting LEFT position of die draw.
+     * @param value - Value of die on roll.
+     * @param g     - 2dGraphics Object used to draw
+     */
     public void drawDie(int top, int left, int value, Graphics2D g) {
         int INNER_PADDING = DICE_SIZE / 4;
         int DOT_RADIUS = DICE_SIZE / 12;
@@ -1065,6 +1121,17 @@ public class GUI {
 
             x += step;
         }
+    }
+
+    /**
+     * Getters
+     */
+    public static int getBoardComponentWidth() {
+        return boardComponent.getWidth();
+    }
+
+    public static int getBoardComponentHeight() {
+        return boardComponent.getHeight();
     }
 
     public static void main(String[] args) {

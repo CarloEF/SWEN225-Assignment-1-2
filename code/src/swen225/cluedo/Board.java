@@ -47,7 +47,7 @@ public class Board {
     /**
      * Moves a player to a room
      *
-     * @param player The player to move
+     * @param player  The player to move
      * @param newRoom The room to move to
      */
     public void movePlayer(Player player, Room newRoom) {
@@ -57,7 +57,7 @@ public class Board {
     /**
      * Moves a weapon to a room
      *
-     * @param weapon The weapon to move
+     * @param weapon  The weapon to move
      * @param newRoom The room to move to
      */
     public void moveWeapon(Weapon weapon, Room newRoom) {
@@ -278,6 +278,11 @@ public class Board {
     }
 
 
-    public Set<Tile> getValidTiles() { return validTiles;}
-    public Set<Room> getValidRooms() { return validRooms;}
+    public Set<Tile> getValidTiles() {
+        return validTiles;
+    }
+
+    public Set<Room> getValidRooms() {
+        return validRooms;
+    }
 }

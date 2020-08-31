@@ -23,8 +23,9 @@ public class Player implements CluedoObject {
 
     /**
      * Constructs the player
-     * @param name The player's name (e.g. Col. Mustard)
-     * @param colour The colour that this player is drawn as
+     *
+     * @param name     The player's name (e.g. Col. Mustard)
+     * @param colour   The colour that this player is drawn as
      * @param username The username of the person controlling this player, or empty String if no player
      */
     public Player(String name, Color colour, String username) {
@@ -44,6 +45,7 @@ public class Player implements CluedoObject {
 
     /**
      * Draw this player on the Board
+     *
      * @param g The graphics object to draw to
      */
     public void draw(Graphics2D g) {
@@ -52,6 +54,7 @@ public class Player implements CluedoObject {
 
     /**
      * Adds a card to the player's hand
+     *
      * @param card The Card to add
      */
     public void addCard(Card card) {
@@ -60,9 +63,10 @@ public class Player implements CluedoObject {
 
     /**
      * Gets the cards a player can use to refute a murder suggestion
+     *
      * @param murdererSugg The suggested Player
-     * @param weaponSugg The suggested Weapon
-     * @param roomSugg The suggested Room
+     * @param weaponSugg   The suggested Weapon
+     * @param roomSugg     The suggested Room
      * @return The cards this player can use to refute this suggestion
      */
     public List<Card> getRefutes(Player murdererSugg, Weapon weaponSugg, Room roomSugg) {
@@ -79,6 +83,7 @@ public class Player implements CluedoObject {
 
     /**
      * Moves the player to a tile
+     *
      * @param newTile The tile to move to
      */
     public void moveToTile(Tile newTile) {
@@ -98,6 +103,7 @@ public class Player implements CluedoObject {
 
     /**
      * Gets a list of the cards in the player's hand
+     *
      * @return The Cards
      */
     public List<Card> getCards() {
@@ -106,6 +112,7 @@ public class Player implements CluedoObject {
 
     /**
      * Gets whether the player is allowed to suggest/accuse
+     *
      * @return True if player is allowed (hasn't made an incorrect accusation)
      */
     public boolean canAccuse() {
@@ -114,6 +121,7 @@ public class Player implements CluedoObject {
 
     /**
      * Sets whether the player is allowed to suggest/accuse
+     *
      * @param allowed The value to change to
      */
     public void setCanAccuse(boolean allowed) {
@@ -122,6 +130,7 @@ public class Player implements CluedoObject {
 
     /**
      * Gets the player's name
+     *
      * @return player's name
      */
     public String getName() {
@@ -135,6 +144,7 @@ public class Player implements CluedoObject {
 
     /**
      * Setter for username
+     *
      * @param username The name of the human controlling this player
      */
     public void setUsername(String username) {
@@ -143,6 +153,7 @@ public class Player implements CluedoObject {
 
     /**
      * Moves the player to the room
+     *
      * @param room - the room to move to
      */
     public void moveToRoom(Room room) {
@@ -159,12 +170,16 @@ public class Player implements CluedoObject {
 
     /**
      * Returns the username of the player controlling this character
+     *
      * @return The username as a String
      */
-    public String getUsername() {return username;}
+    public String getUsername() {
+        return username;
+    }
 
     /**
      * Returns the colour that this player is drawn as
+     *
      * @return A Color object
      */
     public Color getColour() {
