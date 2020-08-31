@@ -1043,10 +1043,9 @@ public class GUI {
         String text = "Readme:\n" +
                 "Assignment 2 Implementation by:\n" +
                 "Carlo Flores, 300439425\n" +
-                "Elias Z, \n" +
-                "Francis Nguyen-Ly, \n" +
+                "Elias Wood, 300497766\n" +
+                "Francis Nguyen-Ly, 300399215\n" +
                 "Ollie Franklin, 300497201\n";
-
         displayTextDialog(text, "Rules", parentFrame);
     }
 
